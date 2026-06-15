@@ -1,0 +1,22 @@
+{
+  "id": "ghostly-field-club",
+  "tracks": [
+    {
+      "track": 1,
+      "audio": "assets/audio/ghostly-field-club/01.mp3"
+    }
+  ],
+  "story": [
+    {
+      "track": 1,
+      "title": {
+        "zh": "第一段标题",
+        "ja": "第一段タイトル"
+      },
+      "text": {
+        "zh": "把你本地持有、可使用的简体中文正文放在这里。",
+        "ja": "手元で使用できる日本語本文をここに入れます。"
+      }
+    }
+  ]
+}

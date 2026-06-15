@@ -9,6 +9,18 @@ Create `content/content.json` from `content/content.example.json` to add text an
 
 Audio files are expected under `assets/audio/<album-id>/<track-number>.mp3`.
 
+For private local use, you can also import untracked content:
+
+```sh
+mkdir -p local-content/story local-content/audio
+cp local-content.example/story/ghostly-field-club.json local-content/story/
+node scripts/import-local-content.mjs
+```
+
+Put story override JSON files in `local-content/story/` and audio files in `local-content/audio/<album-id>/`.
+The importer generates `content/content.json` and copies audio into `assets/audio/`.
+Those generated/private content files are ignored by git.
+
 ## Local Preview
 
 ```sh
