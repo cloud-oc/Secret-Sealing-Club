@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="秘封俱乐部音乐 CD 阅读站：边听 ZUN's Music Collection，边读专辑附带故事。"
+    />
+    <title>秘封俱乐部 | Music & Stories</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <canvas id="starfield" aria-hidden="true"></canvas>
+
+    <header class="site-header">
+      <a class="brand" href="#/">
+        <span class="brand-mark">秘</span>
+        <span>
+          <strong>Secret Sealing Club</strong>
+          <small>Music & Stories Archive</small>
+        </span>
+      </a>
+
+      <nav class="top-nav" aria-label="主导航">
+        <a href="#/">Albums</a>
+        <a href="#/about">Guide</a>
+        <button class="ghost-button" id="lang-toggle" type="button" aria-label="切换语言">
+          中文 / 日本語
+        </button>
+      </nav>
+    </header>
+
+    <main id="app" tabindex="-1"></main>
+
+    <div class="player-shell" id="player-shell" aria-label="音乐播放器">
+      <div class="player-meta">
+        <span class="player-index" id="player-index">TRACK 00</span>
+        <strong id="player-title">选择一首曲子</strong>
+        <small id="player-album">秘封俱乐部</small>
+      </div>
+
+      <div class="player-controls">
+        <button class="icon-button" id="prev-track" type="button" aria-label="上一首">‹</button>
+        <button class="play-button" id="play-toggle" type="button" aria-label="播放或暂停">▶</button>
+        <button class="icon-button" id="next-track" type="button" aria-label="下一首">›</button>
+      </div>
+
+      <div class="player-timeline">
+        <span id="current-time">0:00</span>
+        <input id="seek" type="range" min="0" max="1000" value="0" aria-label="播放进度" />
+        <span id="duration">0:00</span>
+      </div>
+
+      <audio id="audio" preload="metadata"></audio>
+    </div>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
