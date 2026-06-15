@@ -19,4 +19,6 @@ Then open `http://127.0.0.1:4173`.
 
 ## GitHub Pages
 
-Because this is a plain static site, set Pages to deploy from the `main` branch and the repository root.
+This repository includes `.github/workflows/pages.yml`, so pushes to `main` deploy automatically with GitHub Actions.
+
+In the repository settings, set Pages to use **GitHub Actions** as the source.
