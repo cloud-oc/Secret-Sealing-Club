@@ -1,4 +1,6 @@
-import { albums } from "./data.js";
+import { albums as baseAlbums } from "./data.js";
+
+let albums = baseAlbums;
 
 const state = {
   lang: localStorage.getItem("ssc-language") || "zh",
@@ -103,6 +105,59 @@ function route() {
   }
 
   renderNotFound();
+}
+
+async function loadContentOverrides() {
+  try {
+    const response = await fetch("./content/content.json", { cache: "no-store" });
+    if (!response.ok) return;
+    const overrides = await response.json();
+    albums = mergeAlbums(baseAlbums, overrides.albums || []);
+  } catch {
+    albums = baseAlbums;
+  }
+}
+
+function mergeAlbums(sourceAlbums, overrideAlbums) {
+  return sourceAlbums.map((album) => {
+    const override = overrideAlbums.find((item) => item.id === album.id);
+    if (!override) return album;
+
+    return {
+      ...album,
+      ...pickDefined(override, ["source", "color", "catalog", "year"]),
+      title: { ...album.title, ...(override.title || {}) },
+      summary: { ...album.summary, ...(override.summary || {}) },
+      tracks: mergeTracks(album.tracks, override.tracks || []),
+      story: mergeStory(album.story, override.story || []),
+    };
+  });
+}
+
+function mergeTracks(sourceTracks, overrideTracks) {
+  return sourceTracks.map((track, index) => {
+    const override = overrideTracks[index] || overrideTracks.find((item) => item.track === index + 1);
+    return override ? { ...track, ...pickDefined(override, ["title", "audio"]) } : track;
+  });
+}
+
+function mergeStory(sourceStory, overrideStory) {
+  return sourceStory.map((section, index) => {
+    const override = overrideStory[index] || overrideStory.find((item) => item.track === section.track);
+    if (!override) return section;
+    return {
+      ...section,
+      title: { ...section.title, ...(override.title || {}) },
+      text: { ...section.text, ...(override.text || {}) },
+    };
+  });
+}
+
+function pickDefined(source, keys) {
+  return keys.reduce((result, key) => {
+    if (source[key] !== undefined) result[key] = source[key];
+    return result;
+  }, {});
 }
 
 function renderHome() {
@@ -421,4 +476,5 @@ window.addEventListener("hashchange", route);
 window.addEventListener("resize", drawStars);
 
 drawStars();
+await loadContentOverrides();
 route();

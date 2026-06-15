@@ -5,7 +5,7 @@ An immersive static reading site for the Secret Sealing Club music albums and bo
 ## Content Notes
 
 The site ships with structured album and track data, bilingual UI, and placeholder story excerpts.
-Replace the placeholders in `src/data.js` with text and audio you have permission to use.
+Create `content/content.json` from `content/content.example.json` to add text and audio you have permission to use without editing the app source.
 
 Audio files are expected under `assets/audio/<album-id>/<track-number>.mp3`.
 
