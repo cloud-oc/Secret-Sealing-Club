@@ -32,6 +32,9 @@
     <main id="app" tabindex="-1"></main>
 
     <div class="player-shell" id="player-shell" aria-label="音乐播放器">
+      <button class="playlist-toggle" id="playlist-toggle" type="button" aria-label="展开曲目列表">
+        ≡
+      </button>
       <div class="player-meta">
         <span class="player-index" id="player-index">TRACK 00</span>
         <strong id="player-title">在书架前停留</strong>
@@ -51,6 +54,8 @@
       </div>
 
       <audio id="audio" preload="metadata"></audio>
+
+      <div class="playlist-panel" id="playlist-panel" hidden></div>
     </div>
 
     <script type="module" src="./src/main.js"></script>

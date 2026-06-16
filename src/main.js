@@ -19,6 +19,8 @@ const player = {
   prev: document.querySelector("#prev-track"),
   next: document.querySelector("#next-track"),
   play: document.querySelector("#play-toggle"),
+  playlistToggle: document.querySelector("#playlist-toggle"),
+  playlistPanel: document.querySelector("#playlist-panel"),
   seek: document.querySelector("#seek"),
   current: document.querySelector("#current-time"),
   duration: document.querySelector("#duration"),
@@ -35,13 +37,10 @@ const t = {
     heroBody:
       "在铁路、星图与旧科学的气味里，一边听曲，一边读梅莉和莲子的夜谈。",
     start: "翻阅藏书",
-    observation: "社团便笺",
-    observationText:
-      "这里收着九张秘封音乐 CD 的读本。曲子响起时，故事会在旁边亮起，像深夜车窗外忽然对上的星。",
     tracks: "曲目",
+    playlist: "曲目",
+    closePlaylist: "收起曲目",
     trackUnit: "曲",
-    readMode: "读本语言",
-    noAudio: "若音频尚未放入，仍可先按曲目阅读；补上音频后，这里就是夜行播放机。",
     source: "原典线索",
     quietNote: "愿每一次边界观测，都有一首曲子作证。",
     github: "GitHub",
@@ -60,13 +59,10 @@ const t = {
     heroBody:
       "鉄道、星図、古い科学の匂いの中で、曲を聴きながらメリーと蓮子の夜話を読む。",
     start: "蔵書を開く",
-    observation: "サークルメモ",
-    observationText:
-      "九つの秘封音楽 CD 読本を収めています。曲が鳴ると、隣の物語が静かに灯ります。",
     tracks: "トラック",
+    playlist: "曲目",
+    closePlaylist: "曲目を閉じる",
     trackUnit: "曲",
-    readMode: "読本の言語",
-    noAudio: "音声が未配置でも、曲目に沿って読めます。音声を置けば夜行プレイヤーになります。",
     source: "原典の手掛かり",
     quietNote: "境界観測のたび、そばに一曲がありますように。",
     github: "GitHub",
@@ -186,10 +182,6 @@ function renderHome() {
       <div class="orbital" aria-hidden="true">
         <div class="orbit-ring"></div>
         <div class="orbit-ring"></div>
-        <div class="constellation-card">
-          <strong>${tr("observation")}</strong>
-          <p>${tr("observationText")}</p>
-        </div>
       </div>
     </section>
     <section class="album-grid" id="albums" aria-label="专辑列表">
@@ -237,27 +229,12 @@ function renderAlbum(id) {
           <p>${album.summary[state.lang]}</p>
           <a class="source-link" href="${album.source}" target="_blank" rel="noreferrer">${tr("source")}</a>
         </div>
-        <div class="track-list" aria-label="${tr("tracks")}">
-          ${album.tracks.map((track, index) => trackButton(track, index)).join("")}
-        </div>
       </aside>
 
-      <section class="reader">
-        <div class="reader-tools">
-          <div>
-            <strong>${tr("readMode")}</strong>
-            <div class="reader-note">${tr("noAudio")}</div>
-          </div>
-          <div class="language-switch">
-            <button class="language-button" data-lang="zh" type="button">中文</button>
-            <button class="language-button" data-lang="ja" type="button">日本語</button>
-          </div>
-        </div>
-
+      <section class="reader lyric-reader">
         <div class="story">
           ${album.story.map((section, index) => storySection(album, section, index)).join("")}
         </div>
-        <p class="copyright-note">${tr("quietNote")}</p>
       </section>
     </article>
     ${siteFooter()}
@@ -281,7 +258,7 @@ function storySection(album, section, index) {
   const track = album.tracks[section.track - 1] || album.tracks[index];
   const text = section.text[state.lang]?.trim() || tr("emptyStory");
   return `
-    <section class="story-section ${index === state.trackIndex ? "is-active" : ""}" id="story-${index}" data-story="${index}">
+    <section class="story-section lyric-section ${index === state.trackIndex ? "is-active" : ""}" id="story-${index}" data-story="${index}">
       <div class="story-track">TRACK ${String(section.track).padStart(2, "0")}</div>
       <div class="story-card">
         <h2>${track?.title || section.title[state.lang]}</h2>
@@ -319,16 +296,7 @@ function contentReadmeName() {
 }
 
 function bindAlbum(album) {
-  document.querySelectorAll("[data-track]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const index = Number(button.dataset.track);
-      selectTrack(album, index, true);
-    });
-  });
-
-  document.querySelectorAll("[data-lang]").forEach((button) => {
-    button.addEventListener("click", () => setLanguage(button.dataset.lang));
-  });
+  renderPlaylist(album);
 }
 
 function selectTrack(album, index, autoplay) {
@@ -339,8 +307,8 @@ function selectTrack(album, index, autoplay) {
   document.querySelectorAll(".story-section").forEach((section, sectionIndex) => {
     section.classList.toggle("is-active", sectionIndex === index);
   });
-  document.querySelector(`#story-${index}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
   updatePlayer(album, index, autoplay);
+  closePlaylist();
 }
 
 function updatePlayer(album, index, autoplay) {
@@ -375,8 +343,8 @@ function setLanguage(lang) {
 }
 
 function updateLanguageButtons() {
-  document.querySelectorAll("[data-lang]").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.lang === state.lang);
+  player.playlistPanel.querySelectorAll(".track-button").forEach((button, index) => {
+    button.classList.toggle("is-active", index === state.trackIndex);
   });
 }
 
@@ -441,6 +409,39 @@ audio.addEventListener("ended", () => {
   player.next.click();
 });
 
+player.playlistToggle.addEventListener("click", () => {
+  const isOpen = player.playlistPanel.hidden;
+  player.playlistPanel.hidden = !isOpen;
+  player.playlistToggle.classList.toggle("is-active", isOpen);
+  player.playlistToggle.setAttribute("aria-label", isOpen ? tr("closePlaylist") : tr("playlist"));
+});
+
+function closePlaylist() {
+  player.playlistPanel.hidden = true;
+  player.playlistToggle.classList.remove("is-active");
+  player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+}
+
+function renderPlaylist(album) {
+  player.playlistPanel.innerHTML = `
+    <div class="playlist-panel-header">
+      <strong>${album.title[state.lang]}</strong>
+      <span>${album.tracks.length}${tr("trackUnit")}</span>
+    </div>
+    <div class="track-list" aria-label="${tr("tracks")}">
+      ${album.tracks.map((track, index) => trackButton(track, index)).join("")}
+    </div>
+  `;
+  player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+
+  player.playlistPanel.querySelectorAll("[data-track]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const index = Number(button.dataset.track);
+      selectTrack(album, index, true);
+    });
+  });
+}
+
 function updatePlayButton() {
   player.play.textContent = state.isPlaying ? "Ⅱ" : "▶";
 }
@@ -452,6 +453,7 @@ document.querySelector("#lang-toggle").addEventListener("click", () => {
 function syncShellText() {
   document.querySelector(".brand strong").textContent = tr("brand");
   document.querySelector(".brand small").textContent = tr("brandSub");
+  player.playlistToggle.setAttribute("aria-label", tr("playlist"));
 }
 
 function drawStars() {

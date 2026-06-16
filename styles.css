@@ -129,7 +129,6 @@ button {
 .icon-button,
 .play-button,
 .track-button,
-.language-button,
 .source-link {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -146,7 +145,6 @@ button {
 .icon-button:hover,
 .play-button:hover,
 .track-button:hover,
-.language-button:hover,
 .source-link:hover {
   border-color: rgba(86, 214, 189, 0.58);
   color: #fff;
@@ -265,34 +263,6 @@ h1 {
   transform: rotate(31deg);
 }
 
-.constellation-card {
-  position: absolute;
-  right: 4%;
-  bottom: 9%;
-  width: min(360px, 82vw);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 20px;
-  background:
-    linear-gradient(180deg, rgba(237, 232, 218, 0.08), rgba(237, 232, 218, 0.025)),
-    rgba(12, 15, 23, 0.78);
-  box-shadow: 0 24px 70px var(--shadow);
-  backdrop-filter: blur(18px);
-}
-
-.constellation-card strong {
-  display: block;
-  margin-bottom: 12px;
-  color: var(--accent-2);
-  font-family: "SFMono-Regular", "Cascadia Code", monospace;
-  letter-spacing: 0.08em;
-}
-
-.constellation-card p {
-  color: #d7d0c3;
-  line-height: 1.7;
-}
-
 .album-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -363,9 +333,11 @@ h1 {
 
 .album-page {
   display: grid;
-  grid-template-columns: minmax(250px, 340px) minmax(0, 1fr);
-  gap: clamp(18px, 3vw, 40px);
-  padding: clamp(22px, 4vw, 54px) clamp(16px, 4vw, 54px);
+  min-height: calc(100dvh - var(--header-h) - var(--player-h));
+  grid-template-columns: minmax(230px, 320px) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 72px);
+  align-items: center;
+  padding: clamp(22px, 4vw, 54px) clamp(16px, 5vw, 70px);
 }
 
 .album-aside {
@@ -436,7 +408,9 @@ h1 {
 .track-list {
   display: grid;
   gap: 8px;
-  padding: 0 18px 18px;
+  max-height: min(54vh, 520px);
+  overflow: auto;
+  padding: 0;
 }
 
 .track-button {
@@ -466,48 +440,19 @@ h1 {
   white-space: nowrap;
 }
 
-.reader-tools {
-  position: sticky;
-  top: calc(var(--header-h) + 12px);
-  z-index: 10;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 10px;
-  background: rgba(9, 11, 18, 0.82);
-  backdrop-filter: blur(16px);
-}
-
-.language-switch {
-  display: flex;
-  gap: 8px;
-}
-
-.language-button {
-  min-height: 34px;
-  padding: 0 12px;
-  color: var(--muted);
-}
-
-.language-button.is-active {
-  border-color: rgba(86, 214, 189, 0.66);
-  color: #06100e;
-  background: var(--accent);
-}
-
-.reader-note {
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
 .story {
   display: grid;
   gap: 18px;
+}
+
+.lyric-reader {
+  display: grid;
+  min-height: 52vh;
+  align-items: center;
+}
+
+.lyric-reader .story {
+  display: block;
 }
 
 .story-section {
@@ -519,9 +464,23 @@ h1 {
   padding: 18px;
 }
 
+.lyric-section {
+  display: none;
+}
+
 .story-section.is-active {
   border-color: rgba(86, 214, 189, 0.38);
   background: rgba(86, 214, 189, 0.055);
+}
+
+.lyric-section.is-active {
+  display: grid;
+  min-height: min(54vh, 520px);
+  align-items: center;
+  border-color: rgba(86, 214, 189, 0.28);
+  background:
+    linear-gradient(120deg, rgba(86, 214, 189, 0.08), rgba(215, 179, 99, 0.035)),
+    rgba(9, 11, 18, 0.45);
 }
 
 .story-track {
@@ -539,14 +498,15 @@ h1 {
 
 .story-card h2 {
   margin-bottom: 10px;
-  font-size: clamp(1.45rem, 3vw, 2.4rem);
+  font-size: clamp(2.1rem, 5vw, 5.2rem);
+  line-height: 1.04;
 }
 
 .story-card p {
   max-width: 78ch;
   color: #e6dece;
-  font-size: 1.05rem;
-  line-height: 2.05;
+  font-size: clamp(1.08rem, 2vw, 1.45rem);
+  line-height: 1.95;
 }
 
 .story-card .empty-copy {
@@ -602,8 +562,8 @@ h1 {
   left: clamp(10px, 2vw, 22px);
   z-index: 40;
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) auto minmax(220px, 0.9fr);
-  gap: 18px;
+  grid-template-columns: 48px minmax(180px, 1fr) auto minmax(220px, 0.9fr);
+  gap: 12px;
   align-items: center;
   min-height: var(--player-h);
   border: 1px solid rgba(236, 230, 215, 0.24);
@@ -612,6 +572,56 @@ h1 {
   background: rgba(12, 15, 23, 0.88);
   box-shadow: 0 22px 80px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(20px);
+}
+
+.playlist-toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.playlist-toggle:hover,
+.playlist-toggle:focus-visible,
+.playlist-toggle.is-active {
+  border-color: rgba(86, 214, 189, 0.68);
+  background: rgba(86, 214, 189, 0.11);
+}
+
+.playlist-panel {
+  position: absolute;
+  left: 14px;
+  bottom: calc(100% + 10px);
+  width: min(420px, calc(100vw - 28px));
+  border: 1px solid rgba(236, 230, 215, 0.24);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: rgba(9, 11, 18, 0.94);
+  box-shadow: 0 22px 80px rgba(0, 0, 0, 0.48);
+  backdrop-filter: blur(20px);
+}
+
+.playlist-panel[hidden] {
+  display: none;
+}
+
+.playlist-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.playlist-panel-header strong {
+  color: var(--ink);
 }
 
 .player-meta {
@@ -698,7 +708,7 @@ input[type="range"] {
   }
 
   .album-aside,
-  .reader-tools {
+  .lyric-reader {
     position: static;
   }
 
@@ -707,8 +717,8 @@ input[type="range"] {
     overflow: visible;
   }
 
-  .track-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .lyric-section.is-active {
+    min-height: 44vh;
   }
 }
 
@@ -761,6 +771,10 @@ input[type="range"] {
     padding: 14px;
   }
 
+  .lyric-section.is-active {
+    min-height: 46vh;
+  }
+
   .story-card {
     border-left: 0;
     border-top: 1px solid var(--line);
@@ -773,12 +787,22 @@ input[type="range"] {
   }
 
   .player-shell {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
     gap: 10px;
+  }
+
+  .player-controls {
+    justify-content: end;
   }
 
   .player-timeline {
     grid-column: 1 / -1;
+  }
+
+  .playlist-panel {
+    right: 0;
+    left: 0;
+    width: auto;
   }
 
   .site-footer {
