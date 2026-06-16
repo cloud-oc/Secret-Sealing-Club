@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260616-cinematic-hud");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-card-hierarchy");
 
 let albums = baseAlbums;
 
@@ -244,9 +244,6 @@ function albumCarousel() {
       <div class="carousel-viewport">
         ${albums.map(albumPoster).join("")}
       </div>
-      <div class="carousel-readout" aria-live="polite">
-        ${activeAlbum ? albumReadout(activeAlbum, state.homeAlbumIndex) : ""}
-      </div>
       <div class="carousel-dots" role="tablist" aria-label="${tr("albumCarousel")}">
         ${albums.map(carouselDot).join("")}
       </div>
@@ -261,7 +258,6 @@ function albumPoster(album, index) {
       <span class="poster-glow" aria-hidden="true"></span>
       <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
       <span class="poster-title-block">
-        <span class="poster-ja">${album.title.ja}</span>
         <h2>${album.title[state.lang]}</h2>
       </span>
       <p>${album.summary[state.lang]}</p>
@@ -270,21 +266,6 @@ function albumPoster(album, index) {
         <span>${album.tracks.length}${tr("trackUnit")}</span>
       </span>
     </a>
-  `;
-}
-
-function albumReadout(album, index) {
-  return `
-    <div>
-      <span class="readout-label">${album.catalog}</span>
-      <strong>${album.title[state.lang]}</strong>
-      <p>${album.summary[state.lang]}</p>
-    </div>
-    <a class="readout-action" href="#/album/${album.id}">
-      <span>${tr("observeAlbum")}</span>
-      ${icon("chevron-right")}
-    </a>
-    <span class="readout-index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
   `;
 }
 
@@ -442,7 +423,6 @@ function updateHomeCarousel() {
   const slides = document.querySelectorAll("[data-carousel-slide]");
   const dots = document.querySelectorAll("[data-carousel-index]");
   const activeAlbum = albums[state.homeAlbumIndex];
-  const readout = document.querySelector(".carousel-readout");
   const hud = document.querySelector(".carousel-hud");
 
   slides.forEach((slide) => {
@@ -450,20 +430,19 @@ function updateHomeCarousel() {
     const offset = carouselOffset(index);
     const distance = Math.abs(offset);
     const isActive = offset === 0;
-    const isNear = distance === 1;
     const isCompact = window.innerWidth <= 760;
-    const x = isCompact ? 0 : offset * 118;
+    const x = isCompact ? 0 : offset * 24;
 
     slide.dataset.offset = String(offset);
     slide.style.setProperty("--poster-x", `${x}px`);
-    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.82");
-    slide.style.setProperty("--poster-opacity", isActive || isNear ? "1" : "0");
+    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.96");
+    slide.style.setProperty("--poster-opacity", isActive ? "1" : "0");
     slide.style.setProperty("--poster-rotate", `${isCompact ? 0 : offset * -1.8}deg`);
-    slide.style.setProperty("--poster-rotate-y", `${isCompact ? 0 : offset * -16}deg`);
-    slide.style.setProperty("--poster-z-depth", isActive || isCompact ? "0" : "-120");
+    slide.style.setProperty("--poster-rotate-y", "0deg");
+    slide.style.setProperty("--poster-z-depth", "0");
     slide.style.setProperty("--poster-z", String(20 - distance));
     slide.classList.toggle("is-active", isActive);
-    slide.classList.toggle("is-near", isNear);
+    slide.classList.toggle("is-near", false);
     slide.classList.toggle("is-far", distance > 1);
     slide.setAttribute("aria-hidden", String(!isActive));
     slide.tabIndex = isActive ? 0 : -1;
@@ -474,10 +453,6 @@ function updateHomeCarousel() {
     dot.classList.toggle("is-active", isActive);
     dot.setAttribute("aria-selected", String(isActive));
   });
-
-  if (activeAlbum && readout) {
-    readout.innerHTML = albumReadout(activeAlbum, state.homeAlbumIndex);
-  }
 
   if (activeAlbum && hud) {
     hud.innerHTML = `

@@ -13,7 +13,12 @@
   --signal: #5db9df;
   --danger: #d96c75;
   --shadow: rgba(0, 0, 0, 0.48);
-  --radius: 4px;
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+  --radius: var(--radius-sm);
   --header-h: 72px;
   --player-h: 92px;
   font-family:
@@ -231,7 +236,7 @@ button {
   height: 30px;
   place-items: center;
   border: 1px solid rgba(244, 240, 231, 0.18);
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   color: currentColor;
   background: #05080d;
 }
@@ -264,7 +269,7 @@ button {
   height: 42px;
   place-items: center;
   border: 1px solid rgba(96, 217, 200, 0.62);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   color: var(--accent);
   background:
     linear-gradient(135deg, rgba(96, 217, 200, 0.14), transparent 58%),
@@ -322,10 +327,16 @@ button {
   min-height: 42px;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   padding: 0;
   color: var(--muted);
   background: #090d13;
+}
+
+.github-button .icon-chip,
+.language-trigger .icon-chip {
+  border-color: transparent;
+  background: transparent;
 }
 
 .github-button:hover,
@@ -355,7 +366,7 @@ button {
   min-height: 42px;
   align-items: center;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   padding: 0 10px 0 7px;
   color: var(--ink);
   background: #090d13;
@@ -387,7 +398,7 @@ button {
   display: grid;
   width: 156px;
   border: 1px solid rgba(244, 240, 231, 0.28);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   padding: 6px;
   background: #090d13;
   box-shadow: 0 18px 34px var(--shadow);
@@ -400,7 +411,7 @@ button {
 .language-menu button {
   min-height: 36px;
   border: 0;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   background: transparent;
   text-align: left;
@@ -421,7 +432,7 @@ button {
 .netease-link,
 .album-switch-button {
   border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   color: var(--ink);
   background: #090d13;
 }
@@ -760,22 +771,23 @@ h1 {
   min-height: 310px;
   overflow: hidden;
   border: 1px solid rgba(244, 240, 231, 0.34);
-  border-radius: 0;
+  border-radius: var(--radius-card);
   padding: clamp(20px, 3vw, 34px);
   background:
-    repeating-linear-gradient(0deg, rgba(244, 240, 231, 0.045) 0 1px, transparent 1px 7px),
-    linear-gradient(90deg, rgba(244, 240, 231, 0.08) 0 1px, transparent 1px 100%),
-    linear-gradient(165deg, rgba(244, 240, 231, 0.12), transparent 28%),
-    linear-gradient(135deg, var(--album-color, rgba(96, 217, 200, 0.18)), rgba(12, 17, 24, 1) 47%, #05080d 100%);
+    linear-gradient(90deg, rgba(244, 240, 231, 0.07) 1px, transparent 1px),
+    repeating-linear-gradient(0deg, rgba(244, 240, 231, 0.036) 0 1px, transparent 1px 9px),
+    linear-gradient(165deg, rgba(244, 240, 231, 0.12), transparent 30%),
+    linear-gradient(135deg, var(--album-color, rgba(96, 217, 200, 0.18)), #111821 44%, #070a10 100%);
   background-size:
-    auto,
     64px 100%,
     auto,
+    auto,
     auto;
-  background-color: #0d1219;
+  background-color: #101720;
   box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.34),
-    inset 0 0 0 1px rgba(4, 6, 9, 0.86);
+    0 22px 54px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 1px rgba(244, 240, 231, 0.06),
+    inset 0 -1px 0 rgba(96, 217, 200, 0.08);
 }
 
 .album-card::before,
@@ -821,7 +833,7 @@ h1 {
 .album-poster {
   position: absolute;
   top: 46%;
-  right: 6%;
+  right: 7%;
   display: flex;
   width: min(78%, 620px);
   min-height: min(54vh, 540px);
@@ -842,11 +854,12 @@ h1 {
 
 .album-poster.is-near {
   pointer-events: none;
-  filter: saturate(0.72) brightness(0.48);
+  visibility: hidden;
 }
 
 .album-poster.is-far {
   pointer-events: none;
+  visibility: hidden;
 }
 
 .album-poster:hover,
@@ -888,18 +901,9 @@ h1 {
 
 .poster-title-block {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   margin-top: auto;
-  margin-bottom: 14px;
-}
-
-.poster-ja {
-  display: block;
-  color: rgba(244, 240, 231, 0.38);
-  font-size: clamp(2.4rem, 7vw, 6rem);
-  font-weight: 900;
-  line-height: 0.8;
-  pointer-events: none;
+  margin-bottom: 18px;
 }
 
 .album-poster p {
@@ -907,99 +911,22 @@ h1 {
   font-size: clamp(1rem, 1.6vw, 1.2rem);
 }
 
-.carousel-readout {
-  position: absolute;
-  right: 0;
-  bottom: 24px;
-  z-index: 30;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: end;
-  width: min(92%, 560px);
-  border: 1px solid rgba(244, 240, 231, 0.3);
-  padding: 16px 18px;
-  background:
-    linear-gradient(90deg, rgba(96, 217, 200, 0.16), transparent 42%),
-    rgba(5, 8, 13, 0.92);
-  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.44);
-}
-
-.carousel-readout strong,
-.carousel-readout p,
-.readout-label {
-  display: block;
-}
-
-.carousel-readout strong {
-  margin: 4px 0 6px;
-  font-size: clamp(1.2rem, 2.4vw, 1.8rem);
-}
-
-.carousel-readout p {
-  max-width: 50ch;
-  margin: 0;
-  color: rgba(244, 240, 231, 0.78);
-  line-height: 1.68;
-}
-
-.readout-label,
-.readout-index {
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-}
-
-.readout-index {
-  position: absolute;
-  right: 18px;
-  top: -46px;
-  color: rgba(244, 240, 231, 0.16);
-  font-size: clamp(3rem, 7vw, 5.4rem);
-  line-height: 1;
-}
-
-.readout-action {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid rgba(244, 240, 231, 0.24);
-  padding: 0 12px;
-  background: #05080d;
-  color: var(--ink);
-  font-size: 0.86rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.readout-action:hover,
-.readout-action:focus-visible {
-  border-color: rgba(96, 217, 200, 0.82);
-  color: #fff;
-  transform: translateX(2px);
-}
-
 .carousel-dots {
   position: absolute;
-  right: auto;
-  bottom: 28px;
-  left: 0;
+  right: clamp(10px, 2vw, 18px);
+  bottom: clamp(8px, 2vw, 20px);
+  left: auto;
   z-index: 26;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  gap: 6px;
+  justify-content: center;
+  gap: 7px;
 }
 
 .carousel-dot {
   display: grid;
-  width: 76px;
-  height: 24px;
-  grid-template-columns: 24px 1fr;
-  gap: 8px;
-  align-items: center;
+  width: 22px;
+  height: 22px;
+  place-items: center;
   border: 0;
   padding: 0;
   color: rgba(244, 240, 231, 0.58);
@@ -1010,25 +937,27 @@ h1 {
 }
 
 .carousel-dot span {
-  width: 24px;
-  height: 2px;
+  width: 7px;
+  height: 7px;
   border: 1px solid rgba(244, 240, 231, 0.35);
-  border-radius: 0;
+  border-radius: 50%;
   background: rgba(244, 240, 231, 0.16);
   transition:
+    transform 0.28s ease,
     width 0.28s ease,
     border-color 0.28s ease,
     background 0.28s ease;
 }
 
 .carousel-dot.is-active span {
-  width: 34px;
+  width: 18px;
+  border-radius: var(--radius-pill);
   border-color: var(--accent);
   background: var(--accent);
 }
 
 .carousel-dot em {
-  font-style: normal;
+  display: none;
 }
 
 .carousel-dot.is-active {
@@ -1090,7 +1019,7 @@ h1 {
   max-height: calc(100dvh - var(--header-h) - var(--player-h) - 64px);
   overflow: auto;
   border: 1px solid var(--line-strong);
-  border-radius: 0;
+  border-radius: var(--radius-card);
   background:
     linear-gradient(135deg, var(--album-color), transparent 28%),
     repeating-linear-gradient(0deg, rgba(244, 240, 231, 0.035) 0 1px, transparent 1px 9px),
@@ -1106,6 +1035,7 @@ h1 {
   inset: 12px;
   z-index: -1;
   border: 1px solid rgba(244, 240, 231, 0.14);
+  border-radius: calc(var(--radius-card) - 6px);
   pointer-events: none;
 }
 
@@ -1151,7 +1081,7 @@ h1 {
   width: 36px;
   height: 36px;
   place-items: center;
-  border-radius: 2px;
+  border-radius: 50%;
   background: #05080d;
   color: #f2ecdd;
 }
@@ -1265,7 +1195,7 @@ h1 {
 .album-icon-link {
   position: relative;
   overflow: hidden;
-  border-radius: 2px;
+  border-radius: 50%;
   background: #05080d;
   box-shadow: inset 0 0 0 1px rgba(4, 6, 9, 0.66);
 }
@@ -1302,7 +1232,7 @@ h1 {
   min-height: 42px;
   padding: 9px 10px;
   text-align: left;
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
 }
 
 .track-button.is-active {
@@ -1449,7 +1379,7 @@ h1 {
 
 .copyright-note {
   border: 1px solid rgba(215, 179, 99, 0.28);
-  border-radius: var(--radius);
+  border-radius: var(--radius-md);
   margin-top: 24px;
   padding: 16px;
   color: #d7c9a8;
@@ -1480,7 +1410,7 @@ h1 {
   align-items: center;
   min-height: var(--player-h);
   border: 1px solid rgba(244, 240, 231, 0.3);
-  border-radius: 0;
+  border-radius: var(--radius-card);
   padding: 14px;
   background:
     repeating-linear-gradient(90deg, rgba(244, 240, 231, 0.035) 0 1px, transparent 1px 26px),
@@ -1559,7 +1489,7 @@ h1 {
   width: 46px;
   height: 46px;
   border: 1px solid var(--line);
-  border-radius: 2px;
+  border-radius: var(--radius-md);
   color: var(--accent);
   background: #090d13;
   box-shadow: inset 0 0 0 1px rgba(4, 6, 9, 0.72);
@@ -1591,7 +1521,7 @@ h1 {
   bottom: calc(100% + 10px);
   width: min(420px, calc(100vw - 28px));
   border: 1px solid rgba(244, 240, 231, 0.3);
-  border-radius: 0;
+  border-radius: var(--radius-card);
   padding: 14px;
   background: #090d13;
   box-shadow: 0 22px 46px rgba(0, 0, 0, 0.4);
@@ -1672,12 +1602,13 @@ h1 {
   place-items: center;
   width: 40px;
   height: 40px;
-  border-radius: 2px;
+  border-radius: var(--radius-md);
 }
 
 .play-button {
   width: 48px;
   height: 48px;
+  border-radius: 50%;
   border-color: rgba(96, 217, 200, 0.86);
   color: #06100e;
   background: var(--accent);
@@ -1754,16 +1685,10 @@ input[type="range"]::-webkit-slider-thumb {
       rotate(var(--poster-rotate, 0deg));
   }
 
-  .carousel-readout {
-    right: 50%;
-    bottom: 18px;
-    transform: translateX(50%);
-    width: min(92%, 620px);
-  }
-
   .carousel-dots {
-    left: 10px;
-    bottom: 26px;
+    right: 50%;
+    bottom: 22px;
+    transform: translateX(50%);
   }
 
   .album-page {
@@ -1895,6 +1820,7 @@ input[type="range"]::-webkit-slider-thumb {
   .album-poster.is-near,
   .album-poster.is-far {
     opacity: 0 !important;
+    visibility: hidden;
   }
 
   .album-card::before {
@@ -1909,10 +1835,6 @@ input[type="range"]::-webkit-slider-thumb {
     font-size: clamp(1.48rem, 8vw, 2.2rem);
   }
 
-  .poster-ja {
-    font-size: clamp(2rem, 12vw, 3.5rem);
-  }
-
   .album-poster p {
     display: -webkit-box;
     overflow: hidden;
@@ -1923,46 +1845,24 @@ input[type="range"]::-webkit-slider-thumb {
   }
 
   .carousel-dots {
-    bottom: 132px;
-    left: 4px;
+    right: 50%;
+    bottom: 20px;
+    transform: translateX(50%);
     gap: 5px;
   }
 
   .carousel-dot {
-    width: 48px;
+    width: 24px;
     height: 24px;
-    grid-template-columns: 14px 1fr;
-    gap: 5px;
   }
 
   .carousel-dot span {
-    width: 22px;
-    height: 3px;
+    width: 7px;
+    height: 7px;
   }
 
   .carousel-dot.is-active span {
-    width: 24px;
-  }
-
-  .carousel-readout {
-    bottom: 18px;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 12px;
-  }
-
-  .carousel-readout p {
-    display: none;
-  }
-
-  .readout-action {
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .readout-index {
-    top: -32px;
-    font-size: 3rem;
+    width: 18px;
   }
 
   .hero-system {
