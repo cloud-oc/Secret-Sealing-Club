@@ -5,6 +5,9 @@ export const albums = [
     year: "2003",
     color: "rgba(86, 214, 189, 0.18)",
     source: "https://thwiki.cc/%E8%93%AE%E5%8F%B0%E9%87%8E%E5%A4%9C%E8%A1%8C/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=2091288",
+    },
     title: {
       zh: "莲台野夜行",
       ja: "蓮台野夜行",
@@ -41,6 +44,9 @@ export const albums = [
     year: "2004",
     color: "rgba(77, 116, 176, 0.24)",
     source: "https://thwiki.cc/%E6%A2%A6%E8%BF%9D%E7%A7%91%E5%AD%A6%E4%B8%96%E7%BA%AA/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=2091287",
+    },
     title: {
       zh: "梦违科学世纪",
       ja: "夢違科学世紀",
@@ -76,6 +82,9 @@ export const albums = [
     year: "2006",
     color: "rgba(215, 179, 99, 0.2)",
     source: "https://thwiki.cc/%E5%8D%AF%E9%85%89%E4%B8%9C%E6%B5%B7%E9%81%93/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=2091285",
+    },
     title: {
       zh: "卯酉东海道",
       ja: "卯酉東海道",
@@ -111,6 +120,9 @@ export const albums = [
     year: "2006",
     color: "rgba(113, 92, 171, 0.25)",
     source: "https://thwiki.cc/%E5%A4%A7%E7%A9%BA%E9%AD%94%E6%9C%AF/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=2091284",
+    },
     title: {
       zh: "大空魔术",
       ja: "大空魔術",
@@ -145,6 +157,9 @@ export const albums = [
     year: "2012",
     color: "rgba(67, 150, 116, 0.24)",
     source: "https://thwiki.cc/%E9%B8%9F%E8%88%B9%E9%81%97%E8%BF%B9/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=48357",
+    },
     title: {
       zh: "鸟船遗迹",
       ja: "鳥船遺跡",
@@ -179,6 +194,9 @@ export const albums = [
     year: "2012",
     color: "rgba(186, 73, 90, 0.22)",
     source: "https://thwiki.cc/%E4%BC%8A%E5%A5%98%E8%AF%BA%E7%89%A9%E8%B4%A8/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=2091281",
+    },
     title: {
       zh: "伊奘诺物质",
       ja: "伊弉諾物質",
@@ -213,6 +231,9 @@ export const albums = [
     year: "2016",
     color: "rgba(148, 132, 91, 0.25)",
     source: "https://thwiki.cc/%E7%87%95%E7%9F%B3%E5%8D%9A%E7%89%A9%E5%BF%97/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=34678981",
+    },
     title: {
       zh: "燕石博物志",
       ja: "燕石博物誌",
@@ -248,6 +269,9 @@ export const albums = [
     year: "2016",
     color: "rgba(80, 80, 88, 0.33)",
     source: "https://thwiki.cc/%E6%97%A7%E7%BA%A6%E9%85%92%E9%A6%86/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=34818027",
+    },
     title: {
       zh: "旧约酒馆",
       ja: "旧約酒場",
@@ -282,6 +306,9 @@ export const albums = [
     year: "2024",
     color: "rgba(104, 161, 188, 0.24)",
     source: "https://thwiki.cc/%E4%B8%83%E5%A4%95%E5%9D%82%E6%A2%A6%E5%B9%BB%E8%83%BD/%E9%99%84%E5%B8%A6%E6%95%85%E4%BA%8B",
+    links: {
+      netease: "https://music.163.com/#/album?id=195480254",
+    },
     title: {
       zh: "七夕坂梦幻能",
       ja: "七夕坂夢幻能",

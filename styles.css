@@ -125,27 +125,121 @@ button {
   color: var(--ink);
 }
 
-.ghost-button,
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.language-switcher {
+  position: relative;
+}
+
+.language-trigger {
+  display: inline-grid;
+  grid-template-columns: 30px 12px;
+  gap: 6px;
+  min-height: 42px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 10px 0 7px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.language-trigger:hover,
+.language-trigger:focus-visible,
+.language-trigger.is-active {
+  border-color: rgba(86, 214, 189, 0.58);
+  color: #fff;
+  background: rgba(86, 214, 189, 0.08);
+}
+
+.language-symbol {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(86, 214, 189, 0.42);
+  border-radius: 50%;
+  color: var(--accent);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.language-symbol span:first-child {
+  transform: translate(-2px, 2px);
+}
+
+.language-symbol span:last-child {
+  color: var(--accent-2);
+  font-size: 0.62rem;
+  transform: translate(4px, -3px);
+}
+
+.language-caret {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  width: 156px;
+  border: 1px solid rgba(236, 230, 215, 0.24);
+  border-radius: var(--radius);
+  padding: 6px;
+  background: rgba(9, 11, 18, 0.94);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(18px);
+}
+
+.language-menu[hidden] {
+  display: none;
+}
+
+.language-menu button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  text-align: left;
+  padding: 0 10px;
+}
+
+.language-menu button:hover,
+.language-menu button:focus-visible,
+.language-menu button.is-active {
+  color: var(--ink);
+  background: rgba(86, 214, 189, 0.11);
+}
+
 .icon-button,
 .play-button,
 .track-button,
-.source-link {
+.source-link,
+.netease-link,
+.album-switch-button {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   color: var(--ink);
   background: rgba(255, 255, 255, 0.04);
 }
 
-.ghost-button {
-  min-height: 38px;
-  padding: 0 14px;
-}
-
-.ghost-button:hover,
 .icon-button:hover,
 .play-button:hover,
 .track-button:hover,
-.source-link:hover {
+.source-link:hover,
+.netease-link:hover,
+.album-switch-button:hover {
   border-color: rgba(86, 214, 189, 0.58);
   color: #fff;
 }
@@ -341,15 +435,38 @@ h1 {
 }
 
 .album-aside {
+  min-height: min(640px, calc(100dvh - var(--header-h) - var(--player-h) - 96px));
   position: sticky;
   top: calc(var(--header-h) + 18px);
   align-self: start;
-  max-height: calc(100dvh - var(--header-h) - var(--player-h) - 52px);
+  max-height: calc(100dvh - var(--header-h) - var(--player-h) - 96px);
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: rgba(12, 15, 23, 0.75);
   backdrop-filter: blur(16px);
+}
+
+.album-switcher {
+  position: absolute;
+  top: 18px;
+  right: 16px;
+  z-index: 2;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.album-switch-button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(9, 11, 18, 0.5);
+  backdrop-filter: blur(12px);
+  color: #f2ecdd;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .album-cover {
@@ -382,12 +499,12 @@ h1 {
 }
 
 .album-info {
-  padding: 18px;
+  padding: 18px 18px 76px;
 }
 
 .album-info h1 {
   margin-bottom: 10px;
-  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
   line-height: 1.02;
 }
 
@@ -396,13 +513,34 @@ h1 {
   line-height: 1.75;
 }
 
-.source-link {
+.album-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.source-link,
+.netease-link {
   display: inline-flex;
   min-height: 36px;
   align-items: center;
-  margin-top: 10px;
   padding: 0 12px;
   color: var(--muted);
+}
+
+.album-corner-link {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  color: #06100e;
+  background: var(--accent);
+  font-weight: 800;
 }
 
 .track-list {
@@ -734,6 +872,36 @@ input[type="range"] {
   }
 }
 
+@media (min-width: 1061px) and (max-height: 780px) {
+  .album-page {
+    align-items: start;
+    padding-top: 26px;
+  }
+
+  .album-cover {
+    min-height: 210px;
+  }
+
+  .cover-disc {
+    width: 168px;
+    margin-top: 8px;
+  }
+
+  .cover-disc span {
+    width: 34px;
+    height: 34px;
+  }
+
+  .album-info h1 {
+    font-size: clamp(1.9rem, 3vw, 2.85rem);
+  }
+
+  .album-info p {
+    font-size: 0.92rem;
+    line-height: 1.62;
+  }
+}
+
 @media (max-width: 760px) {
   :root {
     --header-h: 64px;
@@ -753,9 +921,10 @@ input[type="range"] {
     font-size: 0.82rem;
   }
 
-  .ghost-button {
-    min-height: 34px;
-    padding: 0 10px;
+  .language-trigger {
+    grid-template-columns: 30px 12px;
+    min-height: 36px;
+    padding: 0 9px 0 6px;
   }
 
   .hero {
@@ -778,15 +947,29 @@ input[type="range"] {
   }
 
   .album-page {
-    gap: 18px;
+    gap: 26px;
     align-items: start;
     padding-bottom: calc(var(--player-h) + 24px);
   }
 
   .album-aside {
+    min-height: 0;
+    position: relative;
+    z-index: 1;
     display: grid;
     grid-template-columns: 86px minmax(0, 1fr);
     align-items: stretch;
+  }
+
+  .album-switcher {
+    top: 8px;
+    right: 8px;
+  }
+
+  .album-switch-button {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
   }
 
   .album-cover {
@@ -811,7 +994,7 @@ input[type="range"] {
   }
 
   .album-info {
-    padding: 12px;
+    padding: 12px 50px 12px 12px;
   }
 
   .album-info h1 {
@@ -830,13 +1013,26 @@ input[type="range"] {
     line-height: 1.55;
   }
 
+  .album-links {
+    margin-top: 10px;
+  }
+
   .source-link {
     min-height: 32px;
-    margin-top: 8px;
+    padding: 0 10px;
     font-size: 0.82rem;
   }
 
+  .album-corner-link {
+    right: 10px;
+    bottom: 10px;
+    width: 34px;
+    height: 34px;
+    font-size: 0.86rem;
+  }
+
   .lyric-reader {
+    margin-top: 6px;
     min-height: max(300px, calc(100dvh - var(--header-h) - var(--player-h) - 210px));
   }
 

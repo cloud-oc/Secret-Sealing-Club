@@ -23,9 +23,32 @@
       </a>
 
       <nav class="top-nav" aria-label="主导航">
-        <button class="ghost-button" id="lang-toggle" type="button" aria-label="切换语言">
-          中文 / 日本語
-        </button>
+        <div class="language-switcher">
+          <button
+            class="language-trigger"
+            id="lang-toggle"
+            type="button"
+            aria-label="切换语言"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="language-menu"
+          >
+            <span class="language-symbol" aria-hidden="true">
+              <span>文</span>
+              <span>A</span>
+            </span>
+            <span class="visually-hidden" id="language-current">中文</span>
+            <span class="language-caret" aria-hidden="true">⌄</span>
+          </button>
+          <div class="language-menu" id="language-menu" role="menu" hidden>
+            <button type="button" role="menuitemradio" data-language="zh" aria-checked="true">
+              中文
+            </button>
+            <button type="button" role="menuitemradio" data-language="ja" aria-checked="false">
+              日本語
+            </button>
+          </div>
+        </div>
       </nav>
     </header>
 

@@ -25,6 +25,12 @@ const player = {
   current: document.querySelector("#current-time"),
   duration: document.querySelector("#duration"),
 };
+const language = {
+  toggle: document.querySelector("#lang-toggle"),
+  current: document.querySelector("#language-current"),
+  menu: document.querySelector("#language-menu"),
+  options: document.querySelectorAll("[data-language]"),
+};
 
 const t = {
   zh: {
@@ -42,6 +48,11 @@ const t = {
     closePlaylist: "收起曲目",
     trackUnit: "曲",
     source: "原典线索",
+    switchAlbum: "切换专辑",
+    prevAlbum: "上一张",
+    nextAlbum: "下一张",
+    netease: "网易云",
+    languageToggle: "切换语言",
     quietNote: "愿每一次边界观测，都有一首曲子作证。",
     github: "GitHub",
     contentGuide: "内容格式",
@@ -64,6 +75,11 @@ const t = {
     closePlaylist: "曲目を閉じる",
     trackUnit: "曲",
     source: "原典の手掛かり",
+    switchAlbum: "アルバム切替",
+    prevAlbum: "前の一枚",
+    nextAlbum: "次の一枚",
+    netease: "网易云",
+    languageToggle: "言語を切り替える",
     quietNote: "境界観測のたび、そばに一曲がありますように。",
     github: "GitHub",
     contentGuide: "内容形式",
@@ -127,6 +143,7 @@ function mergeAlbums(sourceAlbums, overrideAlbums) {
     return {
       ...album,
       ...pickDefined(override, ["source", "color", "catalog", "year"]),
+      links: { ...(album.links || {}), ...(override.links || {}) },
       title: { ...album.title, ...(override.title || {}) },
       summary: { ...album.summary, ...(override.summary || {}) },
       tracks: mergeTracks(album.tracks, override.tracks || []),
@@ -214,13 +231,20 @@ function renderAlbum(id) {
     return;
   }
 
+  const albumIndex = albums.findIndex((item) => item.id === album.id);
+  const previousAlbum = albums[(albumIndex - 1 + albums.length) % albums.length];
+  const nextAlbum = albums[(albumIndex + 1) % albums.length];
   state.albumId = album.id;
   if (state.trackIndex >= album.tracks.length) state.trackIndex = 0;
-  document.title = `${album.title.zh} | 秘封俱乐部`;
+  document.title = `${album.title[state.lang]} | ${tr("brand")}`;
 
   app.innerHTML = `
     <article class="album-page" style="--album-color: ${album.color}">
       <aside class="album-aside">
+        <div class="album-switcher" aria-label="${tr("switchAlbum")}">
+          <a class="album-switch-button" href="#/album/${previousAlbum.id}" data-album-jump="${previousAlbum.id}" aria-label="${tr("prevAlbum")}: ${previousAlbum.title[state.lang]}">‹</a>
+          <a class="album-switch-button" href="#/album/${nextAlbum.id}" data-album-jump="${nextAlbum.id}" aria-label="${tr("nextAlbum")}: ${nextAlbum.title[state.lang]}">›</a>
+        </div>
         <div class="album-cover">
           <p class="kicker">${album.catalog}</p>
           <div class="cover-disc"><span></span></div>
@@ -228,8 +252,11 @@ function renderAlbum(id) {
         <div class="album-info">
           <h1>${album.title[state.lang]}</h1>
           <p>${album.summary[state.lang]}</p>
-          <a class="source-link" href="${album.source}" target="_blank" rel="noreferrer">${tr("source")}</a>
+          <div class="album-links">
+            <a class="source-link" href="${album.source}" target="_blank" rel="noreferrer">${tr("source")}</a>
+          </div>
         </div>
+        <a class="netease-link album-corner-link" href="${album.links?.netease || neteaseSearchUrl(album)}" target="_blank" rel="noreferrer" aria-label="${tr("netease")}: ${album.title[state.lang]}" title="${tr("netease")}">云</a>
       </aside>
 
       <section class="reader lyric-reader">
@@ -300,6 +327,12 @@ function contentReadmeName() {
 
 function bindAlbum(album) {
   renderPlaylist(album);
+  document.querySelectorAll("[data-album-jump]").forEach((link) => {
+    link.addEventListener("click", () => {
+      state.trackIndex = 0;
+      closePlaylist();
+    });
+  });
 }
 
 function selectTrack(album, index, autoplay) {
@@ -346,9 +379,21 @@ function setLanguage(lang) {
 }
 
 function updateLanguageButtons() {
+  language.current.textContent = state.lang === "zh" ? "中文" : "日本語";
+  language.toggle.setAttribute("aria-label", tr("languageToggle"));
+  language.options.forEach((option) => {
+    const isActive = option.dataset.language === state.lang;
+    option.classList.toggle("is-active", isActive);
+    option.setAttribute("aria-checked", String(isActive));
+  });
+
   player.playlistPanel.querySelectorAll(".track-button").forEach((button, index) => {
     button.classList.toggle("is-active", index === state.trackIndex);
   });
+}
+
+function neteaseSearchUrl(album) {
+  return `https://music.163.com/#/search/m/?s=${encodeURIComponent(album.title.ja)}&type=10`;
 }
 
 function formatTime(value) {
@@ -458,14 +503,38 @@ function updatePlayButton() {
   player.play.textContent = state.isPlaying ? "Ⅱ" : "▶";
 }
 
-document.querySelector("#lang-toggle").addEventListener("click", () => {
-  setLanguage(state.lang === "zh" ? "ja" : "zh");
+language.toggle.addEventListener("click", () => {
+  setLanguageMenuOpen(language.menu.hidden);
+});
+
+language.options.forEach((option) => {
+  option.addEventListener("click", () => {
+    setLanguage(option.dataset.language);
+    setLanguageMenuOpen(false);
+  });
+});
+
+document.addEventListener("click", (event) => {
+  if (event.target.closest(".language-switcher")) return;
+  setLanguageMenuOpen(false);
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") setLanguageMenuOpen(false);
 });
 
 function syncShellText() {
+  document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "ja";
   document.querySelector(".brand strong").textContent = tr("brand");
   document.querySelector(".brand small").textContent = tr("brandSub");
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+  updateLanguageButtons();
+}
+
+function setLanguageMenuOpen(isOpen) {
+  language.menu.hidden = !isOpen;
+  language.toggle.classList.toggle("is-active", isOpen);
+  language.toggle.setAttribute("aria-expanded", String(isOpen));
 }
 
 function drawStars() {
