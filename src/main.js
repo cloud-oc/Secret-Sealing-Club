@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260616-hypergryph-polish");
+const { albums: baseAlbums } = await import("./data.js?v=20260616-cinematic-hud");
 
 let albums = baseAlbums;
 
@@ -57,6 +57,7 @@ const t = {
     trackUnit: "曲",
     albumCarousel: "秘封藏书",
     openAlbum: "打开读本",
+    observeAlbum: "观测这张读本",
     source: "原典线索",
     switchAlbum: "切换专辑",
     prevAlbum: "上一张",
@@ -81,6 +82,7 @@ const t = {
     trackUnit: "曲",
     albumCarousel: "秘封蔵書",
     openAlbum: "読本を開く",
+    observeAlbum: "この読本を観測",
     source: "原典の手掛かり",
     switchAlbum: "アルバム切替",
     prevAlbum: "前の一枚",
@@ -195,12 +197,26 @@ function pickDefined(source, keys) {
 function renderHome() {
   stopHomeCarouselTimer();
   if (state.homeAlbumIndex >= albums.length) state.homeAlbumIndex = 0;
+  document.body.dataset.view = "home";
   document.title = tr("siteTitle");
   app.innerHTML = `
     <section class="hero">
+      <div class="hero-stage" aria-hidden="true">
+        <span class="stage-orbit stage-orbit-a"></span>
+        <span class="stage-orbit stage-orbit-b"></span>
+        <span class="stage-slice stage-slice-a"></span>
+        <span class="stage-slice stage-slice-b"></span>
+      </div>
       <div class="hero-copy">
         <p class="kicker">${tr("heroKicker")}</p>
         <h1>${tr("heroTitleA")}<br><span class="jp-title">${tr("heroTitleB")}</span></h1>
+        <div class="hero-system" aria-hidden="true">
+          <span>RENKO</span>
+          <i></i>
+          <span>MERRY</span>
+          <i></i>
+          <span>BARRIER FIELD</span>
+        </div>
       </div>
       ${albumCarousel()}
     </section>
@@ -218,10 +234,18 @@ function renderHome() {
 }
 
 function albumCarousel() {
+  const activeAlbum = albums[state.homeAlbumIndex] || albums[0];
   return `
     <section class="album-carousel" id="albums" aria-label="${tr("albumCarousel")}" aria-roledescription="carousel">
+      <div class="carousel-hud" aria-hidden="true">
+        <span>${activeAlbum?.catalog || "ZCDS"}</span>
+        <span>${String(state.homeAlbumIndex + 1).padStart(2, "0")} / ${String(albums.length).padStart(2, "0")}</span>
+      </div>
       <div class="carousel-viewport">
         ${albums.map(albumPoster).join("")}
+      </div>
+      <div class="carousel-readout" aria-live="polite">
+        ${activeAlbum ? albumReadout(activeAlbum, state.homeAlbumIndex) : ""}
       </div>
       <div class="carousel-dots" role="tablist" aria-label="${tr("albumCarousel")}">
         ${albums.map(carouselDot).join("")}
@@ -234,8 +258,12 @@ function albumPoster(album, index) {
   const offset = carouselOffset(index);
   return `
     <a class="album-card album-poster" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
+      <span class="poster-glow" aria-hidden="true"></span>
       <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
-      <h2>${album.title[state.lang]}</h2>
+      <span class="poster-title-block">
+        <span class="poster-ja">${album.title.ja}</span>
+        <h2>${album.title[state.lang]}</h2>
+      </span>
       <p>${album.summary[state.lang]}</p>
       <span class="album-meta">
         <span>${album.year}</span>
@@ -245,11 +273,27 @@ function albumPoster(album, index) {
   `;
 }
 
+function albumReadout(album, index) {
+  return `
+    <div>
+      <span class="readout-label">${album.catalog}</span>
+      <strong>${album.title[state.lang]}</strong>
+      <p>${album.summary[state.lang]}</p>
+    </div>
+    <a class="readout-action" href="#/album/${album.id}">
+      <span>${tr("observeAlbum")}</span>
+      ${icon("chevron-right")}
+    </a>
+    <span class="readout-index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+  `;
+}
+
 function carouselDot(album, index) {
   const isActive = index === state.homeAlbumIndex;
   return `
     <button class="carousel-dot ${isActive ? "is-active" : ""}" type="button" role="tab" data-carousel-index="${index}" aria-label="${album.title[state.lang]}" aria-selected="${String(isActive)}">
       <span></span>
+      <em>${String(index + 1).padStart(2, "0")}</em>
     </button>
   `;
 }
@@ -265,6 +309,7 @@ function renderAlbum(id) {
   const albumIndex = albums.findIndex((item) => item.id === album.id);
   const previousAlbum = albums[(albumIndex - 1 + albums.length) % albums.length];
   const nextAlbum = albums[(albumIndex + 1) % albums.length];
+  document.body.dataset.view = "album";
   state.albumId = album.id;
   if (state.trackIndex >= album.tracks.length) state.trackIndex = 0;
   document.title = `${album.title[state.lang]} | ${tr("brand")}`;
@@ -272,6 +317,11 @@ function renderAlbum(id) {
   app.innerHTML = `
     <article class="album-page" style="--album-color: ${album.color}">
       <aside class="album-aside">
+        <div class="album-aside-signal" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
         <div class="album-switcher" aria-label="${tr("switchAlbum")}">
           <a class="album-switch-button" href="#/album/${previousAlbum.id}" data-album-jump="${previousAlbum.id}" aria-label="${tr("prevAlbum")}: ${previousAlbum.title[state.lang]}">${icon("chevron-left")}</a>
           <a class="album-switch-button" href="#/album/${nextAlbum.id}" data-album-jump="${nextAlbum.id}" aria-label="${tr("nextAlbum")}: ${nextAlbum.title[state.lang]}">${icon("chevron-right")}</a>
@@ -297,6 +347,10 @@ function renderAlbum(id) {
       </aside>
 
       <section class="reader lyric-reader">
+        <div class="reader-hud" aria-hidden="true">
+          <span>${album.catalog}</span>
+          <span>${album.year}</span>
+        </div>
         <div class="story">
           ${album.story.map((section, index) => storySection(album, section, index)).join("")}
         </div>
@@ -335,6 +389,7 @@ function storySection(album, section, index) {
 
 function renderNotFound() {
   stopHomeCarouselTimer();
+  document.body.dataset.view = "empty";
   app.innerHTML = `
     <section class="empty-state">
       <p class="kicker">404</p>
@@ -387,6 +442,8 @@ function updateHomeCarousel() {
   const slides = document.querySelectorAll("[data-carousel-slide]");
   const dots = document.querySelectorAll("[data-carousel-index]");
   const activeAlbum = albums[state.homeAlbumIndex];
+  const readout = document.querySelector(".carousel-readout");
+  const hud = document.querySelector(".carousel-hud");
 
   slides.forEach((slide) => {
     const index = Number(slide.dataset.carouselSlide);
@@ -394,13 +451,16 @@ function updateHomeCarousel() {
     const distance = Math.abs(offset);
     const isActive = offset === 0;
     const isNear = distance === 1;
-    const x = offset * 42;
+    const isCompact = window.innerWidth <= 760;
+    const x = isCompact ? 0 : offset * 118;
 
     slide.dataset.offset = String(offset);
     slide.style.setProperty("--poster-x", `${x}px`);
-    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.92");
+    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.82");
     slide.style.setProperty("--poster-opacity", isActive || isNear ? "1" : "0");
-    slide.style.setProperty("--poster-rotate", `${offset * -1.8}deg`);
+    slide.style.setProperty("--poster-rotate", `${isCompact ? 0 : offset * -1.8}deg`);
+    slide.style.setProperty("--poster-rotate-y", `${isCompact ? 0 : offset * -16}deg`);
+    slide.style.setProperty("--poster-z-depth", isActive || isCompact ? "0" : "-120");
     slide.style.setProperty("--poster-z", String(20 - distance));
     slide.classList.toggle("is-active", isActive);
     slide.classList.toggle("is-near", isNear);
@@ -414,6 +474,17 @@ function updateHomeCarousel() {
     dot.classList.toggle("is-active", isActive);
     dot.setAttribute("aria-selected", String(isActive));
   });
+
+  if (activeAlbum && readout) {
+    readout.innerHTML = albumReadout(activeAlbum, state.homeAlbumIndex);
+  }
+
+  if (activeAlbum && hud) {
+    hud.innerHTML = `
+      <span>${activeAlbum.catalog}</span>
+      <span>${String(state.homeAlbumIndex + 1).padStart(2, "0")} / ${String(albums.length).padStart(2, "0")}</span>
+    `;
+  }
 
   if (!state.albumId && activeAlbum) syncPlayerAlbumLink(activeAlbum);
 }
