@@ -1,11 +1,8 @@
 # Album Content
 
-Edit the album JSON files in `content/albums/`.
-The browser loads these files directly at runtime.
+[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
 
-This repository intentionally does not include copyrighted booklet text or music files. Put only content that you have permission to use here.
-
-## Format
+Album JSON files in `content/albums/` are loaded directly by the site. Keep one file per album and make the file name match the album `id`.
 
 ```json
 {
@@ -16,13 +13,11 @@ This repository intentionally does not include copyrighted booklet text or music
   "story": [
     {
       "track": 1,
-      "title": { "zh": "中文标题", "ja": "日本語タイトル" },
-      "text": { "zh": "中文正文", "ja": "日本語本文" }
+      "title": { "zh": "Chinese title", "ja": "日本語タイトル" },
+      "text": { "zh": "Chinese story text", "ja": "Japanese story text" }
     }
   ]
 }
 ```
 
-`id` must match the album IDs in `src/data.js`.
-
-Audio files should be placed under `assets/audio/<album-id>/`.
+The `track` value links a song, an audio file, and a story section.

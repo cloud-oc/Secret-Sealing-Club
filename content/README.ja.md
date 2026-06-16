@@ -1,0 +1,23 @@
+# アルバム内容
+
+[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+
+`content/albums/` のアルバム JSON はサイトから直接読み込まれます。アルバムごとに 1 つのファイルを置き、ファイル名はアルバム `id` と合わせることを推奨します。
+
+```json
+{
+  "id": "ghostly-field-club",
+  "tracks": [
+    { "track": 1, "audio": "assets/audio/ghostly-field-club/01.mp3" }
+  ],
+  "story": [
+    {
+      "track": 1,
+      "title": { "zh": "中文标题", "ja": "日本語タイトル" },
+      "text": { "zh": "中文正文", "ja": "日本語本文" }
+    }
+  ]
+}
+```
+
+`track` は曲、音声ファイル、物語セクションを対応させるために使います。
