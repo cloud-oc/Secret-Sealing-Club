@@ -189,6 +189,7 @@ function renderHome() {
     </section>
     ${siteFooter()}
   `;
+  setPlaylistAvailability(Boolean(state.albumId));
   updateLanguageButtons();
 }
 
@@ -241,6 +242,7 @@ function renderAlbum(id) {
   `;
 
   bindAlbum(album);
+  setPlaylistAvailability(true);
   updatePlayer(album, state.trackIndex, false);
   updateLanguageButtons();
 }
@@ -277,6 +279,7 @@ function renderNotFound() {
     </section>
     ${siteFooter()}
   `;
+  setPlaylistAvailability(Boolean(state.albumId));
 }
 
 function siteFooter() {
@@ -410,16 +413,24 @@ audio.addEventListener("ended", () => {
 });
 
 player.playlistToggle.addEventListener("click", () => {
+  if (player.playlistToggle.disabled) return;
   const isOpen = player.playlistPanel.hidden;
   player.playlistPanel.hidden = !isOpen;
   player.playlistToggle.classList.toggle("is-active", isOpen);
   player.playlistToggle.setAttribute("aria-label", isOpen ? tr("closePlaylist") : tr("playlist"));
+  player.playlistToggle.setAttribute("aria-expanded", String(isOpen));
 });
 
 function closePlaylist() {
   player.playlistPanel.hidden = true;
   player.playlistToggle.classList.remove("is-active");
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+  player.playlistToggle.setAttribute("aria-expanded", "false");
+}
+
+function setPlaylistAvailability(isAvailable) {
+  player.playlistToggle.disabled = !isAvailable;
+  if (!isAvailable) closePlaylist();
 }
 
 function renderPlaylist(album) {
@@ -433,6 +444,7 @@ function renderPlaylist(album) {
     </div>
   `;
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+  player.playlistToggle.disabled = false;
 
   player.playlistPanel.querySelectorAll("[data-track]").forEach((button) => {
     button.addEventListener("click", () => {

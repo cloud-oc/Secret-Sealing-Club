@@ -32,8 +32,16 @@
     <main id="app" tabindex="-1"></main>
 
     <div class="player-shell" id="player-shell" aria-label="音乐播放器">
-      <button class="playlist-toggle" id="playlist-toggle" type="button" aria-label="展开曲目列表">
-        ≡
+      <button
+        class="playlist-toggle"
+        id="playlist-toggle"
+        type="button"
+        aria-label="展开曲目列表"
+        aria-controls="playlist-panel"
+        aria-expanded="false"
+        disabled
+      >
+        ☰
       </button>
       <div class="player-meta">
         <span class="player-index" id="player-index">TRACK 00</span>
