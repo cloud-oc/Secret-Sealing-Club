@@ -46,11 +46,9 @@ const t = {
     siteTitle: "秘封俱乐部 | 夜行读本",
     brand: "秘封俱乐部",
     brandSub: "夜行读本",
-    heroKicker: "欢迎回到秘封俱乐部",
-    heroTitleA: "夜还很长",
-    heroTitleB: "翻开下一张秘封",
-    heroBody:
-      "在铁路、星图与旧科学的气味里，一边听曲，一边读梅莉和莲子的夜谈。",
+    heroKicker: "欢迎来到秘封俱乐部",
+    heroTitleA: "科学世纪",
+    heroTitleB: "听见秘封",
     start: "回到首页",
     tracks: "曲目",
     playlist: "曲目",
@@ -64,9 +62,6 @@ const t = {
     nextAlbum: "下一张",
     netease: "网易云",
     languageToggle: "切换语言",
-    quietNote: "愿每一次边界观测，都有一首曲子作证。",
-    github: "GitHub",
-    contentGuide: "内容格式",
     emptyStory: "这一页还在社团抽屉里。填入正文后，它会随曲目一起亮起。",
     notFoundTitle: "未观测到这个坐标",
     notFoundBody: "回到藏书目，重新选择一份秘封记录。",
@@ -76,10 +71,8 @@ const t = {
     brand: "秘封倶楽部",
     brandSub: "夜行読本",
     heroKicker: "秘封倶楽部へようこそ",
-    heroTitleA: "夜はまだ長い",
-    heroTitleB: "次の秘封を開く",
-    heroBody:
-      "鉄道、星図、古い科学の匂いの中で、曲を聴きながらメリーと蓮子の夜話を読む。",
+    heroTitleA: "科学世紀",
+    heroTitleB: "秘封を聴く",
     start: "表紙へ戻る",
     tracks: "トラック",
     playlist: "曲目",
@@ -93,9 +86,6 @@ const t = {
     nextAlbum: "次の一枚",
     netease: "网易云",
     languageToggle: "言語を切り替える",
-    quietNote: "境界観測のたび、そばに一曲がありますように。",
-    github: "GitHub",
-    contentGuide: "内容形式",
     emptyStory: "この頁はまだ部室の引き出しの中です。本文を入れると、曲と一緒に灯ります。",
     notFoundTitle: "この座標は観測できません",
     notFoundBody: "蔵書目録へ戻って、もう一度秘封記録を選んでください。",
@@ -206,11 +196,9 @@ function renderHome() {
       <div class="hero-copy">
         <p class="kicker">${tr("heroKicker")}</p>
         <h1>${tr("heroTitleA")}<br><span class="jp-title">${tr("heroTitleB")}</span></h1>
-        <p>${tr("heroBody")}</p>
       </div>
       ${albumCarousel()}
     </section>
-    ${siteFooter()}
   `;
   setPlaylistAvailability(Boolean(state.albumId));
   updateLanguageButtons();
@@ -306,7 +294,6 @@ function renderAlbum(id) {
         </div>
       </section>
     </article>
-    ${siteFooter()}
   `;
 
   bindAlbum(album);
@@ -346,7 +333,6 @@ function renderNotFound() {
       <h1>${tr("notFoundTitle")}</h1>
       <p>${tr("notFoundBody")} <a class="text-link" href="#/">${tr("start")}</a></p>
     </section>
-    ${siteFooter()}
   `;
   setPlaylistAvailability(Boolean(state.albumId));
 }
@@ -442,22 +428,6 @@ function stopHomeCarouselTimer() {
 function restartHomeCarouselTimer() {
   stopHomeCarouselTimer();
   startHomeCarouselTimer();
-}
-
-function siteFooter() {
-  return `
-    <footer class="site-footer">
-      <p>${tr("quietNote")}</p>
-      <nav aria-label="站点链接">
-        <a href="https://github.com/cloud-oc/Secret-Sealing-Club" target="_blank" rel="noreferrer">${tr("github")}</a>
-        <a href="./content/${contentReadmeName()}">${tr("contentGuide")}</a>
-      </nav>
-    </footer>
-  `;
-}
-
-function contentReadmeName() {
-  return state.lang === "zh" ? "README.zh-CN.md" : "README.ja.md";
 }
 
 function bindAlbum(album) {
