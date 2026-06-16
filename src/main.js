@@ -26,58 +26,54 @@ const player = {
 
 const t = {
   zh: {
-    heroKicker: "ZUN's Music Collection Reader",
-    heroTitleA: "在两个世界的缝隙里",
-    heroTitleB: "听见秘封",
+    siteTitle: "秘封俱乐部 | 夜行读本",
+    brand: "秘封俱乐部",
+    brandSub: "夜行读本",
+    heroKicker: "欢迎回到秘封俱乐部",
+    heroTitleA: "夜还很长",
+    heroTitleB: "翻开下一张秘封",
     heroBody:
-      "把秘封俱乐部音乐 CD 做成可阅读的档案：每张专辑独立成页，曲目与故事片段互相对应。读者可以一边播放音乐，一边在中文与日文之间切换。",
-    start: "进入专辑",
-    guide: "内容维护指南",
-    observation: "观测记录",
+      "在铁路、星图与旧科学的气味里，一边听曲，一边读梅莉和莲子的夜谈。",
+    start: "翻阅藏书",
+    observation: "社团便笺",
     observationText:
-      "当前站点已搭好完整交互结构。为尊重原作与汉化版权，示例小说是占位摘要；你可以在 src/data.js 中替换为已获授权的中文与日文全文。",
+      "这里收着九张秘封音乐 CD 的读本。曲子响起时，故事会在旁边亮起，像深夜车窗外忽然对上的星。",
     tracks: "曲目",
-    readMode: "阅读语言",
-    noAudio: "音频文件未放入仓库时，播放器会显示曲目并保持阅读联动；放入 assets/audio 后即可播放。",
-    source: "资料页",
-    copyright:
-      "版权提示：本页结构用于个人整理与阅读体验。请只填入你有权使用或公开授权可转载的小说文本与音频文件。",
-    aboutTitle: "站点维护指南",
-    aboutBody:
-      "这是一个纯静态网站，可以直接部署到 GitHub Pages。完整小说与音频不要硬编码进页面，统一维护在 src/data.js 与 assets/audio 目录中。",
-    aboutSteps: [
-      "在 src/data.js 的 albums 数组里找到对应专辑。",
-      "把 story.zh 和 story.ja 的占位摘要替换为已授权文本。",
-      "把音频文件放进 assets/audio，并把 tracks[].audio 改成对应路径。",
-      "提交到 GitHub 后，在仓库 Settings → Pages 选择 Deploy from a branch / main / root。",
-    ],
+    trackUnit: "曲",
+    readMode: "读本语言",
+    noAudio: "若音频尚未放入，仍可先按曲目阅读；补上音频后，这里就是夜行播放机。",
+    source: "原典线索",
+    quietNote: "愿每一次边界观测，都有一首曲子作证。",
+    github: "GitHub",
+    contentGuide: "内容格式",
+    emptyStory: "这一页还在社团抽屉里。填入正文后，它会随曲目一起亮起。",
+    notFoundTitle: "未观测到这个坐标",
+    notFoundBody: "回到藏书目，重新选择一份秘封记录。",
   },
   ja: {
-    heroKicker: "ZUN's Music Collection Reader",
-    heroTitleA: "ふたつの世界の隙間で",
-    heroTitleB: "秘封を聴く",
+    siteTitle: "秘封倶楽部 | 夜行読本",
+    brand: "秘封倶楽部",
+    brandSub: "夜行読本",
+    heroKicker: "秘封倶楽部へようこそ",
+    heroTitleA: "夜はまだ長い",
+    heroTitleB: "次の秘封を開く",
     heroBody:
-      "秘封倶楽部の音楽 CD を読むためのアーカイブです。アルバムごとにページを分け、曲と物語の断片を対応させています。中国語と日本語を切り替えながら読めます。",
-    start: "アルバムへ",
-    guide: "編集ガイド",
-    observation: "観測記録",
+      "鉄道、星図、古い科学の匂いの中で、曲を聴きながらメリーと蓮子の夜話を読む。",
+    start: "蔵書を開く",
+    observation: "サークルメモ",
     observationText:
-      "サイトの構造とインタラクションは実装済みです。原作と翻訳の権利に配慮し、本文は要約プレースホルダーです。許諾済みの全文を src/data.js に入れてください。",
+      "九つの秘封音楽 CD 読本を収めています。曲が鳴ると、隣の物語が静かに灯ります。",
     tracks: "トラック",
-    readMode: "表示言語",
-    noAudio: "音声ファイルが未配置の場合でも、曲目表示と読書連動は利用できます。assets/audio に入れると再生できます。",
-    source: "資料ページ",
-    copyright:
-      "権利に関する注意：このページ構造は個人整理と読書体験のためのものです。使用権または転載許可のある本文と音声のみ追加してください。",
-    aboutTitle: "サイト編集ガイド",
-    aboutBody:
-      "このサイトは静的ファイルだけで動作し、GitHub Pages にそのまま配置できます。本文と音声は src/data.js と assets/audio で管理します。",
-    aboutSteps: [
-      "src/data.js の albums 配列で対象アルバムを探します。",
-      "story.zh と story.ja の要約を、許諾済みの本文に置き換えます。",
-      "音声ファイルを assets/audio に置き、tracks[].audio を更新します。",
-      "GitHub に push 後、Settings → Pages で Deploy from a branch / main / root を選びます。",
-    ],
+    trackUnit: "曲",
+    readMode: "読本の言語",
+    noAudio: "音声が未配置でも、曲目に沿って読めます。音声を置けば夜行プレイヤーになります。",
+    source: "原典の手掛かり",
+    quietNote: "境界観測のたび、そばに一曲がありますように。",
+    github: "GitHub",
+    contentGuide: "内容形式",
+    emptyStory: "この頁はまだ部室の引き出しの中です。本文を入れると、曲と一緒に灯ります。",
+    notFoundTitle: "この座標は観測できません",
+    notFoundBody: "蔵書目録へ戻って、もう一度秘封記録を選んでください。",
   },
 };
 
@@ -94,13 +90,14 @@ function route() {
     return;
   }
 
-  if (kind === "album" && id) {
-    renderAlbum(id);
+  if (kind === "albums") {
+    renderHome();
+    requestAnimationFrame(() => document.querySelector("#albums")?.scrollIntoView({ block: "start" }));
     return;
   }
 
-  if (kind === "about") {
-    renderAbout();
+  if (kind === "album" && id) {
+    renderAlbum(id);
     return;
   }
 
@@ -175,7 +172,7 @@ function pickDefined(source, keys) {
 }
 
 function renderHome() {
-  document.title = "秘封俱乐部 | Music & Stories";
+  document.title = tr("siteTitle");
   app.innerHTML = `
     <section class="hero">
       <div class="hero-copy">
@@ -184,7 +181,6 @@ function renderHome() {
         <p>${tr("heroBody")}</p>
         <div class="hero-actions">
           <a class="primary-link" href="#albums">${tr("start")}</a>
-          <a class="secondary-link" href="#/about">${tr("guide")}</a>
         </div>
       </div>
       <div class="orbital" aria-hidden="true">
@@ -199,6 +195,7 @@ function renderHome() {
     <section class="album-grid" id="albums" aria-label="专辑列表">
       ${albums.map(albumCard).join("")}
     </section>
+    ${siteFooter()}
   `;
   updateLanguageButtons();
 }
@@ -206,12 +203,12 @@ function renderHome() {
 function albumCard(album, index) {
   return `
     <a class="album-card" href="#/album/${album.id}" style="--album-color: ${album.color}">
-      <span class="album-number">ARCHIVE ${String(index + 1).padStart(2, "0")}</span>
+      <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
       <h2>${album.title[state.lang]}</h2>
       <p>${album.summary[state.lang]}</p>
       <span class="album-meta">
         <span>${album.year}</span>
-        <span>${album.tracks.length} tracks</span>
+        <span>${album.tracks.length}${tr("trackUnit")}</span>
       </span>
     </a>
   `;
@@ -260,9 +257,10 @@ function renderAlbum(id) {
         <div class="story">
           ${album.story.map((section, index) => storySection(album, section, index)).join("")}
         </div>
-        <p class="copyright-note">${tr("copyright")}</p>
+        <p class="copyright-note">${tr("quietNote")}</p>
       </section>
     </article>
+    ${siteFooter()}
   `;
 
   bindAlbum(album);
@@ -281,41 +279,43 @@ function trackButton(track, index) {
 
 function storySection(album, section, index) {
   const track = album.tracks[section.track - 1] || album.tracks[index];
+  const text = section.text[state.lang]?.trim() || tr("emptyStory");
   return `
     <section class="story-section ${index === state.trackIndex ? "is-active" : ""}" id="story-${index}" data-story="${index}">
       <div class="story-track">TRACK ${String(section.track).padStart(2, "0")}</div>
       <div class="story-card">
         <h2>${track?.title || section.title[state.lang]}</h2>
-        <p>${section.text[state.lang]}</p>
+        <p class="${section.text[state.lang]?.trim() ? "" : "empty-copy"}">${text}</p>
       </div>
     </section>
   `;
-}
-
-function renderAbout() {
-  document.title = "维护指南 | 秘封俱乐部";
-  app.innerHTML = `
-    <section class="about-page">
-      <p class="kicker">Static archive</p>
-      <h1>${tr("aboutTitle")}</h1>
-      <p>${tr("aboutBody")}</p>
-      <ol>
-        ${tr("aboutSteps").map((step) => `<li>${step}</li>`).join("")}
-      </ol>
-      <p>发布命令建议使用 <code>git init</code>、<code>git add .</code>、<code>git commit</code>，再推送到 GitHub 仓库并开启 Pages。</p>
-    </section>
-  `;
-  updateLanguageButtons();
 }
 
 function renderNotFound() {
   app.innerHTML = `
     <section class="empty-state">
       <p class="kicker">404</p>
-      <h1>未观测到这个坐标</h1>
-      <p>回到 <a class="source-link" href="#/">专辑列表</a> 重新选择一个秘封记录。</p>
+      <h1>${tr("notFoundTitle")}</h1>
+      <p>${tr("notFoundBody")} <a class="source-link" href="#/">${tr("start")}</a></p>
     </section>
+    ${siteFooter()}
   `;
+}
+
+function siteFooter() {
+  return `
+    <footer class="site-footer">
+      <p>${tr("quietNote")}</p>
+      <nav aria-label="站点链接">
+        <a href="https://github.com/cloud-oc/Secret-Sealing-Club" target="_blank" rel="noreferrer">${tr("github")}</a>
+        <a href="./content/${contentReadmeName()}">${tr("contentGuide")}</a>
+      </nav>
+    </footer>
+  `;
+}
+
+function contentReadmeName() {
+  return state.lang === "zh" ? "README.zh-CN.md" : "README.ja.md";
 }
 
 function bindAlbum(album) {
@@ -370,6 +370,7 @@ function updatePlayer(album, index, autoplay) {
 function setLanguage(lang) {
   state.lang = lang;
   localStorage.setItem("ssc-language", lang);
+  syncShellText();
   route();
 }
 
@@ -448,6 +449,11 @@ document.querySelector("#lang-toggle").addEventListener("click", () => {
   setLanguage(state.lang === "zh" ? "ja" : "zh");
 });
 
+function syncShellText() {
+  document.querySelector(".brand strong").textContent = tr("brand");
+  document.querySelector(".brand small").textContent = tr("brandSub");
+}
+
 function drawStars() {
   const canvas = document.querySelector("#starfield");
   const context = canvas.getContext("2d");
@@ -491,4 +497,5 @@ window.addEventListener("resize", drawStars);
 
 drawStars();
 await loadContentOverrides();
+syncShellText();
 route();

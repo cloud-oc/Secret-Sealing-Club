@@ -115,7 +115,7 @@ button {
 .top-nav {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   color: var(--muted);
   font-size: 0.9rem;
 }
@@ -272,8 +272,10 @@ h1 {
   width: min(360px, 82vw);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 18px;
-  background: rgba(12, 15, 23, 0.78);
+  padding: 20px;
+  background:
+    linear-gradient(180deg, rgba(237, 232, 218, 0.08), rgba(237, 232, 218, 0.025)),
+    rgba(12, 15, 23, 0.78);
   box-shadow: 0 24px 70px var(--shadow);
   backdrop-filter: blur(18px);
 }
@@ -547,6 +549,11 @@ h1 {
   line-height: 2.05;
 }
 
+.story-card .empty-copy {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .copyright-note {
   border: 1px solid rgba(215, 179, 99, 0.28);
   border-radius: var(--radius);
@@ -557,28 +564,35 @@ h1 {
   line-height: 1.7;
 }
 
-.about-page {
-  max-width: 920px;
-  padding: clamp(34px, 7vw, 88px) clamp(16px, 5vw, 68px);
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 clamp(16px, 5vw, 68px) calc(var(--player-h) + 28px);
+  border-top: 1px solid var(--line);
+  padding: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
 }
 
-.about-page h1 {
-  font-size: clamp(2.5rem, 7vw, 6rem);
+.site-footer p {
+  margin: 0;
 }
 
-.about-page p,
-.about-page li {
-  color: #d8d0c2;
-  font-size: 1.04rem;
-  line-height: 1.9;
+.site-footer nav {
+  display: flex;
+  gap: 14px;
 }
 
-.about-page code {
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  padding: 0.12em 0.35em;
+.site-footer a {
+  color: #bfb6a7;
+}
+
+.site-footer a:hover,
+.site-footer a:focus-visible {
   color: var(--accent);
-  background: rgba(255, 255, 255, 0.06);
 }
 
 .player-shell {
@@ -717,10 +731,6 @@ input[type="range"] {
     font-size: 0.82rem;
   }
 
-  .top-nav a:nth-child(2) {
-    display: none;
-  }
-
   .ghost-button {
     min-height: 34px;
     padding: 0 10px;
@@ -769,6 +779,11 @@ input[type="range"] {
 
   .player-timeline {
     grid-column: 1 / -1;
+  }
+
+  .site-footer {
+    display: grid;
+    margin-bottom: calc(var(--player-h) + 22px);
   }
 }
 
