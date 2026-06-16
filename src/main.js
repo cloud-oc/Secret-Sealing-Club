@@ -6,8 +6,13 @@ const state = {
   lang: localStorage.getItem("ssc-language") || "zh",
   albumId: "",
   trackIndex: 0,
+  homeAlbumIndex: 0,
   isPlaying: false,
 };
+
+let homeCarouselTimer = 0;
+const homeCarouselDelay = 5200;
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -42,11 +47,13 @@ const t = {
     heroTitleB: "翻开下一张秘封",
     heroBody:
       "在铁路、星图与旧科学的气味里，一边听曲，一边读梅莉和莲子的夜谈。",
-    start: "翻阅藏书",
+    start: "回到首页",
     tracks: "曲目",
     playlist: "曲目",
     closePlaylist: "收起曲目",
     trackUnit: "曲",
+    albumCarousel: "秘封藏书",
+    openAlbum: "打开读本",
     source: "原典线索",
     switchAlbum: "切换专辑",
     prevAlbum: "上一张",
@@ -69,11 +76,13 @@ const t = {
     heroTitleB: "次の秘封を開く",
     heroBody:
       "鉄道、星図、古い科学の匂いの中で、曲を聴きながらメリーと蓮子の夜話を読む。",
-    start: "蔵書を開く",
+    start: "表紙へ戻る",
     tracks: "トラック",
     playlist: "曲目",
     closePlaylist: "曲目を閉じる",
     trackUnit: "曲",
+    albumCarousel: "秘封蔵書",
+    openAlbum: "読本を開く",
     source: "原典の手掛かり",
     switchAlbum: "アルバム切替",
     prevAlbum: "前の一枚",
@@ -185,6 +194,8 @@ function pickDefined(source, keys) {
 }
 
 function renderHome() {
+  stopHomeCarouselTimer();
+  if (state.homeAlbumIndex >= albums.length) state.homeAlbumIndex = 0;
   document.title = tr("siteTitle");
   app.innerHTML = `
     <section class="hero">
@@ -192,27 +203,37 @@ function renderHome() {
         <p class="kicker">${tr("heroKicker")}</p>
         <h1>${tr("heroTitleA")}<br><span class="jp-title">${tr("heroTitleB")}</span></h1>
         <p>${tr("heroBody")}</p>
-        <div class="hero-actions">
-          <a class="primary-link" href="#albums">${tr("start")}</a>
-        </div>
       </div>
-      <div class="orbital" aria-hidden="true">
-        <div class="orbit-ring"></div>
-        <div class="orbit-ring"></div>
-      </div>
-    </section>
-    <section class="album-grid" id="albums" aria-label="专辑列表">
-      ${albums.map(albumCard).join("")}
+      ${albumCarousel()}
     </section>
     ${siteFooter()}
   `;
   setPlaylistAvailability(Boolean(state.albumId));
   updateLanguageButtons();
+  bindHomeCarousel();
 }
 
-function albumCard(album, index) {
+function albumCarousel() {
   return `
-    <a class="album-card" href="#/album/${album.id}" style="--album-color: ${album.color}">
+    <section class="album-carousel" id="albums" aria-label="${tr("albumCarousel")}" aria-roledescription="carousel">
+      <div class="carousel-viewport">
+        ${albums.map(albumPoster).join("")}
+      </div>
+      <div class="carousel-controls" aria-label="${tr("switchAlbum")}">
+        <button class="carousel-arrow" type="button" data-carousel-step="-1" aria-label="${tr("prevAlbum")}">‹</button>
+        <button class="carousel-arrow" type="button" data-carousel-step="1" aria-label="${tr("nextAlbum")}">›</button>
+      </div>
+      <div class="carousel-dots" role="tablist" aria-label="${tr("albumCarousel")}">
+        ${albums.map(carouselDot).join("")}
+      </div>
+    </section>
+  `;
+}
+
+function albumPoster(album, index) {
+  const offset = carouselOffset(index);
+  return `
+    <a class="album-card album-poster" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
       <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
       <h2>${album.title[state.lang]}</h2>
       <p>${album.summary[state.lang]}</p>
@@ -224,7 +245,17 @@ function albumCard(album, index) {
   `;
 }
 
+function carouselDot(album, index) {
+  const isActive = index === state.homeAlbumIndex;
+  return `
+    <button class="carousel-dot ${isActive ? "is-active" : ""}" type="button" role="tab" data-carousel-index="${index}" aria-label="${album.title[state.lang]}" aria-selected="${String(isActive)}">
+      <span></span>
+    </button>
+  `;
+}
+
 function renderAlbum(id) {
+  stopHomeCarouselTimer();
   const album = albums.find((item) => item.id === id);
   if (!album) {
     renderNotFound();
@@ -298,6 +329,7 @@ function storySection(album, section, index) {
 }
 
 function renderNotFound() {
+  stopHomeCarouselTimer();
   app.innerHTML = `
     <section class="empty-state">
       <p class="kicker">404</p>
@@ -307,6 +339,99 @@ function renderNotFound() {
     ${siteFooter()}
   `;
   setPlaylistAvailability(Boolean(state.albumId));
+}
+
+function bindHomeCarousel() {
+  updateHomeCarousel();
+
+  document.querySelectorAll("[data-carousel-step]").forEach((button) => {
+    button.addEventListener("click", () => {
+      shiftHomeCarousel(Number(button.dataset.carouselStep), true);
+    });
+  });
+
+  document.querySelectorAll("[data-carousel-index]").forEach((button) => {
+    button.addEventListener("click", () => {
+      setHomeCarouselIndex(Number(button.dataset.carouselIndex), true);
+    });
+  });
+
+  const carousel = document.querySelector(".album-carousel");
+  carousel?.addEventListener("mouseenter", stopHomeCarouselTimer);
+  carousel?.addEventListener("mouseleave", startHomeCarouselTimer);
+  carousel?.addEventListener("focusin", stopHomeCarouselTimer);
+  carousel?.addEventListener("focusout", () => {
+    if (!carousel.contains(document.activeElement)) startHomeCarouselTimer();
+  });
+
+  startHomeCarouselTimer();
+}
+
+function carouselOffset(index) {
+  const count = albums.length;
+  let offset = index - state.homeAlbumIndex;
+  if (offset > count / 2) offset -= count;
+  if (offset < -count / 2) offset += count;
+  return offset;
+}
+
+function shiftHomeCarousel(direction, userInitiated = false) {
+  setHomeCarouselIndex(state.homeAlbumIndex + direction, userInitiated);
+}
+
+function setHomeCarouselIndex(index, userInitiated = false) {
+  state.homeAlbumIndex = (index + albums.length) % albums.length;
+  updateHomeCarousel();
+  if (userInitiated) restartHomeCarouselTimer();
+}
+
+function updateHomeCarousel() {
+  const slides = document.querySelectorAll("[data-carousel-slide]");
+  const dots = document.querySelectorAll("[data-carousel-index]");
+
+  slides.forEach((slide) => {
+    const index = Number(slide.dataset.carouselSlide);
+    const offset = carouselOffset(index);
+    const distance = Math.abs(offset);
+    const isActive = offset === 0;
+    const isNear = distance === 1;
+    const x = offset * 56;
+
+    slide.dataset.offset = String(offset);
+    slide.style.setProperty("--poster-x", `${x}px`);
+    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.9");
+    slide.style.setProperty("--poster-opacity", isActive ? "1" : isNear ? "0.46" : "0");
+    slide.style.setProperty("--poster-rotate", `${offset * -2.4}deg`);
+    slide.style.setProperty("--poster-z", String(20 - distance));
+    slide.classList.toggle("is-active", isActive);
+    slide.classList.toggle("is-near", isNear);
+    slide.classList.toggle("is-far", distance > 1);
+    slide.setAttribute("aria-hidden", String(!isActive));
+    slide.tabIndex = isActive ? 0 : -1;
+  });
+
+  dots.forEach((dot) => {
+    const isActive = Number(dot.dataset.carouselIndex) === state.homeAlbumIndex;
+    dot.classList.toggle("is-active", isActive);
+    dot.setAttribute("aria-selected", String(isActive));
+  });
+}
+
+function startHomeCarouselTimer() {
+  stopHomeCarouselTimer();
+  if (prefersReducedMotion.matches || !document.querySelector(".album-carousel")) return;
+  homeCarouselTimer = window.setInterval(() => shiftHomeCarousel(1), homeCarouselDelay);
+}
+
+function stopHomeCarouselTimer() {
+  if (!homeCarouselTimer) return;
+  window.clearInterval(homeCarouselTimer);
+  homeCarouselTimer = 0;
+}
+
+function restartHomeCarouselTimer() {
+  stopHomeCarouselTimer();
+  startHomeCarouselTimer();
 }
 
 function siteFooter() {
