@@ -13,6 +13,10 @@ const state = {
 let homeCarouselTimer = 0;
 const homeCarouselDelay = 5200;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let starAnimationFrame = 0;
+let starCanvasWidth = 0;
+let starCanvasHeight = 0;
+let starCanvasPixelRatio = 0;
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -284,10 +288,16 @@ function renderAlbum(id) {
           <h1>${album.title[state.lang]}</h1>
           <p>${album.summary[state.lang]}</p>
           <div class="album-links">
-            <a class="source-link" href="${album.source}" target="_blank" rel="noreferrer">${tr("source")}</a>
+            <a class="album-icon-link source-link" href="${album.source}" target="_blank" rel="noreferrer" aria-label="${tr("source")}" title="${tr("source")}">
+              <span class="icon-book" aria-hidden="true"></span>
+              <span class="visually-hidden">${tr("source")}</span>
+            </a>
+            <a class="album-icon-link netease-link" href="${album.links?.netease || neteaseSearchUrl(album)}" target="_blank" rel="noreferrer" aria-label="${tr("netease")}: ${album.title[state.lang]}" title="${tr("netease")}">
+              <span class="icon-turntable" aria-hidden="true"></span>
+              <span class="visually-hidden">${tr("netease")}</span>
+            </a>
           </div>
         </div>
-        <a class="netease-link album-corner-link" href="${album.links?.netease || neteaseSearchUrl(album)}" target="_blank" rel="noreferrer" aria-label="${tr("netease")}: ${album.title[state.lang]}" title="${tr("netease")}">云</a>
       </aside>
 
       <section class="reader lyric-reader">
@@ -334,7 +344,7 @@ function renderNotFound() {
     <section class="empty-state">
       <p class="kicker">404</p>
       <h1>${tr("notFoundTitle")}</h1>
-      <p>${tr("notFoundBody")} <a class="source-link" href="#/">${tr("start")}</a></p>
+      <p>${tr("notFoundBody")} <a class="text-link" href="#/">${tr("start")}</a></p>
     </section>
     ${siteFooter()}
   `;
@@ -395,13 +405,13 @@ function updateHomeCarousel() {
     const distance = Math.abs(offset);
     const isActive = offset === 0;
     const isNear = distance === 1;
-    const x = offset * 56;
+    const x = offset * 42;
 
     slide.dataset.offset = String(offset);
     slide.style.setProperty("--poster-x", `${x}px`);
-    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.9");
-    slide.style.setProperty("--poster-opacity", isActive ? "1" : isNear ? "0.46" : "0");
-    slide.style.setProperty("--poster-rotate", `${offset * -2.4}deg`);
+    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.92");
+    slide.style.setProperty("--poster-opacity", isActive || isNear ? "1" : "0");
+    slide.style.setProperty("--poster-rotate", `${offset * -1.8}deg`);
     slide.style.setProperty("--poster-z", String(20 - distance));
     slide.classList.toggle("is-active", isActive);
     slide.classList.toggle("is-near", isNear);
@@ -662,48 +672,108 @@ function setLanguageMenuOpen(isOpen) {
   language.toggle.setAttribute("aria-expanded", String(isOpen));
 }
 
-function drawStars() {
+function drawStars(time = 0) {
   const canvas = document.querySelector("#starfield");
   const context = canvas.getContext("2d");
   const pixelRatio = window.devicePixelRatio || 1;
   const width = window.innerWidth;
   const height = window.innerHeight;
-  canvas.width = width * pixelRatio;
-  canvas.height = height * pixelRatio;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  context.scale(pixelRatio, pixelRatio);
+  const slowTime = prefersReducedMotion.matches ? 0 : time * 0.00008;
+
+  if (width !== starCanvasWidth || height !== starCanvasHeight || pixelRatio !== starCanvasPixelRatio) {
+    starCanvasWidth = width;
+    starCanvasHeight = height;
+    starCanvasPixelRatio = pixelRatio;
+    canvas.width = width * pixelRatio;
+    canvas.height = height * pixelRatio;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+  }
+
+  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   context.clearRect(0, 0, width, height);
 
-  const starCount = Math.min(170, Math.floor((width * height) / 7600));
-  context.fillStyle = "rgba(236, 230, 215, 0.8)";
+  const space = context.createRadialGradient(width * 0.58, height * 0.42, 0, width * 0.58, height * 0.42, Math.max(width, height) * 0.82);
+  space.addColorStop(0, "#171b30");
+  space.addColorStop(0.46, "#0b1020");
+  space.addColorStop(1, "#040711");
+  context.fillStyle = space;
+  context.fillRect(0, 0, width, height);
+
+  drawNebula(context, width, height, slowTime);
+
+  const starCount = Math.min(360, Math.floor((width * height) / 4200));
 
   for (let index = 0; index < starCount; index += 1) {
-    const x = (Math.sin(index * 91.7) * 0.5 + 0.5) * width;
-    const y = (Math.cos(index * 53.3) * 0.5 + 0.5) * height;
-    const radius = index % 11 === 0 ? 1.35 : 0.75;
-    context.globalAlpha = index % 7 === 0 ? 0.84 : 0.38;
+    const layer = index % 5;
+    const drift = slowTime * (12 + layer * 8);
+    const x = wrap((Math.sin(index * 91.7) * 0.5 + 0.5) * width + drift * (layer % 2 ? -1 : 1), width);
+    const y = wrap((Math.cos(index * 53.3) * 0.5 + 0.5) * height + slowTime * (8 + layer * 5), height);
+    const pulse = prefersReducedMotion.matches ? 0 : Math.sin(time * 0.0012 + index * 0.61) * 0.18;
+    const radius = index % 29 === 0 ? 1.85 : index % 11 === 0 ? 1.2 : 0.62;
+    context.globalAlpha = Math.min(0.94, (index % 7 === 0 ? 0.72 : 0.34) + pulse);
+    context.fillStyle = index % 13 === 0 ? "rgba(215, 179, 99, 0.92)" : "rgba(236, 230, 215, 0.86)";
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fill();
   }
 
-  context.globalAlpha = 0.28;
+  context.globalAlpha = 0.24;
   context.strokeStyle = "#56d6bd";
   context.beginPath();
   for (let index = 0; index < 9; index += 1) {
-    const x = width * (0.62 + Math.sin(index * 1.7) * 0.19);
-    const y = height * (0.18 + index * 0.065);
+    const x = width * (0.62 + Math.sin(index * 1.7 + slowTime * 0.9) * 0.19);
+    const y = height * (0.18 + index * 0.065 + Math.cos(index + slowTime) * 0.012);
     if (index === 0) context.moveTo(x, y);
     else context.lineTo(x, y);
   }
   context.stroke();
+
+  context.globalAlpha = 1;
+}
+
+function drawNebula(context, width, height, time) {
+  const clouds = [
+    [0.18, 0.18, 0.44, "rgba(86, 214, 189, 0.16)"],
+    [0.78, 0.22, 0.36, "rgba(104, 161, 188, 0.14)"],
+    [0.55, 0.68, 0.5, "rgba(215, 179, 99, 0.1)"],
+    [0.32, 0.78, 0.34, "rgba(113, 92, 171, 0.13)"],
+  ];
+
+  clouds.forEach(([baseX, baseY, size, color], index) => {
+    const x = width * (baseX + Math.sin(time * (0.7 + index * 0.18) + index) * 0.035);
+    const y = height * (baseY + Math.cos(time * (0.62 + index * 0.16) + index) * 0.04);
+    const radius = Math.max(width, height) * size;
+    const gradient = context.createRadialGradient(x, y, radius * 0.08, x, y, radius);
+    gradient.addColorStop(0, color);
+    gradient.addColorStop(0.62, "rgba(11, 16, 32, 0.08)");
+    gradient.addColorStop(1, "rgba(4, 7, 17, 0)");
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, width, height);
+  });
+}
+
+function wrap(value, limit) {
+  return ((value % limit) + limit) % limit;
+}
+
+function animateStars(time = 0) {
+  drawStars(time);
+  if (!prefersReducedMotion.matches) {
+    starAnimationFrame = window.requestAnimationFrame(animateStars);
+  }
+}
+
+function resetStars() {
+  window.cancelAnimationFrame(starAnimationFrame);
+  animateStars(0);
 }
 
 window.addEventListener("hashchange", route);
-window.addEventListener("resize", drawStars);
+window.addEventListener("resize", resetStars);
+prefersReducedMotion.addEventListener("change", resetStars);
 
-drawStars();
+animateStars();
 await loadContentOverrides();
 syncShellText();
 route();
