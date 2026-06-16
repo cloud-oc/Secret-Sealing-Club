@@ -664,31 +664,31 @@ function drawStars(time = 0) {
   context.clearRect(0, 0, width, height);
 
   const space = context.createRadialGradient(width * 0.58, height * 0.42, 0, width * 0.58, height * 0.42, Math.max(width, height) * 0.82);
-  space.addColorStop(0, "#171b30");
-  space.addColorStop(0.46, "#0b1020");
+  space.addColorStop(0, "#11182a");
+  space.addColorStop(0.5, "#090f1e");
   space.addColorStop(1, "#040711");
   context.fillStyle = space;
   context.fillRect(0, 0, width, height);
 
   drawNebula(context, width, height, slowTime);
 
-  const starCount = Math.min(360, Math.floor((width * height) / 4200));
+  const starCount = Math.min(300, Math.floor((width * height) / 4800));
 
   for (let index = 0; index < starCount; index += 1) {
     const layer = index % 5;
     const drift = slowTime * (12 + layer * 8);
     const x = wrap((Math.sin(index * 91.7) * 0.5 + 0.5) * width + drift * (layer % 2 ? -1 : 1), width);
     const y = wrap((Math.cos(index * 53.3) * 0.5 + 0.5) * height + slowTime * (8 + layer * 5), height);
-    const pulse = prefersReducedMotion.matches ? 0 : Math.sin(time * 0.0012 + index * 0.61) * 0.18;
-    const radius = index % 29 === 0 ? 1.85 : index % 11 === 0 ? 1.2 : 0.62;
-    context.globalAlpha = Math.min(0.94, (index % 7 === 0 ? 0.72 : 0.34) + pulse);
-    context.fillStyle = index % 13 === 0 ? "rgba(215, 179, 99, 0.92)" : "rgba(236, 230, 215, 0.86)";
+    const pulse = prefersReducedMotion.matches ? 0 : Math.sin(time * 0.0012 + index * 0.61) * 0.12;
+    const radius = index % 29 === 0 ? 1.4 : index % 11 === 0 ? 1 : 0.56;
+    context.globalAlpha = Math.min(0.78, (index % 7 === 0 ? 0.56 : 0.3) + pulse);
+    context.fillStyle = index % 13 === 0 ? "rgba(215, 179, 99, 0.72)" : "rgba(236, 230, 215, 0.78)";
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fill();
   }
 
-  context.globalAlpha = 0.24;
+  context.globalAlpha = 0.18;
   context.strokeStyle = "#56d6bd";
   context.beginPath();
   for (let index = 0; index < 9; index += 1) {
@@ -704,10 +704,10 @@ function drawStars(time = 0) {
 
 function drawNebula(context, width, height, time) {
   const clouds = [
-    [0.18, 0.18, 0.44, "rgba(86, 214, 189, 0.16)"],
-    [0.78, 0.22, 0.36, "rgba(104, 161, 188, 0.14)"],
-    [0.55, 0.68, 0.5, "rgba(215, 179, 99, 0.1)"],
-    [0.32, 0.78, 0.34, "rgba(113, 92, 171, 0.13)"],
+    [0.18, 0.18, 0.44, "rgba(86, 214, 189, 0.1)"],
+    [0.78, 0.22, 0.36, "rgba(104, 161, 188, 0.08)"],
+    [0.55, 0.68, 0.5, "rgba(215, 179, 99, 0.07)"],
+    [0.32, 0.78, 0.34, "rgba(113, 92, 171, 0.08)"],
   ];
 
   clouds.forEach(([baseX, baseY, size, color], index) => {
