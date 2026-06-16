@@ -28,6 +28,7 @@ const player = {
   prev: document.querySelector("#prev-track"),
   next: document.querySelector("#next-track"),
   play: document.querySelector("#play-toggle"),
+  art: document.querySelector("#player-art"),
   playlistToggle: document.querySelector("#playlist-toggle"),
   playlistPanel: document.querySelector("#playlist-panel"),
   seek: document.querySelector("#seek"),
@@ -204,7 +205,14 @@ function renderHome() {
       ${albumCarousel()}
     </section>
   `;
-  setPlaylistAvailability(Boolean(state.albumId));
+  const playerAlbum = currentAlbum();
+  if (!state.albumId && playerAlbum) state.albumId = playerAlbum.id;
+  if (playerAlbum) {
+    if (state.trackIndex >= playerAlbum.tracks.length) state.trackIndex = 0;
+    renderPlaylist(playerAlbum);
+    updatePlayer(playerAlbum, state.trackIndex, false);
+  }
+  setPlaylistAvailability(Boolean(playerAlbum));
   updateLanguageButtons();
   bindHomeCarousel();
 }
@@ -401,8 +409,8 @@ function bindCarouselDrag(carousel) {
     carousel.classList.remove("is-dragging");
 
     if (didDrag) {
-      suppressNextCarouselClick(carousel);
       if (Math.abs(deltaX) > 44) {
+        suppressNextCarouselClick(carousel);
         shiftHomeCarousel(deltaX < 0 ? 1 : -1, true);
         return;
       }
@@ -447,6 +455,7 @@ function setHomeCarouselIndex(index, userInitiated = false) {
 function updateHomeCarousel() {
   const slides = document.querySelectorAll("[data-carousel-slide]");
   const dots = document.querySelectorAll("[data-carousel-index]");
+  const activeAlbum = albums[state.homeAlbumIndex];
 
   slides.forEach((slide) => {
     const index = Number(slide.dataset.carouselSlide);
@@ -474,6 +483,8 @@ function updateHomeCarousel() {
     dot.classList.toggle("is-active", isActive);
     dot.setAttribute("aria-selected", String(isActive));
   });
+
+  if (!state.albumId && activeAlbum) syncPlayerAlbumLink(activeAlbum);
 }
 
 function startHomeCarouselTimer() {
@@ -522,6 +533,7 @@ function updatePlayer(album, index, autoplay) {
   player.index.textContent = `TRACK ${String(index + 1).padStart(2, "0")}`;
   player.title.textContent = track.title;
   player.album.textContent = album.title[state.lang];
+  syncPlayerAlbumLink(album);
 
   if (audio.dataset.src !== track.audio) {
     audio.dataset.src = track.audio;
@@ -537,6 +549,13 @@ function updatePlayer(album, index, autoplay) {
       updatePlayButton();
     });
   }
+}
+
+function syncPlayerAlbumLink(album) {
+  if (!album) return;
+  player.art.href = `#/album/${album.id}`;
+  player.art.style.setProperty("--album-color", album.color);
+  player.art.setAttribute("aria-label", `${tr("openAlbum")}: ${album.title[state.lang]}`);
 }
 
 function setLanguage(lang) {
@@ -662,6 +681,14 @@ function renderPlaylist(album) {
   player.playlistPanel.querySelectorAll("[data-track]").forEach((button) => {
     button.addEventListener("click", () => {
       const index = Number(button.dataset.track);
+      const isOnAlbumPage = location.hash === `#/album/${album.id}`;
+      if (!isOnAlbumPage) {
+        state.trackIndex = index;
+        updatePlayer(album, index, true);
+        closePlaylist();
+        location.hash = `#/album/${album.id}`;
+        return;
+      }
       selectTrack(album, index, true);
     });
   });
