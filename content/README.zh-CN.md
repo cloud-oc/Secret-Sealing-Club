@@ -7,9 +7,6 @@
 ```json
 {
   "id": "ghostly-field-club",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/ghostly-field-club/01.mp3" }
-  ],
   "story": [
     {
       "track": 1,
@@ -20,4 +17,4 @@
 }
 ```
 
-`track` 用来把曲目、音频文件和故事段落对应起来。
+`track` 用来把故事段落和内置曲目列表、网易云播放源对应起来。

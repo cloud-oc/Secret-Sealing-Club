@@ -1,4 +1,4 @@
-import { albums as baseAlbums } from "./data.js";
+const { albums: baseAlbums } = await import("./data.js?v=20260616-netease");
 
 let albums = baseAlbums;
 
@@ -163,7 +163,7 @@ function mergeAlbums(sourceAlbums, overrideAlbums) {
 function mergeTracks(sourceTracks, overrideTracks) {
   return sourceTracks.map((track, index) => {
     const override = overrideTracks[index] || overrideTracks.find((item) => item.track === index + 1);
-    return override ? { ...track, ...pickDefined(override, ["title", "audio"]) } : track;
+    return override ? { ...track, ...pickDefined(override, ["title", "audio", "neteaseId", "netease"]) } : track;
   });
 }
 
@@ -460,15 +460,17 @@ function selectTrack(album, index, autoplay) {
 function updatePlayer(album, index, autoplay) {
   const track = album.tracks[index] || album.tracks[0];
   if (!track) return;
+  const source = trackAudioSource(track);
 
   player.index.textContent = `TRACK ${String(index + 1).padStart(2, "0")}`;
   player.title.textContent = track.title;
+  syncPlayerTrackLink(track);
   player.album.textContent = album.title[state.lang];
   syncPlayerAlbumLink(album);
 
-  if (audio.dataset.src !== track.audio) {
-    audio.dataset.src = track.audio;
-    audio.src = track.audio;
+  if (audio.dataset.src !== source) {
+    audio.dataset.src = source;
+    audio.src = source;
     player.seek.value = 0;
     player.current.textContent = "0:00";
     player.duration.textContent = "0:00";
@@ -480,6 +482,25 @@ function updatePlayer(album, index, autoplay) {
       updatePlayButton();
     });
   }
+}
+
+function trackAudioSource(track) {
+  if (track.neteaseId) return `https://music.163.com/song/media/outer/url?id=${track.neteaseId}.mp3`;
+  return track.audio || "";
+}
+
+function syncPlayerTrackLink(track) {
+  const link = track.netease || (track.neteaseId ? `https://music.163.com/#/song?id=${track.neteaseId}` : "");
+  if (link) {
+    player.title.href = link;
+    player.title.removeAttribute("aria-disabled");
+    player.title.tabIndex = 0;
+    return;
+  }
+
+  player.title.href = "#";
+  player.title.setAttribute("aria-disabled", "true");
+  player.title.tabIndex = -1;
 }
 
 function syncPlayerAlbumLink(album) {

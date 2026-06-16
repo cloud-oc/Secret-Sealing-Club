@@ -1,4 +1,34 @@
-export const albums = [
+const neteaseTrackIds = {
+  "ghostly-field-club": [
+    22766020, 22766028, 22766021, 22766023, 22766022, 22766029, 22766019, 22766024, 22766026, 22766025, 22766027,
+  ],
+  "changeability-of-strange-dream": [
+    22766017, 22766011, 22766008, 22766018, 22766016, 22766015, 22766014, 22766009, 22766012, 22766010, 22766013,
+  ],
+  "retrospective-53-minutes": [
+    22765958, 22765954, 22765950, 22765953, 22765959, 22765960, 22765955, 22765956, 22765952, 22765957, 22765951,
+  ],
+  "magical-astronomy": [
+    22765942, 22765949, 22765946, 22765947, 22765944, 22765948, 22765945, 22765941, 22765940, 22765943,
+  ],
+  "trojan-green-asteroid": [
+    508946, 508950, 508954, 508958, 508962, 508966, 508970, 508973, 508976, 508979,
+  ],
+  "neo-traditionalism-of-japan": [
+    22765903, 22765901, 22765899, 22765895, 22765896, 22765897, 22765900, 22765902, 22765898, 22765904,
+  ],
+  "dr-latencys-freak-report": [
+    412785468, 412785469, 412785470, 412785471, 412785472, 412785473, 412785474, 412785475, 412785476, 412785477, 412785478,
+  ],
+  "dateless-bar-old-adam": [
+    425280128, 425280129, 425280130, 425280131, 425280132, 425280133, 425280134, 425280135, 425280136, 425280137,
+  ],
+  "taboo-japan-disentanglement": [
+    2154797765, 2154796502, 2154797766, 2154796503, 2154796504, 2154796505, 2154797767, 2154797768, 2154797769, 2154796508,
+  ],
+};
+
+const albumsBase = [
   {
     id: "ghostly-field-club",
     catalog: "ZCDS-0001",
@@ -338,6 +368,24 @@ export const albums = [
     ]),
   },
 ];
+
+export const albums = albumsBase.map((album) => {
+  const ids = neteaseTrackIds[album.id] || [];
+
+  return {
+    ...album,
+    tracks: album.tracks.map((track, index) => {
+      const neteaseId = ids[index];
+      if (!neteaseId) return track;
+
+      return {
+        ...track,
+        neteaseId,
+        netease: `https://music.163.com/#/song?id=${neteaseId}`,
+      };
+    }),
+  };
+});
 
 function track(title, audio) {
   return { title, audio };

@@ -1,27 +1,15 @@
 {
   "id": "neo-traditionalism-of-japan",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/neo-traditionalism-of-japan/01.mp3" },
-    { "track": 2, "audio": "assets/audio/neo-traditionalism-of-japan/02.mp3" },
-    { "track": 3, "audio": "assets/audio/neo-traditionalism-of-japan/03.mp3" },
-    { "track": 4, "audio": "assets/audio/neo-traditionalism-of-japan/04.mp3" },
-    { "track": 5, "audio": "assets/audio/neo-traditionalism-of-japan/05.mp3" },
-    { "track": 6, "audio": "assets/audio/neo-traditionalism-of-japan/06.mp3" },
-    { "track": 7, "audio": "assets/audio/neo-traditionalism-of-japan/07.mp3" },
-    { "track": 8, "audio": "assets/audio/neo-traditionalism-of-japan/08.mp3" },
-    { "track": 9, "audio": "assets/audio/neo-traditionalism-of-japan/09.mp3" },
-    { "track": 10, "audio": "assets/audio/neo-traditionalism-of-japan/10.mp3" }
-  ],
   "story": [
-    { "track": 1, "title": { "zh": "緑のサナトリウム", "ja": "緑のサナトリウム" }, "text": { "zh": "", "ja": "" } },
-    { "track": 2, "title": { "zh": "牛に引かれて善光寺参り", "ja": "牛に引かれて善光寺参り" }, "text": { "zh": "", "ja": "" } },
-    { "track": 3, "title": { "zh": "ハートフェルトファンシー", "ja": "ハートフェルトファンシー" }, "text": { "zh": "", "ja": "" } },
-    { "track": 4, "title": { "zh": "六十年目の東方裁判 ～ Fate of Sixty Years", "ja": "六十年目の東方裁判 ～ Fate of Sixty Years" }, "text": { "zh": "", "ja": "" } },
-    { "track": 5, "title": { "zh": "アガルタの風", "ja": "アガルタの風" }, "text": { "zh": "", "ja": "" } },
-    { "track": 6, "title": { "zh": "イザナギオブジェクト", "ja": "イザナギオブジェクト" }, "text": { "zh": "", "ja": "" } },
-    { "track": 7, "title": { "zh": "妖怪裏参道", "ja": "妖怪裏参道" }, "text": { "zh": "", "ja": "" } },
-    { "track": 8, "title": { "zh": "アンノウンX ～ Unfound Adventure", "ja": "アンノウンX ～ Unfound Adventure" }, "text": { "zh": "", "ja": "" } },
-    { "track": 9, "title": { "zh": "日本中の不思議を集めて", "ja": "日本中の不思議を集めて" }, "text": { "zh": "", "ja": "" } },
-    { "track": 10, "title": { "zh": "素敵な墓場で暮しましょ", "ja": "素敵な墓場で暮しましょ" }, "text": { "zh": "", "ja": "" } }
+    {"track":1,"title":{"zh":"緑のサナトリウム","ja":"緑のサナトリウム"},"text":{"zh":"","ja":""}},
+    {"track":2,"title":{"zh":"牛に引かれて善光寺参り","ja":"牛に引かれて善光寺参り"},"text":{"zh":"","ja":""}},
+    {"track":3,"title":{"zh":"ハートフェルトファンシー","ja":"ハートフェルトファンシー"},"text":{"zh":"","ja":""}},
+    {"track":4,"title":{"zh":"六十年目の東方裁判 ～ Fate of Sixty Years","ja":"六十年目の東方裁判 ～ Fate of Sixty Years"},"text":{"zh":"","ja":""}},
+    {"track":5,"title":{"zh":"アガルタの風","ja":"アガルタの風"},"text":{"zh":"","ja":""}},
+    {"track":6,"title":{"zh":"イザナギオブジェクト","ja":"イザナギオブジェクト"},"text":{"zh":"","ja":""}},
+    {"track":7,"title":{"zh":"妖怪裏参道","ja":"妖怪裏参道"},"text":{"zh":"","ja":""}},
+    {"track":8,"title":{"zh":"アンノウンX ～ Unfound Adventure","ja":"アンノウンX ～ Unfound Adventure"},"text":{"zh":"","ja":""}},
+    {"track":9,"title":{"zh":"日本中の不思議を集めて","ja":"日本中の不思議を集めて"},"text":{"zh":"","ja":""}},
+    {"track":10,"title":{"zh":"素敵な墓場で暮しましょ","ja":"素敵な墓場で暮しましょ"},"text":{"zh":"","ja":""}}
   ]
 }

@@ -1,29 +1,16 @@
 {
   "id": "changeability-of-strange-dream",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/changeability-of-strange-dream/01.mp3" },
-    { "track": 2, "audio": "assets/audio/changeability-of-strange-dream/02.mp3" },
-    { "track": 3, "audio": "assets/audio/changeability-of-strange-dream/03.mp3" },
-    { "track": 4, "audio": "assets/audio/changeability-of-strange-dream/04.mp3" },
-    { "track": 5, "audio": "assets/audio/changeability-of-strange-dream/05.mp3" },
-    { "track": 6, "audio": "assets/audio/changeability-of-strange-dream/06.mp3" },
-    { "track": 7, "audio": "assets/audio/changeability-of-strange-dream/07.mp3" },
-    { "track": 8, "audio": "assets/audio/changeability-of-strange-dream/08.mp3" },
-    { "track": 9, "audio": "assets/audio/changeability-of-strange-dream/09.mp3" },
-    { "track": 10, "audio": "assets/audio/changeability-of-strange-dream/10.mp3" },
-    { "track": 11, "audio": "assets/audio/changeability-of-strange-dream/11.mp3" }
-  ],
   "story": [
-    { "track": 1, "title": { "zh": "童祭 ～ Innocent Treasures", "ja": "童祭 ～ Innocent Treasures" }, "text": { "zh": "", "ja": "" } },
-    { "track": 2, "title": { "zh": "華胥の夢", "ja": "華胥の夢" }, "text": { "zh": "", "ja": "" } },
-    { "track": 3, "title": { "zh": "上海紅茶館 ～ Chinese Tea", "ja": "上海紅茶館 ～ Chinese Tea" }, "text": { "zh": "", "ja": "" } },
-    { "track": 4, "title": { "zh": "ヴォヤージュ1969", "ja": "ヴォヤージュ1969" }, "text": { "zh": "", "ja": "" } },
-    { "track": 5, "title": { "zh": "科学世紀の少年少女", "ja": "科学世紀の少年少女" }, "text": { "zh": "", "ja": "" } },
-    { "track": 6, "title": { "zh": "永夜の報い ～ Imperishable Night", "ja": "永夜の報い ～ Imperishable Night" }, "text": { "zh": "", "ja": "" } },
-    { "track": 7, "title": { "zh": "夜が降りてくる ～ Evening Star", "ja": "夜が降りてくる ～ Evening Star" }, "text": { "zh": "", "ja": "" } },
-    { "track": 8, "title": { "zh": "人形裁判 ～ 人の形弄びし少女", "ja": "人形裁判 ～ 人の形弄びし少女" }, "text": { "zh": "", "ja": "" } },
-    { "track": 9, "title": { "zh": "夢と現の境界", "ja": "夢と現の境界" }, "text": { "zh": "", "ja": "" } },
-    { "track": 10, "title": { "zh": "幻想機械 ～ Phantom Factory", "ja": "幻想機械 ～ Phantom Factory" }, "text": { "zh": "", "ja": "" } },
-    { "track": 11, "title": { "zh": "幽玄の槭樹 ～ Eternal Dream", "ja": "幽玄の槭樹 ～ Eternal Dream" }, "text": { "zh": "", "ja": "" } }
+    {"track":1,"title":{"zh":"童祭 ～ Innocent Treasures","ja":"童祭 ～ Innocent Treasures"},"text":{"zh":"","ja":""}},
+    {"track":2,"title":{"zh":"華胥の夢","ja":"華胥の夢"},"text":{"zh":"","ja":""}},
+    {"track":3,"title":{"zh":"上海紅茶館 ～ Chinese Tea","ja":"上海紅茶館 ～ Chinese Tea"},"text":{"zh":"","ja":""}},
+    {"track":4,"title":{"zh":"ヴォヤージュ1969","ja":"ヴォヤージュ1969"},"text":{"zh":"","ja":""}},
+    {"track":5,"title":{"zh":"科学世紀の少年少女","ja":"科学世紀の少年少女"},"text":{"zh":"","ja":""}},
+    {"track":6,"title":{"zh":"永夜の報い ～ Imperishable Night","ja":"永夜の報い ～ Imperishable Night"},"text":{"zh":"","ja":""}},
+    {"track":7,"title":{"zh":"夜が降りてくる ～ Evening Star","ja":"夜が降りてくる ～ Evening Star"},"text":{"zh":"","ja":""}},
+    {"track":8,"title":{"zh":"人形裁判 ～ 人の形弄びし少女","ja":"人形裁判 ～ 人の形弄びし少女"},"text":{"zh":"","ja":""}},
+    {"track":9,"title":{"zh":"夢と現の境界","ja":"夢と現の境界"},"text":{"zh":"","ja":""}},
+    {"track":10,"title":{"zh":"幻想機械 ～ Phantom Factory","ja":"幻想機械 ～ Phantom Factory"},"text":{"zh":"","ja":""}},
+    {"track":11,"title":{"zh":"幽玄の槭樹 ～ Eternal Dream","ja":"幽玄の槭樹 ～ Eternal Dream"},"text":{"zh":"","ja":""}}
   ]
 }

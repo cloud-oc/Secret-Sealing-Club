@@ -10,7 +10,8 @@
 
 - 面向 ZUN's Music Collection 与秘封俱乐部故事的静态同人站
 - 收录 9 张带 Booklet 故事的秘封音乐 CD 页面
-- 固定播放器，支持曲目与故事段落联动高亮
+- 固定播放器，使用网易云音乐曲目链接播放
+- 支持曲目与故事段落联动高亮
 - 中文 / 日文阅读模式
 - 不需要后端，适合 GitHub Pages 部署
 
@@ -30,7 +31,7 @@
 七夕坂梦幻能
 ```
 
-## 添加故事和音频
+## 添加故事
 
 专辑正文文件在：
 
@@ -38,13 +39,7 @@
 content/albums/
 ```
 
-音频路径按这个结构引用：
-
-```text
-assets/audio/<album-id>/01.mp3
-```
-
-编辑对应专辑 JSON，填写 `text.zh` 和 `text.ja`。`track` 会把曲目、音频和故事段落连在一起。
+编辑对应专辑 JSON，填写 `text.zh` 和 `text.ja`。`track` 会把故事段落和内置曲目列表、网易云播放源对应起来。
 
 ```json
 {
@@ -54,7 +49,7 @@ assets/audio/<album-id>/01.mp3
 }
 ```
 
-音频文件默认会被 `.gitignore` 忽略。如果你希望 GitHub Pages 线上站点也能播放音频，需要先移除 `.gitignore` 里对应的音频忽略规则，再提交。
+曲目信息和网易云单曲 ID 在 `src/data.js` 里。通常不需要修改它，除非网易云链接变化。
 
 ## 本地预览
 
@@ -78,4 +73,4 @@ Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
 
 ## 说明
 
-这是一个用于阅读和整理体验的同人项目。请只添加你有权使用的文本和音频内容。
+这是一个用于阅读和整理体验的同人项目。请只添加你有权使用的文本内容。

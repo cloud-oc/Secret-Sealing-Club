@@ -939,7 +939,7 @@ h1 {
 }
 
 .player-meta span,
-.player-meta strong,
+.player-meta a,
 .player-meta small {
   display: block;
 }
@@ -951,11 +951,17 @@ h1 {
   letter-spacing: 0.12em;
 }
 
-.player-meta strong {
+.player-track-link {
   overflow: hidden;
   margin: 4px 0;
+  color: var(--ink);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.player-track-link:hover,
+.player-track-link:focus-visible {
+  color: #fff;
 }
 
 .player-meta small {

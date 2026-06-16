@@ -1,27 +1,15 @@
 {
   "id": "taboo-japan-disentanglement",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/taboo-japan-disentanglement/01.mp3" },
-    { "track": 2, "audio": "assets/audio/taboo-japan-disentanglement/02.mp3" },
-    { "track": 3, "audio": "assets/audio/taboo-japan-disentanglement/03.mp3" },
-    { "track": 4, "audio": "assets/audio/taboo-japan-disentanglement/04.mp3" },
-    { "track": 5, "audio": "assets/audio/taboo-japan-disentanglement/05.mp3" },
-    { "track": 6, "audio": "assets/audio/taboo-japan-disentanglement/06.mp3" },
-    { "track": 7, "audio": "assets/audio/taboo-japan-disentanglement/07.mp3" },
-    { "track": 8, "audio": "assets/audio/taboo-japan-disentanglement/08.mp3" },
-    { "track": 9, "audio": "assets/audio/taboo-japan-disentanglement/09.mp3" },
-    { "track": 10, "audio": "assets/audio/taboo-japan-disentanglement/10.mp3" }
-  ],
   "story": [
-    { "track": 1, "title": { "zh": "七夕坂に朝が来る", "ja": "七夕坂に朝が来る" }, "text": { "zh": "", "ja": "" } },
-    { "track": 2, "title": { "zh": "不等式のティンカーベル", "ja": "不等式のティンカーベル" }, "text": { "zh": "", "ja": "" } },
-    { "track": 3, "title": { "zh": "禁断の扉の向こうは、この世かあの世か", "ja": "禁断の扉の向こうは、この世かあの世か" }, "text": { "zh": "", "ja": "" } },
-    { "track": 4, "title": { "zh": "スモーキングドラゴン", "ja": "スモーキングドラゴン" }, "text": { "zh": "", "ja": "" } },
-    { "track": 5, "title": { "zh": "夢幻能 ～ Taboo Marionette", "ja": "夢幻能 ～ Taboo Marionette" }, "text": { "zh": "", "ja": "" } },
-    { "track": 6, "title": { "zh": "クレイジーバックダンサーズ", "ja": "クレイジーバックダンサーズ" }, "text": { "zh": "", "ja": "" } },
-    { "track": 7, "title": { "zh": "憑坐は夢と現の間に ～ Necro-Fantasia", "ja": "憑坐は夢と現の間に ～ Necro-Fantasia" }, "text": { "zh": "", "ja": "" } },
-    { "track": 8, "title": { "zh": "ひとりぼっちの常陸行路", "ja": "ひとりぼっちの常陸行路" }, "text": { "zh": "", "ja": "" } },
-    { "track": 9, "title": { "zh": "地蔵だけが知る哀嘆", "ja": "地蔵だけが知る哀嘆" }, "text": { "zh": "", "ja": "" } },
-    { "track": 10, "title": { "zh": "秘匿されたフォーシーズンズ", "ja": "秘匿されたフォーシーズンズ" }, "text": { "zh": "", "ja": "" } }
+    {"track":1,"title":{"zh":"七夕坂に朝が来る","ja":"七夕坂に朝が来る"},"text":{"zh":"","ja":""}},
+    {"track":2,"title":{"zh":"不等式のティンカーベル","ja":"不等式のティンカーベル"},"text":{"zh":"","ja":""}},
+    {"track":3,"title":{"zh":"禁断の扉の向こうは、この世かあの世か","ja":"禁断の扉の向こうは、この世かあの世か"},"text":{"zh":"","ja":""}},
+    {"track":4,"title":{"zh":"スモーキングドラゴン","ja":"スモーキングドラゴン"},"text":{"zh":"","ja":""}},
+    {"track":5,"title":{"zh":"夢幻能 ～ Taboo Marionette","ja":"夢幻能 ～ Taboo Marionette"},"text":{"zh":"","ja":""}},
+    {"track":6,"title":{"zh":"クレイジーバックダンサーズ","ja":"クレイジーバックダンサーズ"},"text":{"zh":"","ja":""}},
+    {"track":7,"title":{"zh":"憑坐は夢と現の間に ～ Necro-Fantasia","ja":"憑坐は夢と現の間に ～ Necro-Fantasia"},"text":{"zh":"","ja":""}},
+    {"track":8,"title":{"zh":"ひとりぼっちの常陸行路","ja":"ひとりぼっちの常陸行路"},"text":{"zh":"","ja":""}},
+    {"track":9,"title":{"zh":"地蔵だけが知る哀嘆","ja":"地蔵だけが知る哀嘆"},"text":{"zh":"","ja":""}},
+    {"track":10,"title":{"zh":"秘匿されたフォーシーズンズ","ja":"秘匿されたフォーシーズンズ"},"text":{"zh":"","ja":""}}
   ]
 }

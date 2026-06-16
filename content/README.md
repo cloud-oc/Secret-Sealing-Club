@@ -7,9 +7,6 @@ Album JSON files in `content/albums/` are loaded directly by the site. Keep one 
 ```json
 {
   "id": "ghostly-field-club",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/ghostly-field-club/01.mp3" }
-  ],
   "story": [
     {
       "track": 1,
@@ -20,4 +17,4 @@ Album JSON files in `content/albums/` are loaded directly by the site. Keep one 
 }
 ```
 
-The `track` value links a song, an audio file, and a story section.
+The `track` value links a story section to the built-in track list and NetEase Cloud Music playback source.

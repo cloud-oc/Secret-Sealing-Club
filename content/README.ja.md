@@ -7,9 +7,6 @@
 ```json
 {
   "id": "ghostly-field-club",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/ghostly-field-club/01.mp3" }
-  ],
   "story": [
     {
       "track": 1,
@@ -20,4 +17,4 @@
 }
 ```
 
-`track` は曲、音声ファイル、物語セクションを対応させるために使います。
+`track` は物語セクションを、内蔵された曲目リストと NetEase Cloud Music の再生元に対応させるために使います。

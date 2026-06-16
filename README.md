@@ -10,7 +10,8 @@ This site is built for the strange little hour between music and text: open an a
 
 - A static fan site for ZUN's Music Collection and the Secret Sealing Club stories
 - Album pages for the nine booklet-story CDs
-- A fixed music player with track-to-story highlighting
+- A fixed player using NetEase Cloud Music track links
+- Track-to-story highlighting while reading
 - Chinese and Japanese reading modes
 - A GitHub Pages friendly site with no backend
 
@@ -30,7 +31,7 @@ Dateless Bar "Old Adam"
 Taboo Japan Disentanglement
 ```
 
-## Adding Stories And Audio
+## Adding Stories
 
 Album story files live in:
 
@@ -38,13 +39,7 @@ Album story files live in:
 content/albums/
 ```
 
-Audio files are referenced from:
-
-```text
-assets/audio/<album-id>/01.mp3
-```
-
-Edit the matching album JSON and fill `text.zh` and `text.ja`. The `track` number links a song, audio file, and story section together.
+Edit the matching album JSON and fill `text.zh` and `text.ja`. The `track` number links the story section to the built-in album track list and NetEase Cloud Music playback source.
 
 ```json
 {
@@ -54,7 +49,7 @@ Edit the matching album JSON and fill `text.zh` and `text.ja`. The `track` numbe
 }
 ```
 
-Audio files are ignored by git by default. If you want the public GitHub Pages site to play audio, remove the matching audio rules from `.gitignore` before committing.
+Track metadata and NetEase song IDs live in `src/data.js`. You usually do not need to edit them unless a NetEase link changes.
 
 ## Local Preview
 
@@ -78,4 +73,4 @@ Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
 
 ## Note
 
-This is a fan project for reading and preservation-like browsing. Add only content that you have permission to use.
+This is a fan project for reading and preservation-like browsing. Add only text you have permission to use.

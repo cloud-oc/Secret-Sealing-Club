@@ -1,27 +1,15 @@
 {
   "id": "dateless-bar-old-adam",
-  "tracks": [
-    { "track": 1, "audio": "assets/audio/dateless-bar-old-adam/01.mp3" },
-    { "track": 2, "audio": "assets/audio/dateless-bar-old-adam/02.mp3" },
-    { "track": 3, "audio": "assets/audio/dateless-bar-old-adam/03.mp3" },
-    { "track": 4, "audio": "assets/audio/dateless-bar-old-adam/04.mp3" },
-    { "track": 5, "audio": "assets/audio/dateless-bar-old-adam/05.mp3" },
-    { "track": 6, "audio": "assets/audio/dateless-bar-old-adam/06.mp3" },
-    { "track": 7, "audio": "assets/audio/dateless-bar-old-adam/07.mp3" },
-    { "track": 8, "audio": "assets/audio/dateless-bar-old-adam/08.mp3" },
-    { "track": 9, "audio": "assets/audio/dateless-bar-old-adam/09.mp3" },
-    { "track": 10, "audio": "assets/audio/dateless-bar-old-adam/10.mp3" }
-  ],
   "story": [
-    { "track": 1, "title": { "zh": "バー・オールドアダム", "ja": "バー・オールドアダム" }, "text": { "zh": "", "ja": "" } },
-    { "track": 2, "title": { "zh": "燕石博物誌が連れてきた闇", "ja": "燕石博物誌が連れてきた闇" }, "text": { "zh": "", "ja": "" } },
-    { "track": 3, "title": { "zh": "リバースイデオロギー", "ja": "リバースイデオロギー" }, "text": { "zh": "", "ja": "" } },
-    { "track": 4, "title": { "zh": "アウトサイダーカクテル", "ja": "アウトサイダーカクテル" }, "text": { "zh": "", "ja": "" } },
-    { "track": 5, "title": { "zh": "大神神話伝", "ja": "大神神話伝" }, "text": { "zh": "", "ja": "" } },
-    { "track": 6, "title": { "zh": "パンデモニックプラネット", "ja": "パンデモニックプラネット" }, "text": { "zh": "", "ja": "" } },
-    { "track": 7, "title": { "zh": "旧世界の冒険酒場", "ja": "旧世界の冒険酒場" }, "text": { "zh": "", "ja": "" } },
-    { "track": 8, "title": { "zh": "魔界地方都市エソテリア", "ja": "魔界地方都市エソテリア" }, "text": { "zh": "", "ja": "" } },
-    { "track": 9, "title": { "zh": "亡失のエモーション", "ja": "亡失のエモーション" }, "text": { "zh": "", "ja": "" } },
-    { "track": 10, "title": { "zh": "二日酔いの同床異夢", "ja": "二日酔いの同床異夢" }, "text": { "zh": "", "ja": "" } }
+    {"track":1,"title":{"zh":"バー・オールドアダム","ja":"バー・オールドアダム"},"text":{"zh":"","ja":""}},
+    {"track":2,"title":{"zh":"燕石博物誌が連れてきた闇","ja":"燕石博物誌が連れてきた闇"},"text":{"zh":"","ja":""}},
+    {"track":3,"title":{"zh":"リバースイデオロギー","ja":"リバースイデオロギー"},"text":{"zh":"","ja":""}},
+    {"track":4,"title":{"zh":"アウトサイダーカクテル","ja":"アウトサイダーカクテル"},"text":{"zh":"","ja":""}},
+    {"track":5,"title":{"zh":"大神神話伝","ja":"大神神話伝"},"text":{"zh":"","ja":""}},
+    {"track":6,"title":{"zh":"パンデモニックプラネット","ja":"パンデモニックプラネット"},"text":{"zh":"","ja":""}},
+    {"track":7,"title":{"zh":"旧世界の冒険酒場","ja":"旧世界の冒険酒場"},"text":{"zh":"","ja":""}},
+    {"track":8,"title":{"zh":"魔界地方都市エソテリア","ja":"魔界地方都市エソテリア"},"text":{"zh":"","ja":""}},
+    {"track":9,"title":{"zh":"亡失のエモーション","ja":"亡失のエモーション"},"text":{"zh":"","ja":""}},
+    {"track":10,"title":{"zh":"二日酔いの同床異夢","ja":"二日酔いの同床異夢"},"text":{"zh":"","ja":""}}
   ]
 }
