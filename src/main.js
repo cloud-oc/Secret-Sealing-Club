@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260616-netease");
+const { albums: baseAlbums } = await import("./data.js?v=20260616-hypergryph-polish");
 
 let albums = baseAlbums;
 
@@ -724,7 +724,7 @@ function drawStars(time = 0) {
     const pulse = prefersReducedMotion.matches ? 0 : Math.sin(time * 0.0012 + index * 0.61) * 0.12;
     const radius = index % 29 === 0 ? 1.4 : index % 11 === 0 ? 1 : 0.56;
     context.globalAlpha = Math.min(0.78, (index % 7 === 0 ? 0.56 : 0.3) + pulse);
-    context.fillStyle = index % 13 === 0 ? "rgba(215, 179, 99, 0.72)" : "rgba(236, 230, 215, 0.78)";
+    context.fillStyle = index % 13 === 0 ? "rgba(215, 179, 99, 0.72)" : "rgba(244, 240, 231, 0.78)";
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fill();
@@ -746,7 +746,7 @@ function drawStars(time = 0) {
 
 function drawNebula(context, width, height, time) {
   const clouds = [
-    [0.18, 0.18, 0.44, "rgba(86, 214, 189, 0.1)"],
+    [0.18, 0.18, 0.44, "rgba(96, 217, 200, 0.1)"],
     [0.78, 0.22, 0.36, "rgba(104, 161, 188, 0.08)"],
     [0.55, 0.68, 0.5, "rgba(215, 179, 99, 0.07)"],
     [0.32, 0.78, 0.34, "rgba(113, 92, 171, 0.08)"],
