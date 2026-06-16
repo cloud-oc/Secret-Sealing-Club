@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-card-hierarchy");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-timeline-v2");
 
 let albums = baseAlbums;
 
@@ -17,6 +17,12 @@ let starAnimationFrame = 0;
 let starCanvasWidth = 0;
 let starCanvasHeight = 0;
 let starCanvasPixelRatio = 0;
+let earthAnimationFrame = 0;
+let earthRenderer = null;
+let earthScene = null;
+let earthCamera = null;
+let earthGroup = null;
+let earthClockStart = 0;
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -236,10 +242,20 @@ function renderHome() {
 function albumCarousel() {
   const activeAlbum = albums[state.homeAlbumIndex] || albums[0];
   return `
-    <section class="album-carousel" id="albums" aria-label="${tr("albumCarousel")}" aria-roledescription="carousel">
+    <section class="album-carousel orbit-timeline" id="albums" aria-label="${tr("albumCarousel")}" aria-roledescription="carousel">
       <div class="carousel-hud" aria-hidden="true">
         <span>${activeAlbum?.catalog || "ZCDS"}</span>
         <span>${String(state.homeAlbumIndex + 1).padStart(2, "0")} / ${String(albums.length).padStart(2, "0")}</span>
+      </div>
+      <div class="orbit-mask" aria-hidden="true"></div>
+      <div class="orbit-core" aria-hidden="true">
+        <canvas id="earth-canvas"></canvas>
+        <div class="earth-fallback"><span></span></div>
+      </div>
+      <div class="orbit-guide" aria-hidden="true">
+        <span class="orbit-ring orbit-ring-main"></span>
+        <span class="orbit-ring orbit-ring-ghost"></span>
+        <span class="orbit-axis"></span>
       </div>
       <div class="carousel-viewport">
         ${albums.map(albumPoster).join("")}
@@ -254,9 +270,10 @@ function albumCarousel() {
 function albumPoster(album, index) {
   const offset = carouselOffset(index);
   return `
-    <a class="album-card album-poster" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
+    <a class="album-card album-poster timeline-card" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
       <span class="poster-glow" aria-hidden="true"></span>
-      <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
+      <span class="timeline-stem" aria-hidden="true"></span>
+      <span class="album-number">${album.year} · HIFUU ${String(index + 1).padStart(2, "0")}</span>
       <span class="poster-title-block">
         <h2>${album.title[state.lang]}</h2>
       </span>
@@ -281,6 +298,7 @@ function carouselDot(album, index) {
 
 function renderAlbum(id) {
   stopHomeCarouselTimer();
+  disposeEarth();
   const album = albums.find((item) => item.id === id);
   if (!album) {
     renderNotFound();
@@ -370,6 +388,7 @@ function storySection(album, section, index) {
 
 function renderNotFound() {
   stopHomeCarouselTimer();
+  disposeEarth();
   document.body.dataset.view = "empty";
   app.innerHTML = `
     <section class="empty-state">
@@ -383,6 +402,7 @@ function renderNotFound() {
 
 function bindHomeCarousel() {
   updateHomeCarousel();
+  initEarth();
 
   document.querySelectorAll("[data-carousel-index]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -431,21 +451,41 @@ function updateHomeCarousel() {
     const distance = Math.abs(offset);
     const isActive = offset === 0;
     const isCompact = window.innerWidth <= 760;
-    const x = isCompact ? 0 : offset * 24;
+    const step = 360 / albums.length;
+    const angle = -offset * step;
+    const radians = (angle * Math.PI) / 180;
+    const carousel = document.querySelector(".album-carousel");
+    const carouselWidth = carousel?.clientWidth || window.innerWidth;
+    const carouselHeight = carousel?.clientHeight || window.innerHeight;
+    const centerRatio = isCompact ? 0.5 : window.innerWidth <= 1060 ? 0.44 : 0.38;
+    const cardEstimate = isCompact ? Math.min(window.innerWidth * 0.47, 190) : Math.min(Math.max(window.innerWidth * 0.21, 220), 280);
+    const availableRight = carouselWidth * (1 - centerRatio);
+    const orbitRadiusX = isCompact ? 0 : Math.max(146, Math.min(210, availableRight - cardEstimate / 2 - 26));
+    const orbitRadiusY = isCompact ? 0 : Math.max(210, Math.min(276, carouselHeight * 0.42));
+    const x = isCompact ? 0 : Math.cos(radians) * orbitRadiusX;
+    const y = isCompact ? 78 : Math.sin(radians) * orbitRadiusY;
+    const isHiddenSide = !isCompact && Math.cos(radians) < -0.08;
+    const frontness = (Math.cos(radians) + 1) / 2;
+    const opacity = isCompact ? (isActive ? 1 : 0) : isHiddenSide ? 0 : Math.max(0.24, frontness);
+    const scale = isCompact ? (isActive ? 1 : 0.92) : 0.72 + frontness * 0.28;
+    const pointerEnabled = isCompact ? isActive : isActive || (!isHiddenSide && distance <= 1);
 
     slide.dataset.offset = String(offset);
+    slide.dataset.side = isHiddenSide ? "hidden" : "visible";
+    slide.dataset.interactive = String(pointerEnabled);
     slide.style.setProperty("--poster-x", `${x}px`);
-    slide.style.setProperty("--poster-scale", isActive ? "1" : "0.96");
-    slide.style.setProperty("--poster-opacity", isActive ? "1" : "0");
-    slide.style.setProperty("--poster-rotate", `${isCompact ? 0 : offset * -1.8}deg`);
+    slide.style.setProperty("--poster-y", `${y}px`);
+    slide.style.setProperty("--poster-scale", String(scale));
+    slide.style.setProperty("--poster-opacity", String(opacity));
+    slide.style.setProperty("--poster-rotate", `${isCompact ? 0 : Math.sin(radians) * 2.5}deg`);
     slide.style.setProperty("--poster-rotate-y", "0deg");
     slide.style.setProperty("--poster-z-depth", "0");
-    slide.style.setProperty("--poster-z", String(20 - distance));
+    slide.style.setProperty("--poster-z", String(Math.round(10 + frontness * 20 - distance)));
     slide.classList.toggle("is-active", isActive);
-    slide.classList.toggle("is-near", false);
-    slide.classList.toggle("is-far", distance > 1);
-    slide.setAttribute("aria-hidden", String(!isActive));
-    slide.tabIndex = isActive ? 0 : -1;
+    slide.classList.toggle("is-near", distance === 1 && !isHiddenSide);
+    slide.classList.toggle("is-far", !isActive && (isCompact || distance > 1 || isHiddenSide));
+    slide.setAttribute("aria-hidden", String(!pointerEnabled));
+    slide.tabIndex = pointerEnabled ? 0 : -1;
   });
 
   dots.forEach((dot) => {
@@ -464,6 +504,129 @@ function updateHomeCarousel() {
   if (!state.albumId && activeAlbum) syncPlayerAlbumLink(activeAlbum);
 }
 
+async function initEarth() {
+  const canvas = document.querySelector("#earth-canvas");
+  if (!canvas || canvas.dataset.ready) return;
+  canvas.dataset.ready = "true";
+
+  try {
+    const THREE = await import("https://unpkg.com/three@0.165.0/build/three.module.js");
+    if (!document.contains(canvas)) return;
+    earthRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    earthRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+    earthScene = new THREE.Scene();
+    earthCamera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    earthCamera.position.set(0, 0.2, 5.2);
+
+    earthGroup = new THREE.Group();
+    earthScene.add(earthGroup);
+
+    const earthGeometry = new THREE.SphereGeometry(1.36, 96, 96);
+    const earthMaterial = new THREE.MeshStandardMaterial({
+      color: 0x2b8794,
+      roughness: 0.78,
+      metalness: 0.04,
+      emissive: 0x0b3038,
+      emissiveIntensity: 0.62,
+    });
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    earthGroup.add(earth);
+
+    const landMaterial = new THREE.MeshStandardMaterial({
+      color: 0xb8f5cf,
+      roughness: 0.96,
+      metalness: 0.02,
+      emissive: 0x123e3b,
+      emissiveIntensity: 0.34,
+      transparent: true,
+      opacity: 0.78,
+      side: THREE.DoubleSide,
+    });
+    makeLandMasses(THREE, landMaterial).forEach((mass) => earthGroup.add(mass));
+
+    const atmosphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1.43, 96, 96),
+      new THREE.MeshBasicMaterial({ color: 0x76ead8, transparent: true, opacity: 0.12, side: THREE.BackSide }),
+    );
+    earthGroup.add(atmosphere);
+
+    const wire = new THREE.Mesh(
+      new THREE.SphereGeometry(1.375, 32, 16),
+      new THREE.MeshBasicMaterial({ color: 0xece6d7, wireframe: true, transparent: true, opacity: 0.08 }),
+    );
+    earthGroup.add(wire);
+
+    earthScene.add(new THREE.AmbientLight(0xb9eef0, 1.55));
+    const keyLight = new THREE.DirectionalLight(0xb8fff4, 2.4);
+    keyLight.position.set(3.6, 2.5, 4);
+    earthScene.add(keyLight);
+    const rimLight = new THREE.DirectionalLight(0xd7b363, 1.1);
+    rimLight.position.set(-3, -1.2, 2);
+    earthScene.add(rimLight);
+    const frontLight = new THREE.DirectionalLight(0x76ead8, 1.2);
+    frontLight.position.set(0.2, 0.3, 5);
+    earthScene.add(frontLight);
+
+    earthClockStart = performance.now();
+    resizeEarth();
+    animateEarth();
+  } catch {
+    canvas.closest(".orbit-core")?.classList.add("is-fallback");
+  }
+}
+
+function makeLandMasses(THREE, material) {
+  const masses = [
+    { lat: 34, lon: 18, sx: 0.5, sy: 0.2, rz: -0.45 },
+    { lat: 8, lon: 96, sx: 0.42, sy: 0.18, rz: 0.24 },
+    { lat: -19, lon: 138, sx: 0.34, sy: 0.16, rz: -0.28 },
+    { lat: 48, lon: -96, sx: 0.46, sy: 0.2, rz: 0.2 },
+    { lat: -18, lon: -62, sx: 0.3, sy: 0.42, rz: 0.12 },
+    { lat: 57, lon: 130, sx: 0.34, sy: 0.14, rz: 0.42 },
+  ];
+
+  return masses.map(({ lat, lon, sx, sy, rz }) => {
+    const mesh = new THREE.Mesh(new THREE.CircleGeometry(1, 40), material);
+    const phi = ((90 - lat) * Math.PI) / 180;
+    const theta = ((lon + 180) * Math.PI) / 180;
+    const radius = 1.372;
+    mesh.position.set(
+      -radius * Math.sin(phi) * Math.cos(theta),
+      radius * Math.cos(phi),
+      radius * Math.sin(phi) * Math.sin(theta),
+    );
+    mesh.lookAt(0, 0, 0);
+    mesh.rotateZ(rz);
+    mesh.scale.set(sx, sy, 1);
+    return mesh;
+  });
+}
+
+function resizeEarth() {
+  if (!earthRenderer || !earthCamera) return;
+  const canvas = document.querySelector("#earth-canvas");
+  const rect = canvas?.getBoundingClientRect();
+  if (!rect?.width || !rect?.height) return;
+  earthRenderer.setSize(rect.width, rect.height, false);
+  earthCamera.aspect = rect.width / rect.height;
+  earthCamera.updateProjectionMatrix();
+}
+
+function animateEarth(time = performance.now()) {
+  if (!earthRenderer || !earthScene || !earthCamera || !earthGroup) return;
+  resizeEarth();
+  const elapsed = (time - earthClockStart) * 0.001;
+  if (!prefersReducedMotion.matches) {
+    earthGroup.rotation.y = elapsed * 0.16;
+    earthGroup.rotation.x = Math.sin(elapsed * 0.35) * 0.045;
+  }
+  earthRenderer.render(earthScene, earthCamera);
+  if (!prefersReducedMotion.matches) {
+    earthAnimationFrame = window.requestAnimationFrame(animateEarth);
+  }
+}
+
 function startHomeCarouselTimer() {
   stopHomeCarouselTimer();
   if (prefersReducedMotion.matches || !document.querySelector(".album-carousel")) return;
@@ -474,6 +637,25 @@ function stopHomeCarouselTimer() {
   if (!homeCarouselTimer) return;
   window.clearInterval(homeCarouselTimer);
   homeCarouselTimer = 0;
+}
+
+function disposeEarth() {
+  window.cancelAnimationFrame(earthAnimationFrame);
+  earthAnimationFrame = 0;
+
+  if (earthScene) {
+    earthScene.traverse((object) => {
+      object.geometry?.dispose?.();
+      if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose?.());
+      else object.material?.dispose?.();
+    });
+  }
+
+  earthRenderer?.dispose?.();
+  earthRenderer = null;
+  earthScene = null;
+  earthCamera = null;
+  earthGroup = null;
 }
 
 function restartHomeCarouselTimer() {
@@ -825,11 +1007,19 @@ function animateStars(time = 0) {
 function resetStars() {
   window.cancelAnimationFrame(starAnimationFrame);
   animateStars(0);
+  resizeEarth();
 }
 
 window.addEventListener("hashchange", route);
-window.addEventListener("resize", resetStars);
-prefersReducedMotion.addEventListener("change", resetStars);
+window.addEventListener("resize", () => {
+  resetStars();
+  updateHomeCarousel();
+});
+prefersReducedMotion.addEventListener("change", () => {
+  resetStars();
+  window.cancelAnimationFrame(earthAnimationFrame);
+  if (document.querySelector("#earth-canvas")) animateEarth();
+});
 
 animateStars();
 await loadContentOverrides();
