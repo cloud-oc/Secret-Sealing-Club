@@ -96,6 +96,10 @@ function tr(key) {
   return t[state.lang][key];
 }
 
+function icon(name) {
+  return `<svg class="ui-icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+}
+
 function route() {
   const hash = location.hash.replace(/^#\/?/, "");
   const [kind, id] = hash.split("/");
@@ -211,10 +215,6 @@ function albumCarousel() {
       <div class="carousel-viewport">
         ${albums.map(albumPoster).join("")}
       </div>
-      <div class="carousel-controls" aria-label="${tr("switchAlbum")}">
-        <button class="carousel-arrow" type="button" data-carousel-step="-1" aria-label="${tr("prevAlbum")}">‹</button>
-        <button class="carousel-arrow" type="button" data-carousel-step="1" aria-label="${tr("nextAlbum")}">›</button>
-      </div>
       <div class="carousel-dots" role="tablist" aria-label="${tr("albumCarousel")}">
         ${albums.map(carouselDot).join("")}
       </div>
@@ -265,8 +265,8 @@ function renderAlbum(id) {
     <article class="album-page" style="--album-color: ${album.color}">
       <aside class="album-aside">
         <div class="album-switcher" aria-label="${tr("switchAlbum")}">
-          <a class="album-switch-button" href="#/album/${previousAlbum.id}" data-album-jump="${previousAlbum.id}" aria-label="${tr("prevAlbum")}: ${previousAlbum.title[state.lang]}">‹</a>
-          <a class="album-switch-button" href="#/album/${nextAlbum.id}" data-album-jump="${nextAlbum.id}" aria-label="${tr("nextAlbum")}: ${nextAlbum.title[state.lang]}">›</a>
+          <a class="album-switch-button" href="#/album/${previousAlbum.id}" data-album-jump="${previousAlbum.id}" aria-label="${tr("prevAlbum")}: ${previousAlbum.title[state.lang]}">${icon("chevron-left")}</a>
+          <a class="album-switch-button" href="#/album/${nextAlbum.id}" data-album-jump="${nextAlbum.id}" aria-label="${tr("nextAlbum")}: ${nextAlbum.title[state.lang]}">${icon("chevron-right")}</a>
         </div>
         <div class="album-cover">
           <p class="kicker">${album.catalog}</p>
@@ -277,11 +277,11 @@ function renderAlbum(id) {
           <p>${album.summary[state.lang]}</p>
           <div class="album-links">
             <a class="album-icon-link source-link" href="${album.source}" target="_blank" rel="noreferrer" aria-label="${tr("source")}" title="${tr("source")}">
-              <span class="icon-book" aria-hidden="true"></span>
+              ${icon("book")}
               <span class="visually-hidden">${tr("source")}</span>
             </a>
             <a class="album-icon-link netease-link" href="${album.links?.netease || neteaseSearchUrl(album)}" target="_blank" rel="noreferrer" aria-label="${tr("netease")}: ${album.title[state.lang]}" title="${tr("netease")}">
-              <span class="icon-turntable" aria-hidden="true"></span>
+              ${icon("turntable")}
               <span class="visually-hidden">${tr("netease")}</span>
             </a>
           </div>
@@ -340,12 +340,6 @@ function renderNotFound() {
 function bindHomeCarousel() {
   updateHomeCarousel();
 
-  document.querySelectorAll("[data-carousel-step]").forEach((button) => {
-    button.addEventListener("click", () => {
-      shiftHomeCarousel(Number(button.dataset.carouselStep), true);
-    });
-  });
-
   document.querySelectorAll("[data-carousel-index]").forEach((button) => {
     button.addEventListener("click", () => {
       setHomeCarouselIndex(Number(button.dataset.carouselIndex), true);
@@ -353,6 +347,7 @@ function bindHomeCarousel() {
   });
 
   const carousel = document.querySelector(".album-carousel");
+  bindCarouselDrag(carousel);
   carousel?.addEventListener("mouseenter", stopHomeCarouselTimer);
   carousel?.addEventListener("mouseleave", startHomeCarouselTimer);
   carousel?.addEventListener("focusin", stopHomeCarouselTimer);
@@ -361,6 +356,74 @@ function bindHomeCarousel() {
   });
 
   startHomeCarouselTimer();
+}
+
+function bindCarouselDrag(carousel) {
+  const viewport = carousel?.querySelector(".carousel-viewport");
+  if (!carousel || !viewport) return;
+
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let activePointerId = null;
+  let didDrag = false;
+
+  viewport.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.target.closest(".carousel-dots")) return;
+    activePointerId = event.pointerId;
+    startX = event.clientX;
+    startY = event.clientY;
+    currentX = event.clientX;
+    didDrag = false;
+    stopHomeCarouselTimer();
+    viewport.setPointerCapture(activePointerId);
+  });
+
+  viewport.addEventListener("pointermove", (event) => {
+    if (activePointerId === null) return;
+    if (event.pointerId !== activePointerId) return;
+    currentX = event.clientX;
+    const deltaX = currentX - startX;
+    const deltaY = event.clientY - startY;
+
+    if (Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      didDrag = true;
+      carousel.classList.add("is-dragging");
+      event.preventDefault();
+    }
+  });
+
+  const finishDrag = (event) => {
+    if (activePointerId === null) return;
+    if (event.pointerId !== activePointerId) return;
+    const deltaX = currentX - startX;
+    activePointerId = null;
+    carousel.classList.remove("is-dragging");
+
+    if (didDrag) {
+      suppressNextCarouselClick(carousel);
+      if (Math.abs(deltaX) > 44) {
+        shiftHomeCarousel(deltaX < 0 ? 1 : -1, true);
+        return;
+      }
+    }
+
+    restartHomeCarouselTimer();
+  };
+
+  viewport.addEventListener("pointerup", finishDrag);
+  viewport.addEventListener("pointercancel", finishDrag);
+}
+
+function suppressNextCarouselClick(carousel) {
+  const preventClick = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    carousel.removeEventListener("click", preventClick, true);
+  };
+
+  carousel.addEventListener("click", preventClick, true);
+  window.setTimeout(() => carousel.removeEventListener("click", preventClick, true), 240);
 }
 
 function carouselOffset(index) {
@@ -605,7 +668,7 @@ function renderPlaylist(album) {
 }
 
 function updatePlayButton() {
-  player.play.textContent = state.isPlaying ? "Ⅱ" : "▶";
+  player.play.innerHTML = icon(state.isPlaying ? "pause" : "play");
 }
 
 language.toggle.addEventListener("click", () => {
