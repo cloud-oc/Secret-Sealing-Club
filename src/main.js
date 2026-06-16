@@ -108,14 +108,22 @@ function route() {
 }
 
 async function loadContentOverrides() {
+  const overrides = [];
+
   try {
-    const response = await fetch("./content/content.json", { cache: "no-store" });
-    if (!response.ok) return;
-    const overrides = await response.json();
-    albums = mergeAlbums(baseAlbums, overrides.albums || []);
+    await Promise.all(
+      baseAlbums.map(async (album) => {
+        const response = await fetch(`./content/albums/${album.id}.json`, { cache: "no-store" });
+        if (!response.ok) return;
+        overrides.push(await response.json());
+      }),
+    );
   } catch {
     albums = baseAlbums;
+    return;
   }
+
+  albums = mergeAlbums(baseAlbums, overrides);
 }
 
 function mergeAlbums(sourceAlbums, overrideAlbums) {
@@ -142,15 +150,21 @@ function mergeTracks(sourceTracks, overrideTracks) {
 }
 
 function mergeStory(sourceStory, overrideStory) {
-  return sourceStory.map((section, index) => {
-    const override = overrideStory[index] || overrideStory.find((item) => item.track === section.track);
-    if (!override) return section;
-    return {
-      ...section,
-      title: { ...section.title, ...(override.title || {}) },
-      text: { ...section.text, ...(override.text || {}) },
-    };
-  });
+  if (!overrideStory.length) return sourceStory;
+
+  return overrideStory
+    .slice()
+    .sort((a, b) => a.track - b.track)
+    .map((override, index) => {
+      const section = sourceStory.find((item) => item.track === override.track) || sourceStory[index] || {};
+
+      return {
+        ...section,
+        ...pickDefined(override, ["track"]),
+        title: { ...(section.title || {}), ...(override.title || {}) },
+        text: { ...(section.text || {}), ...(override.text || {}) },
+      };
+    });
 }
 
 function pickDefined(source, keys) {
