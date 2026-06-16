@@ -129,8 +129,19 @@ button {
   border: 1px solid rgba(86, 214, 189, 0.55);
   border-radius: 50%;
   color: var(--accent);
-  font-weight: 700;
   background: rgba(8, 12, 20, 0.9);
+}
+
+.brand-icon {
+  display: block;
+  width: 30px;
+  height: 30px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 
 .brand strong,
@@ -353,11 +364,6 @@ h1 {
   min-height: min(58vh, 560px);
   isolation: isolate;
   border-left: 1px solid var(--line);
-  cursor: grab;
-}
-
-.album-carousel.is-dragging {
-  cursor: grabbing;
 }
 
 .album-card {
@@ -398,7 +404,6 @@ h1 {
   position: relative;
   min-height: inherit;
   overflow: hidden;
-  touch-action: pan-y;
 }
 
 .album-poster {
@@ -431,10 +436,6 @@ h1 {
   pointer-events: none;
 }
 
-.album-carousel.is-dragging .album-poster {
-  pointer-events: none;
-}
-
 .album-poster:hover,
 .album-poster:focus-visible {
   transform:
@@ -450,10 +451,15 @@ h1 {
   padding-bottom: 7px;
 }
 
-.album-poster h2 {
+.album-card.album-poster h2 {
   margin-top: auto;
-  font-size: clamp(2.1rem, 4.8vw, 4.4rem);
-  text-wrap: balance;
+  overflow: hidden;
+  max-width: 100%;
+  font-size: clamp(1.92rem, 4.1vw, 3.72rem);
+  line-height: 1.02;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-wrap: nowrap;
 }
 
 .album-poster p {
@@ -549,11 +555,11 @@ h1 {
 }
 
 .album-aside {
-  min-height: min(640px, calc(100dvh - var(--header-h) - var(--player-h) - 96px));
+  min-height: min(640px, calc(100dvh - var(--header-h) - var(--player-h) - 64px));
   position: sticky;
   top: calc(var(--header-h) + 18px);
   align-self: start;
-  max-height: calc(100dvh - var(--header-h) - var(--player-h) - 96px);
+  max-height: calc(100dvh - var(--header-h) - var(--player-h) - 64px);
   overflow: auto;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -609,13 +615,18 @@ h1 {
 }
 
 .album-info {
-  padding: 18px 18px 76px;
+  padding: 18px;
 }
 
 .album-info h1 {
+  overflow: hidden;
   margin-bottom: 10px;
-  font-size: clamp(2rem, 3.4vw, 3rem);
+  max-width: calc(100% - 4px);
+  font-size: clamp(1.58rem, 2.72vw, 2.42rem);
   line-height: 1.02;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-wrap: nowrap;
 }
 
 .album-info p {
@@ -804,7 +815,7 @@ h1 {
   left: clamp(10px, 2vw, 22px);
   z-index: 40;
   display: grid;
-  grid-template-columns: minmax(220px, 0.72fr) minmax(320px, 1fr) 46px;
+  grid-template-columns: minmax(220px, 1fr) minmax(340px, 560px) minmax(220px, 1fr);
   gap: clamp(12px, 2.4vw, 28px);
   align-items: center;
   min-height: var(--player-h);
@@ -819,7 +830,9 @@ h1 {
   grid-template-columns: 56px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
+  justify-self: start;
   min-width: 0;
+  max-width: 430px;
 }
 
 .player-art {
@@ -862,6 +875,7 @@ h1 {
 
 .playlist-toggle {
   display: grid;
+  justify-self: end;
   place-items: center;
   width: 46px;
   height: 46px;
@@ -960,7 +974,9 @@ h1 {
 
 .player-center {
   display: grid;
+  width: min(100%, 560px);
   gap: 8px;
+  justify-self: center;
   min-width: 0;
 }
 
@@ -1059,11 +1075,11 @@ input[type="range"] {
   }
 
   .album-cover {
-    min-height: 210px;
+    min-height: 188px;
   }
 
   .cover-disc {
-    width: 168px;
+    width: 156px;
     margin-top: 8px;
   }
 
@@ -1078,7 +1094,11 @@ input[type="range"] {
 
   .album-info p {
     font-size: 0.92rem;
-    line-height: 1.62;
+    line-height: 1.58;
+  }
+
+  .album-links {
+    margin-top: 14px;
   }
 }
 
@@ -1138,7 +1158,7 @@ input[type="range"] {
     padding: 16px;
   }
 
-  .album-poster h2 {
+  .album-card.album-poster h2 {
     margin-bottom: 8px;
     font-size: clamp(1.48rem, 7vw, 2.1rem);
   }

@@ -8,7 +8,7 @@
       content="秘封俱乐部同人阅读室：在夜色、铁路、星图和旧科学的气味里，边听音乐边读专辑附带故事。"
     />
     <title>秘封俱乐部 | 夜行读本</title>
-    <link rel="stylesheet" href="./styles.css?v=20260616-player-flow" />
+    <link rel="stylesheet" href="./styles.css?v=20260616-click-lockup" />
   </head>
   <body>
     <canvas id="starfield" aria-hidden="true"></canvas>
@@ -60,11 +60,26 @@
         <path d="M18 11l-3 3" />
         <path d="M15 14l-2 2" />
       </symbol>
+      <symbol id="icon-hifuu" viewBox="0 0 48 48">
+        <circle cx="24" cy="24" r="17" />
+        <circle cx="24" cy="24" r="4" />
+        <path d="M7 24h10" />
+        <path d="M31 24h10" />
+        <path d="M24 7v10" />
+        <path d="M24 31v10" />
+        <path d="M12.5 12.5l7 7" />
+        <path d="M28.5 28.5l7 7" />
+        <path d="M35.5 12.5l-7 7" />
+        <path d="M19.5 28.5l-7 7" />
+        <path d="M16 24c2.8 -4.5 5.5 -6.8 8 -6.8s5.2 2.3 8 6.8c-2.8 4.5 -5.5 6.8 -8 6.8s-5.2 -2.3 -8 -6.8z" />
+      </symbol>
     </svg>
 
     <header class="site-header">
       <a class="brand" href="#/">
-        <span class="brand-mark">秘</span>
+        <span class="brand-mark">
+          <svg class="brand-icon" aria-hidden="true"><use href="#icon-hifuu"></use></svg>
+        </span>
         <span>
           <strong>秘封俱乐部</strong>
           <small>夜行读本</small>
@@ -165,6 +180,6 @@
       <div class="playlist-panel" id="playlist-panel" hidden></div>
     </div>
 
-    <script type="module" src="./src/main.js?v=20260616-player-flow"></script>
+    <script type="module" src="./src/main.js?v=20260616-click-lockup"></script>
   </body>
 </html>

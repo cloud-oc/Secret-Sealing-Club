@@ -355,7 +355,6 @@ function bindHomeCarousel() {
   });
 
   const carousel = document.querySelector(".album-carousel");
-  bindCarouselDrag(carousel);
   carousel?.addEventListener("mouseenter", stopHomeCarouselTimer);
   carousel?.addEventListener("mouseleave", startHomeCarouselTimer);
   carousel?.addEventListener("focusin", stopHomeCarouselTimer);
@@ -364,74 +363,6 @@ function bindHomeCarousel() {
   });
 
   startHomeCarouselTimer();
-}
-
-function bindCarouselDrag(carousel) {
-  const viewport = carousel?.querySelector(".carousel-viewport");
-  if (!carousel || !viewport) return;
-
-  let startX = 0;
-  let startY = 0;
-  let currentX = 0;
-  let activePointerId = null;
-  let didDrag = false;
-
-  viewport.addEventListener("pointerdown", (event) => {
-    if (event.button !== 0 || event.target.closest(".carousel-dots")) return;
-    activePointerId = event.pointerId;
-    startX = event.clientX;
-    startY = event.clientY;
-    currentX = event.clientX;
-    didDrag = false;
-    stopHomeCarouselTimer();
-    viewport.setPointerCapture(activePointerId);
-  });
-
-  viewport.addEventListener("pointermove", (event) => {
-    if (activePointerId === null) return;
-    if (event.pointerId !== activePointerId) return;
-    currentX = event.clientX;
-    const deltaX = currentX - startX;
-    const deltaY = event.clientY - startY;
-
-    if (Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY)) {
-      didDrag = true;
-      carousel.classList.add("is-dragging");
-      event.preventDefault();
-    }
-  });
-
-  const finishDrag = (event) => {
-    if (activePointerId === null) return;
-    if (event.pointerId !== activePointerId) return;
-    const deltaX = currentX - startX;
-    activePointerId = null;
-    carousel.classList.remove("is-dragging");
-
-    if (didDrag) {
-      if (Math.abs(deltaX) > 44) {
-        suppressNextCarouselClick(carousel);
-        shiftHomeCarousel(deltaX < 0 ? 1 : -1, true);
-        return;
-      }
-    }
-
-    restartHomeCarouselTimer();
-  };
-
-  viewport.addEventListener("pointerup", finishDrag);
-  viewport.addEventListener("pointercancel", finishDrag);
-}
-
-function suppressNextCarouselClick(carousel) {
-  const preventClick = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    carousel.removeEventListener("click", preventClick, true);
-  };
-
-  carousel.addEventListener("click", preventClick, true);
-  window.setTimeout(() => carousel.removeEventListener("click", preventClick, true), 240);
 }
 
 function carouselOffset(index) {
