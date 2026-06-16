@@ -1,0 +1,27 @@
+{
+  "id": "trojan-green-asteroid",
+  "tracks": [
+    { "track": 1, "audio": "assets/audio/trojan-green-asteroid/01.mp3" },
+    { "track": 2, "audio": "assets/audio/trojan-green-asteroid/02.mp3" },
+    { "track": 3, "audio": "assets/audio/trojan-green-asteroid/03.mp3" },
+    { "track": 4, "audio": "assets/audio/trojan-green-asteroid/04.mp3" },
+    { "track": 5, "audio": "assets/audio/trojan-green-asteroid/05.mp3" },
+    { "track": 6, "audio": "assets/audio/trojan-green-asteroid/06.mp3" },
+    { "track": 7, "audio": "assets/audio/trojan-green-asteroid/07.mp3" },
+    { "track": 8, "audio": "assets/audio/trojan-green-asteroid/08.mp3" },
+    { "track": 9, "audio": "assets/audio/trojan-green-asteroid/09.mp3" },
+    { "track": 10, "audio": "assets/audio/trojan-green-asteroid/10.mp3" }
+  ],
+  "story": [
+    { "track": 1, "title": { "zh": "衛星トリフネ", "ja": "衛星トリフネ" }, "text": { "zh": "", "ja": "" } },
+    { "track": 2, "title": { "zh": "トロヤ群の密林", "ja": "トロヤ群の密林" }, "text": { "zh": "", "ja": "" } },
+    { "track": 3, "title": { "zh": "デザイアドライブ", "ja": "デザイアドライブ" }, "text": { "zh": "", "ja": "" } },
+    { "track": 4, "title": { "zh": "フェアリー冒険譚", "ja": "フェアリー冒険譚" }, "text": { "zh": "", "ja": "" } },
+    { "track": 5, "title": { "zh": "天鳥船神社", "ja": "天鳥船神社" }, "text": { "zh": "", "ja": "" } },
+    { "track": 6, "title": { "zh": "夜空のユーフォーロマンス", "ja": "夜空のユーフォーロマンス" }, "text": { "zh": "", "ja": "" } },
+    { "track": 7, "title": { "zh": "ハルトマンの妖怪少女", "ja": "ハルトマンの妖怪少女" }, "text": { "zh": "", "ja": "" } },
+    { "track": 8, "title": { "zh": "天鳥船神社の結界", "ja": "天鳥船神社の結界" }, "text": { "zh": "", "ja": "" } },
+    { "track": 9, "title": { "zh": "感情の摩天楼 ～ Cosmic Mind", "ja": "感情の摩天楼 ～ Cosmic Mind" }, "text": { "zh": "", "ja": "" } },
+    { "track": 10, "title": { "zh": "宇宙に浮かぶ幻想郷", "ja": "宇宙に浮かぶ幻想郷" }, "text": { "zh": "", "ja": "" } }
+  ]
+}

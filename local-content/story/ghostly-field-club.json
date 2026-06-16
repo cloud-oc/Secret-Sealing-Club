@@ -1,0 +1,29 @@
+{
+  "id": "ghostly-field-club",
+  "tracks": [
+    { "track": 1, "audio": "assets/audio/ghostly-field-club/01.mp3" },
+    { "track": 2, "audio": "assets/audio/ghostly-field-club/02.mp3" },
+    { "track": 3, "audio": "assets/audio/ghostly-field-club/03.mp3" },
+    { "track": 4, "audio": "assets/audio/ghostly-field-club/04.mp3" },
+    { "track": 5, "audio": "assets/audio/ghostly-field-club/05.mp3" },
+    { "track": 6, "audio": "assets/audio/ghostly-field-club/06.mp3" },
+    { "track": 7, "audio": "assets/audio/ghostly-field-club/07.mp3" },
+    { "track": 8, "audio": "assets/audio/ghostly-field-club/08.mp3" },
+    { "track": 9, "audio": "assets/audio/ghostly-field-club/09.mp3" },
+    { "track": 10, "audio": "assets/audio/ghostly-field-club/10.mp3" },
+    { "track": 11, "audio": "assets/audio/ghostly-field-club/11.mp3" }
+  ],
+  "story": [
+    { "track": 1, "title": { "zh": "夜のデンデラ野を逝く", "ja": "夜のデンデラ野を逝く" }, "text": { "zh": "", "ja": "" } },
+    { "track": 2, "title": { "zh": "少女秘封倶楽部", "ja": "少女秘封倶楽部" }, "text": { "zh": "", "ja": "" } },
+    { "track": 3, "title": { "zh": "東方妖々夢 ～ Ancient Temple", "ja": "東方妖々夢 ～ Ancient Temple" }, "text": { "zh": "", "ja": "" } },
+    { "track": 4, "title": { "zh": "古の冥界寺", "ja": "古の冥界寺" }, "text": { "zh": "", "ja": "" } },
+    { "track": 5, "title": { "zh": "幻視の夜 ～ Ghostly Eyes", "ja": "幻視の夜 ～ Ghostly Eyes" }, "text": { "zh": "", "ja": "" } },
+    { "track": 6, "title": { "zh": "魔術師メリー", "ja": "魔術師メリー" }, "text": { "zh": "", "ja": "" } },
+    { "track": 7, "title": { "zh": "月の妖鳥、化猫の幻", "ja": "月の妖鳥、化猫の幻" }, "text": { "zh": "", "ja": "" } },
+    { "track": 8, "title": { "zh": "過去の花 ～ Fairy of Flower", "ja": "過去の花 ～ Fairy of Flower" }, "text": { "zh": "", "ja": "" } },
+    { "track": 9, "title": { "zh": "魔法少女十字軍", "ja": "魔法少女十字軍" }, "text": { "zh": "", "ja": "" } },
+    { "track": 10, "title": { "zh": "少女幻葬 ～ Necro-Fantasy", "ja": "少女幻葬 ～ Necro-Fantasy" }, "text": { "zh": "", "ja": "" } },
+    { "track": 11, "title": { "zh": "幻想の永遠祭", "ja": "幻想の永遠祭" }, "text": { "zh": "", "ja": "" } }
+  ]
+}

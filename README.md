@@ -5,15 +5,13 @@ An immersive static reading site for the Secret Sealing Club music albums and bo
 ## Content Notes
 
 The site ships with structured album and track data, bilingual UI, and placeholder story excerpts.
-Create `content/content.json` from `content/content.example.json` to add text and audio you have permission to use without editing the app source.
+Edit the JSON files in `local-content/story/` to add local story text without editing the app source.
 
 Audio files are expected under `assets/audio/<album-id>/<track-number>.mp3`.
 
 For private local use, you can also import untracked content:
 
 ```sh
-mkdir -p local-content/story local-content/audio
-cp local-content.example/story/ghostly-field-club.json local-content/story/
 node scripts/import-local-content.mjs
 ```
 

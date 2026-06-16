@@ -1,0 +1,27 @@
+{
+  "id": "magical-astronomy",
+  "tracks": [
+    { "track": 1, "audio": "assets/audio/magical-astronomy/01.mp3" },
+    { "track": 2, "audio": "assets/audio/magical-astronomy/02.mp3" },
+    { "track": 3, "audio": "assets/audio/magical-astronomy/03.mp3" },
+    { "track": 4, "audio": "assets/audio/magical-astronomy/04.mp3" },
+    { "track": 5, "audio": "assets/audio/magical-astronomy/05.mp3" },
+    { "track": 6, "audio": "assets/audio/magical-astronomy/06.mp3" },
+    { "track": 7, "audio": "assets/audio/magical-astronomy/07.mp3" },
+    { "track": 8, "audio": "assets/audio/magical-astronomy/08.mp3" },
+    { "track": 9, "audio": "assets/audio/magical-astronomy/09.mp3" },
+    { "track": 10, "audio": "assets/audio/magical-astronomy/10.mp3" }
+  ],
+  "story": [
+    { "track": 1, "title": { "zh": "月面ツアーへようこそ", "ja": "月面ツアーへようこそ" }, "text": { "zh": "", "ja": "" } },
+    { "track": 2, "title": { "zh": "天空のグリニッジ", "ja": "天空のグリニッジ" }, "text": { "zh": "", "ja": "" } },
+    { "track": 3, "title": { "zh": "東の国の眠らない夜", "ja": "東の国の眠らない夜" }, "text": { "zh": "", "ja": "" } },
+    { "track": 4, "title": { "zh": "車椅子の未来宇宙", "ja": "車椅子の未来宇宙" }, "text": { "zh": "", "ja": "" } },
+    { "track": 5, "title": { "zh": "Demystify Feast", "ja": "Demystify Feast" }, "text": { "zh": "", "ja": "" } },
+    { "track": 6, "title": { "zh": "衛星カフェテラス", "ja": "衛星カフェテラス" }, "text": { "zh": "", "ja": "" } },
+    { "track": 7, "title": { "zh": "G Free", "ja": "G Free" }, "text": { "zh": "", "ja": "" } },
+    { "track": 8, "title": { "zh": "大空魔術 ～ Magical Astronomy", "ja": "大空魔術 ～ Magical Astronomy" }, "text": { "zh": "", "ja": "" } },
+    { "track": 9, "title": { "zh": "ネクロファンタジア", "ja": "ネクロファンタジア" }, "text": { "zh": "", "ja": "" } },
+    { "track": 10, "title": { "zh": "向こう側の月", "ja": "向こう側の月" }, "text": { "zh": "", "ja": "" } }
+  ]
+}

@@ -4,4 +4,4 @@ assets/audio/**/*.flac
 assets/audio/**/*.wav
 assets/audio/**/*.ogg
 assets/audio/**/*.m4a
-local-content/
+local-content/audio/
