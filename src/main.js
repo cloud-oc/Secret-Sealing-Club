@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v5");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v6");
 
 let albums = baseAlbums;
 
@@ -63,10 +63,8 @@ const intro = {
   panel: document.querySelector("#site-intro"),
   backdrop: document.querySelector("#intro-backdrop"),
   close: document.querySelector("#intro-close"),
-  kicker: document.querySelector("#intro-kicker"),
   title: document.querySelector("#intro-title"),
   body: document.querySelector("#intro-body"),
-  note: document.querySelector("#intro-note"),
 };
 
 const t = {
@@ -92,10 +90,8 @@ const t = {
     netease: "网易云",
     languageToggle: "切换语言",
     infoToggle: "关于这个网站",
-    introKicker: "秘封俱乐部",
     introTitle: "夜行读本",
-    introBody: "这里收着九张秘封音乐 CD 的读本。选一张专辑，曲目会带着对应的故事段落一起亮起，像深夜车窗外忽然对上的星。",
-    introNote: "可在中文与日本語之间切换；播放器中的曲名会通向网易云音乐。",
+    introBody: "这里收录着九张秘封俱乐部的音乐 CD 读本。选一张专辑，曲目会带着对应的故事段落一起亮起，就像深夜的列车窗外闪烁的星星。",
     closeIntro: "关闭简介",
     emptyStory: "这一页还在社团抽屉里。填入正文后，它会随曲目一起亮起。",
     notFoundTitle: "未观测到这个坐标",
@@ -123,10 +119,8 @@ const t = {
     netease: "网易云",
     languageToggle: "言語を切り替える",
     infoToggle: "このサイトについて",
-    introKicker: "秘封倶楽部",
     introTitle: "夜行読本",
-    introBody: "九枚の秘封音楽 CD に添えられた読本をしまっています。一枚を選ぶと、曲に寄り添う物語の断片が、夜汽車の窓に映る星のように灯ります。",
-    introNote: "中文と日本語を切り替えられます。プレイヤーの曲名は网易云音乐へつながります。",
+    introBody: "ここには秘封倶楽部の九枚の音楽 CD 読本を収めています。一枚を選ぶと、曲に寄り添う物語の断片が、深夜列車の窓の外でまたたく星のように灯ります。",
     closeIntro: "説明を閉じる",
     emptyStory: "この頁はまだ部室の引き出しの中です。本文を入れると、曲と一緒に灯ります。",
     notFoundTitle: "この座標は観測できません",
@@ -301,13 +295,11 @@ function albumCarousel() {
 
 function albumPoster(album, index) {
   const offset = carouselOffset(index);
-  const coverStyle = album.cover ? `--album-cover: url(${cssUrl(album.cover)});` : "";
   return `
-    <a class="album-card album-poster timeline-card ${album.cover ? "has-cover" : ""}" href="#/album/${album.id}" style="--album-color: ${album.color}; ${coverStyle}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
-      <span class="poster-cover" aria-hidden="true"></span>
+    <a class="album-card album-poster timeline-card" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
       <span class="poster-glow" aria-hidden="true"></span>
       <span class="timeline-stem" aria-hidden="true"></span>
-      <span class="album-number">${album.year} · HIFUU ${String(index + 1).padStart(2, "0")}</span>
+      <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
       <span class="poster-title-block">
         <h2>${album.title[state.lang]}</h2>
       </span>
@@ -1099,10 +1091,8 @@ function syncIntroText() {
   intro.toggle?.setAttribute("aria-label", tr("infoToggle"));
   intro.toggle?.setAttribute("title", tr("infoToggle"));
   intro.close?.setAttribute("aria-label", tr("closeIntro"));
-  if (intro.kicker) intro.kicker.textContent = tr("introKicker");
   if (intro.title) intro.title.textContent = tr("introTitle");
   if (intro.body) intro.body.textContent = tr("introBody");
-  if (intro.note) intro.note.textContent = tr("introNote");
 }
 
 function setIntroOpen(isOpen) {
