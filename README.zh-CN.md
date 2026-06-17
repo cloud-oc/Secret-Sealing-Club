@@ -1,23 +1,24 @@
-# 秘封俱乐部
+<p align="center">
+  <img src="./favicon.svg" alt="秘封俱乐部图标" width="88" height="88" />
+</p>
 
-[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+<h1 align="center">秘封俱乐部｜夜行读本</h1>
 
-一个非官方的秘封俱乐部同人阅读室。
+<p align="center">
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a>
+</p>
 
-这个网站想做的是音乐与文字之间的那段奇妙时间：打开一张专辑，播放一首曲子，在旁边读对应的 Booklet 故事。每张专辑都有自己的页面，每首曲子都可以对应一个故事段落，读者可以在中文和日文之间切换，像翻阅一份安静的秘封档案。
+<p align="center">九张秘封音乐 CD 的同人阅读室。</p>
 
-## 这里是什么
+<p align="center">
+  <a href="https://cloud-oc.github.io/Secret-Sealing-Club/">进入网站</a>
+</p>
 
-- 面向 ZUN's Music Collection 与秘封俱乐部故事的静态同人站
-- 收录 9 张带 Booklet 故事的秘封音乐 CD 页面
-- 固定播放器，使用网易云音乐曲目链接播放
-- 支持曲目与故事段落联动高亮
-- 中文 / 日文阅读模式
-- 不需要后端，适合 GitHub Pages 部署
+## 关于
 
-## 专辑范围
+这里收着九张带 Booklet 故事的秘封音乐 CD。选一张专辑，播放一首曲子，对应的故事段落会在旁边亮起。正文支持中文与日文切换，播放使用网易云音乐曲目链接。
 
-当前已经准备了这些专辑的内容文件：
+## 专辑
 
 ```text
 莲台野夜行
@@ -31,15 +32,9 @@
 七夕坂梦幻能
 ```
 
-## 添加故事
+## 内容
 
-专辑正文文件在：
-
-```text
-content/albums/
-```
-
-编辑对应专辑 JSON，填写 `text.zh` 和 `text.ja`。`track` 会把故事段落和内置曲目列表、网易云播放源对应起来。
+专辑正文在 `content/albums/`。曲目信息和网易云单曲 ID 在 `src/data.js`。
 
 ```json
 {
@@ -49,28 +44,14 @@ content/albums/
 }
 ```
 
-曲目信息和网易云单曲 ID 在 `src/data.js` 里。通常不需要修改它，除非网易云链接变化。
-
 ## 本地预览
 
 ```sh
 python3 -m http.server 4173 --bind 127.0.0.1
 ```
 
-然后打开：
+打开 `http://127.0.0.1:4173`。
 
-```text
-http://127.0.0.1:4173
-```
+## 部署
 
-## GitHub Pages
-
-仓库里已经有 GitHub Pages 自动部署 workflow。推送到 `main` 后，请确认仓库设置为：
-
-```text
-Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
-```
-
-## 说明
-
-这是一个用于阅读和整理体验的同人项目。请只添加你有权使用的文本内容。
+推送到 `main` 后，GitHub Pages Actions 会自动发布网站。

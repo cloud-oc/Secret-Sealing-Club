@@ -1,13 +1,20 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v7");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-archive-autoplay-v6");
 
 let albums = baseAlbums;
 
+const playbackStorageKey = "ssc-playback";
+const savedPlayback = readPlaybackState();
+
 const state = {
   lang: localStorage.getItem("ssc-language") || "zh",
-  albumId: "",
-  trackIndex: 0,
+  albumId: savedPlayback.albumId || "",
+  trackIndex: Number.isInteger(savedPlayback.trackIndex) ? savedPlayback.trackIndex : 0,
   homeAlbumIndex: 0,
   isPlaying: false,
+  resumeTime: Number.isFinite(savedPlayback.currentTime) ? savedPlayback.currentTime : 0,
+  wantsAutoplay: savedPlayback.wasPlaying !== false,
+  hasEnteredArchive: false,
+  restoringPlayback: true,
 };
 
 let homeOrbitAnimationFrame = 0;
@@ -66,6 +73,14 @@ const intro = {
   title: document.querySelector("#intro-title"),
   body: document.querySelector("#intro-body"),
 };
+const archiveGate = {
+  shell: document.querySelector("#archive-gate"),
+  kicker: document.querySelector("#archive-gate-kicker"),
+  title: document.querySelector("#archive-gate-title"),
+  body: document.querySelector("#archive-gate-body"),
+  enter: document.querySelector("#archive-enter"),
+  enterLabel: document.querySelector("#archive-enter-label"),
+};
 
 const t = {
   zh: {
@@ -93,6 +108,10 @@ const t = {
     introTitle: "夜行读本",
     introBody: "这里收录着九张秘封俱乐部的音乐 CD 读本。选一张专辑，曲目会带着对应的故事段落一起亮起，就像深夜的列车窗外闪烁的星星。",
     closeIntro: "关闭简介",
+    gateKicker: "HIFUU ARCHIVE",
+    gateTitle: "封存档案",
+    gateBody: "上次的观测记录已经归档。开封后，音乐会从停下的地方继续响起。",
+    gateEnter: "开封进入",
     emptyStory: "这一页还在社团抽屉里。填入正文后，它会随曲目一起亮起。",
     notFoundTitle: "未观测到这个坐标",
     notFoundBody: "回到藏书目，重新选择一份秘封记录。",
@@ -122,6 +141,10 @@ const t = {
     introTitle: "夜行読本",
     introBody: "ここには秘封倶楽部の九枚の音楽 CD 読本を収めています。一枚を選ぶと、曲に寄り添う物語の断片が、深夜列車の窓の外でまたたく星のように灯ります。",
     closeIntro: "説明を閉じる",
+    gateKicker: "HIFUU ARCHIVE",
+    gateTitle: "封印記録",
+    gateBody: "前回の観測記録は保管されています。開封すると、音楽は止まった場所からまた流れ始めます。",
+    gateEnter: "開封する",
     emptyStory: "この頁はまだ部室の引き出しの中です。本文を入れると、曲と一緒に灯ります。",
     notFoundTitle: "この座標は観測できません",
     notFoundBody: "蔵書目録へ戻って、もう一度秘封記録を選んでください。",
@@ -132,8 +155,39 @@ function tr(key) {
   return t[state.lang][key];
 }
 
+function readPlaybackState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(playbackStorageKey) || "{}");
+    return saved && typeof saved === "object" ? saved : {};
+  } catch {
+    return {};
+  }
+}
+
+function savePlaybackState() {
+  if (!state.albumId) return;
+  const pendingResumeTime = state.restoringPlayback && savedPlayback.albumId === state.albumId && state.resumeTime > 0 ? state.resumeTime : 0;
+  const payload = {
+    albumId: state.albumId,
+    trackIndex: state.trackIndex,
+    currentTime: pendingResumeTime || (Number.isFinite(audio.currentTime) ? audio.currentTime : state.resumeTime || 0),
+    wasPlaying: state.isPlaying || state.wantsAutoplay,
+    updatedAt: Date.now(),
+  };
+  localStorage.setItem(playbackStorageKey, JSON.stringify(payload));
+}
+
 function icon(name) {
   return `<svg class="ui-icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function cssUrl(value) {
@@ -193,6 +247,20 @@ async function loadContentOverrides() {
   }
 
   albums = mergeAlbums(baseAlbums, overrides);
+}
+
+function applySavedPlaybackRoute() {
+  if (!savedPlayback.albumId) return;
+  const album = albums.find((item) => item.id === savedPlayback.albumId);
+  if (!album) return;
+
+  state.albumId = album.id;
+  state.trackIndex = Math.min(Math.max(0, state.trackIndex), album.tracks.length - 1);
+  state.homeAlbumIndex = Math.max(0, albums.findIndex((item) => item.id === album.id));
+
+  if (!location.hash || location.hash === "#/") {
+    history.replaceState(null, "", `#/album/${album.id}`);
+  }
 }
 
 function mergeAlbums(sourceAlbums, overrideAlbums) {
@@ -406,15 +474,33 @@ function trackButton(track, index) {
   `;
 }
 
+function storyTextHtml(section) {
+  const rawText = section.text[state.lang]?.replace(/\r\n?/g, "\n").replace(/^\n+|\n+$/g, "");
+  if (!rawText) return `<p class="story-paragraph empty-copy">${escapeHtml(tr("emptyStory"))}</p>`;
+
+  return rawText
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/^\n+|\n+$/g, ""))
+    .filter((paragraph) => paragraph.trim())
+    .map((paragraph) => {
+      const lines = paragraph
+        .split("\n")
+        .map((line) => escapeHtml(line.trimEnd()))
+        .join("<br />");
+      return `<p class="story-paragraph">${lines}</p>`;
+    })
+    .join("");
+}
+
 function storySection(album, section, index) {
   const track = album.tracks[section.track - 1] || album.tracks[index];
-  const text = section.text[state.lang]?.trim() || tr("emptyStory");
+  const title = section.title?.[state.lang] || track?.title || "";
   return `
     <section class="story-section lyric-section ${index === state.trackIndex ? "is-active" : ""}" id="story-${index}" data-story="${index}">
       <div class="story-track">TRACK ${String(section.track).padStart(2, "0")}</div>
       <div class="story-card">
-        <h2>${track?.title || section.title[state.lang]}</h2>
-        <p class="${section.text[state.lang]?.trim() ? "" : "empty-copy"}">${text}</p>
+        <h2>${escapeHtml(title)}</h2>
+        <div class="story-copy">${storyTextHtml(section)}</div>
       </div>
     </section>
   `;
@@ -746,6 +832,8 @@ function bindAlbum(album) {
 }
 
 function selectTrack(album, index, autoplay) {
+  state.resumeTime = 0;
+  state.restoringPlayback = false;
   state.trackIndex = index;
   document.querySelectorAll(".track-button").forEach((button, buttonIndex) => {
     button.classList.toggle("is-active", buttonIndex === index);
@@ -761,7 +849,11 @@ function updatePlayer(album, index, autoplay) {
   const track = album.tracks[index] || album.tracks[0];
   if (!track) return;
   const source = trackAudioSource(track);
+  const canRestoreTime = state.restoringPlayback && savedPlayback.albumId === album.id && album.id === state.albumId && index === state.trackIndex;
+  const restoreTime = canRestoreTime ? state.resumeTime : 0;
 
+  state.albumId = album.id;
+  state.trackIndex = index;
   player.index.textContent = `TRACK ${String(index + 1).padStart(2, "0")}`;
   player.title.textContent = track.title;
   syncPlayerTrackLink(track);
@@ -771,18 +863,20 @@ function updatePlayer(album, index, autoplay) {
   if (audio.dataset.src !== source) {
     audio.dataset.src = source;
     audio.src = source;
+    audio.dataset.resumeTime = restoreTime > 0 ? String(restoreTime) : "";
     player.seek.value = 0;
     updateSeekProgress();
     player.current.textContent = "0:00";
     player.duration.textContent = "0:00";
+  } else if (restoreTime > 0 && Math.abs(audio.currentTime - restoreTime) > 1) {
+    audio.dataset.resumeTime = String(restoreTime);
   }
 
   if (autoplay) {
-    audio.play().catch(() => {
-      state.isPlaying = false;
-      updatePlayButton();
-    });
+    playAudioFromGesture();
   }
+
+  savePlaybackState();
 }
 
 function trackAudioSource(track) {
@@ -850,10 +944,20 @@ function currentAlbum() {
   return albums.find((album) => album.id === state.albumId) || albums[0];
 }
 
+function playAudioFromGesture() {
+  state.wantsAutoplay = true;
+  return audio.play().catch(() => {
+    state.isPlaying = false;
+    state.wantsAutoplay = false;
+    updatePlayButton();
+  });
+}
+
 player.play.addEventListener("click", () => {
   if (audio.paused) {
-    audio.play().catch(() => {});
+    playAudioFromGesture();
   } else {
+    state.wantsAutoplay = false;
     audio.pause();
   }
 });
@@ -878,15 +982,26 @@ player.seek.addEventListener("input", () => {
 
 audio.addEventListener("play", () => {
   state.isPlaying = true;
+  state.wantsAutoplay = true;
   updatePlayButton();
+  savePlaybackState();
 });
 
 audio.addEventListener("pause", () => {
   state.isPlaying = false;
+  state.wantsAutoplay = false;
   updatePlayButton();
+  savePlaybackState();
 });
 
 audio.addEventListener("loadedmetadata", () => {
+  const resumeTime = Number(audio.dataset.resumeTime || 0);
+  if (resumeTime > 0 && Number.isFinite(audio.duration)) {
+    audio.currentTime = Math.min(Math.max(0, resumeTime), Math.max(0, audio.duration - 0.8));
+    audio.dataset.resumeTime = "";
+    state.resumeTime = 0;
+    state.restoringPlayback = false;
+  }
   player.duration.textContent = formatTime(audio.duration);
   updateSeekProgress();
 });
@@ -897,9 +1012,12 @@ audio.addEventListener("timeupdate", () => {
     player.seek.value = Math.round((audio.currentTime / audio.duration) * 1000);
     updateSeekProgress();
   }
+  savePlaybackState();
 });
 
 audio.addEventListener("ended", () => {
+  state.resumeTime = 0;
+  state.restoringPlayback = false;
   player.next.click();
 });
 
@@ -1083,11 +1201,31 @@ document.addEventListener("click", (event) => {
   setLanguageMenuOpen(false);
 });
 
+document.addEventListener(
+  "pointerdown",
+  (event) => {
+    if (!archiveGate.shell || archiveGate.shell.hidden || state.hasEnteredArchive) return;
+    event.preventDefault();
+    enterArchive();
+  },
+  { capture: true },
+);
+
 intro.toggle?.addEventListener("click", () => setIntroOpen(intro.panel.hidden));
 intro.close?.addEventListener("click", () => setIntroOpen(false));
 intro.backdrop?.addEventListener("click", () => setIntroOpen(false));
+archiveGate.enter?.addEventListener("pointerdown", enterArchive);
+archiveGate.enter?.addEventListener("click", enterArchive);
+archiveGate.shell?.addEventListener("pointerdown", enterArchive);
+archiveGate.shell?.addEventListener("click", enterArchive);
 
 document.addEventListener("keydown", (event) => {
+  if (!archiveGate.shell?.hidden && !state.hasEnteredArchive && (event.key === "Enter" || event.key === " ")) {
+    event.preventDefault();
+    enterArchive();
+    return;
+  }
+
   if (event.key === "Escape") {
     setLanguageMenuOpen(false);
     setIntroOpen(false);
@@ -1102,7 +1240,44 @@ function syncShellText() {
   if (brandSub) brandSub.textContent = tr("brandSub");
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
   syncIntroText();
+  syncArchiveGateText();
   updateLanguageButtons();
+}
+
+function syncArchiveGateText() {
+  if (!archiveGate.shell) return;
+  if (archiveGate.kicker) archiveGate.kicker.textContent = tr("gateKicker");
+  if (archiveGate.title) archiveGate.title.textContent = tr("gateTitle");
+  if (archiveGate.body) archiveGate.body.textContent = tr("gateBody");
+  if (archiveGate.enterLabel) archiveGate.enterLabel.textContent = tr("gateEnter");
+}
+
+function setupArchiveGate() {
+  if (!archiveGate.shell) return;
+  syncArchiveGateText();
+  if (state.hasEnteredArchive) {
+    archiveGate.shell.hidden = true;
+    document.body.classList.add("archive-opened");
+    return;
+  }
+  document.body.classList.add("archive-locked");
+  requestAnimationFrame(() => archiveGate.enter?.focus({ preventScroll: true }));
+}
+
+function enterArchive() {
+  if (!archiveGate.shell || archiveGate.shell.hidden || state.hasEnteredArchive) return;
+  state.hasEnteredArchive = true;
+  document.body.classList.add("archive-opening");
+  document.body.classList.remove("archive-locked");
+
+  if (state.wantsAutoplay) playAudioFromGesture();
+
+  window.setTimeout(() => {
+    archiveGate.shell.hidden = true;
+    document.body.classList.remove("archive-opening");
+    document.body.classList.add("archive-opened");
+    app?.focus({ preventScroll: true });
+  }, prefersReducedMotion.matches ? 80 : 820);
 }
 
 function syncIntroText() {
@@ -1233,6 +1408,10 @@ function resetStars() {
 }
 
 window.addEventListener("hashchange", route);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) savePlaybackState();
+});
+window.addEventListener("pagehide", savePlaybackState);
 window.addEventListener("resize", () => {
   resetStars();
   updateHomeCarousel();
@@ -1249,5 +1428,7 @@ prefersReducedMotion.addEventListener("change", () => {
 animateStars();
 restartPlayerSignal();
 await loadContentOverrides();
+applySavedPlaybackRoute();
 syncShellText();
 route();
+setupArchiveGate();

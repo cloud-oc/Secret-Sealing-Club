@@ -1,23 +1,24 @@
-# 秘封倶楽部
+<p align="center">
+  <img src="./favicon.svg" alt="秘封倶楽部アイコン" width="88" height="88" />
+</p>
 
-[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+<h1 align="center">秘封倶楽部｜夜行読本</h1>
 
-秘封倶楽部のための非公式ファンメイド読書室です。
+<p align="center">
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a>
+</p>
 
-このサイトは、音楽と文章のあいだにある不思議な時間のために作られています。アルバムを開き、曲を再生し、その横でブックレットの物語を読む。各アルバムには専用ページがあり、各トラックは対応する物語セクションと結び付けられます。読者は中国語と日本語を切り替えながら、静かな秘封アーカイブを歩くことができます。
+<p align="center">九枚の秘封音楽 CD のためのファンメイド読書室です。</p>
 
-## このサイトについて
+<p align="center">
+  <a href="https://cloud-oc.github.io/Secret-Sealing-Club/">サイトを開く</a>
+</p>
 
-- ZUN's Music Collection と秘封倶楽部ストーリーのための静的ファンサイト
-- ブックレットストーリー付きの秘封音楽 CD 9 作品に対応
-- NetEase Cloud Music の曲リンクを使う固定プレイヤー
-- 曲に連動する物語セクションのハイライト
-- 中国語 / 日本語の読書モード
-- バックエンド不要、GitHub Pages で公開可能
+## 概要
 
-## 対象アルバム
+このサイトは、ブックレットストーリー付きの秘封音楽 CD 九作品をまとめています。アルバムを選び、NetEase Cloud Music の曲を再生すると、対応する物語の断片が横に灯ります。本文は中国語と日本語で切り替えられます。
 
-現在、以下のアルバム用コンテンツファイルがあります。
+## アルバム
 
 ```text
 蓮台野夜行
@@ -31,15 +32,9 @@
 七夕坂夢幻能
 ```
 
-## 物語の追加
+## コンテンツ
 
-アルバム本文ファイルはここにあります。
-
-```text
-content/albums/
-```
-
-対応するアルバム JSON を編集し、`text.zh` と `text.ja` を入力してください。`track` は物語セクションを、内蔵された曲目リストと NetEase Cloud Music の再生元に結び付けます。
+本文 JSON は `content/albums/` にあります。曲目情報と NetEase の曲 ID は `src/data.js` にあります。
 
 ```json
 {
@@ -49,28 +44,14 @@ content/albums/
 }
 ```
 
-曲目情報と NetEase の曲 ID は `src/data.js` にあります。NetEase のリンクが変わらない限り、通常は編集不要です。
-
 ## ローカルプレビュー
 
 ```sh
 python3 -m http.server 4173 --bind 127.0.0.1
 ```
 
-その後、以下を開きます。
+`http://127.0.0.1:4173` を開きます。
 
-```text
-http://127.0.0.1:4173
-```
+## デプロイ
 
-## GitHub Pages
-
-このリポジトリには GitHub Pages 用の自動デプロイ workflow が含まれています。`main` に push したあと、リポジトリ設定で以下を確認してください。
-
-```text
-Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
-```
-
-## 注意
-
-これは読書体験と整理のためのファンプロジェクトです。使用権のあるテキストのみ追加してください。
+`main` に push すると、GitHub Pages Actions から自動公開されます。

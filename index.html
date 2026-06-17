@@ -9,7 +9,7 @@
     />
     <title>秘封俱乐部 | 夜行读本</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260617-orbit-polish-v7" />
+    <link rel="stylesheet" href="./styles.css?v=20260617-archive-autoplay-v6" />
   </head>
   <body>
     <canvas id="starfield" aria-hidden="true"></canvas>
@@ -86,6 +86,28 @@
         <path d="M16 24c2.8 -4.5 5.5 -6.8 8 -6.8s5.2 2.3 8 6.8c-2.8 4.5 -5.5 6.8 -8 6.8s-5.2 -2.3 -8 -6.8z" />
       </symbol>
     </svg>
+
+    <section class="archive-gate" id="archive-gate" role="dialog" aria-modal="true" aria-labelledby="archive-gate-title">
+      <div class="archive-gate-field" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="archive-angel-line" aria-hidden="true">
+        <span>⟊⟟⟒⟔⟁⟐⟡⟠⟑⟓⟒⟊⟟⟒⟔⟁⟐⟡⟠⟑⟓⟒</span>
+      </div>
+      <button class="archive-orb" id="archive-enter" type="button" aria-describedby="archive-gate-body">
+        <span class="archive-orb-aura" aria-hidden="true"></span>
+        <span class="archive-orb-core" aria-hidden="true"></span>
+        <span class="archive-orb-ring" aria-hidden="true"></span>
+        <span class="archive-enter-label" id="archive-enter-label">开封进入</span>
+      </button>
+      <div class="archive-caption">
+        <p class="archive-kicker" id="archive-gate-kicker">HIFUU ARCHIVE</p>
+        <h2 id="archive-gate-title">封存档案</h2>
+        <p id="archive-gate-body">上次的观测记录已经归档。开封后，音乐会从停下的地方继续响起。</p>
+      </div>
+    </section>
 
     <header class="site-header">
       <a class="brand" href="#/">
@@ -217,6 +239,6 @@
       <div class="playlist-panel" id="playlist-panel" hidden></div>
     </div>
 
-    <script type="module" src="./src/main.js?v=20260617-orbit-polish-v7"></script>
+    <script type="module" src="./src/main.js?v=20260617-archive-autoplay-v6"></script>
   </body>
 </html>

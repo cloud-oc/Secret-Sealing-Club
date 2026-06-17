@@ -1,23 +1,24 @@
-# Secret Sealing Club
+<p align="center">
+  <img src="./favicon.svg" alt="Secret Sealing Club icon" width="88" height="88" />
+</p>
 
-[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)
+<h1 align="center">Secret Sealing Club</h1>
 
-An unofficial fan-made reading room for the Secret Sealing Club.
+<p align="center">
+  <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a>
+</p>
 
-This site is built for the strange little hour between music and text: open an album, play a track, and read the booklet story beside it. Each album has its own page, each track can point to a matching story section, and the reader can switch between Chinese and Japanese while staying in the same quiet archive.
+<p align="center">A quiet fan reading room for the Secret Sealing Club albums.</p>
 
-## What This Is
+<p align="center">
+  <a href="https://cloud-oc.github.io/Secret-Sealing-Club/">Open the site</a>
+</p>
 
-- A static fan site for ZUN's Music Collection and the Secret Sealing Club stories
-- Album pages for the nine booklet-story CDs
-- A fixed player using NetEase Cloud Music track links
-- Track-to-story highlighting while reading
-- Chinese and Japanese reading modes
-- A GitHub Pages friendly site with no backend
+## About
+
+This site gathers the nine ZUN's Music Collection CDs with Secret Sealing Club booklet stories. Choose an album, play a track through NetEase Cloud Music, and read the matching story section in Chinese or Japanese.
 
 ## Albums
-
-The site currently has content files for:
 
 ```text
 Ghostly Field Club
@@ -31,25 +32,17 @@ Dateless Bar "Old Adam"
 Taboo Japan Disentanglement
 ```
 
-## Adding Stories
+## Content
 
-Album story files live in:
-
-```text
-content/albums/
-```
-
-Edit the matching album JSON and fill `text.zh` and `text.ja`. The `track` number links the story section to the built-in album track list and NetEase Cloud Music playback source.
+Story JSON files live in `content/albums/`. Track metadata and NetEase song IDs live in `src/data.js`.
 
 ```json
 {
   "track": 1,
-  "title": { "zh": "Chinese title", "ja": "日本語タイトル" },
-  "text": { "zh": "Chinese story text", "ja": "Japanese story text" }
+  "title": { "zh": "中文标题", "ja": "日本語タイトル" },
+  "text": { "zh": "中文正文", "ja": "日本語本文" }
 }
 ```
-
-Track metadata and NetEase song IDs live in `src/data.js`. You usually do not need to edit them unless a NetEase link changes.
 
 ## Local Preview
 
@@ -57,20 +50,8 @@ Track metadata and NetEase song IDs live in `src/data.js`. You usually do not ne
 python3 -m http.server 4173 --bind 127.0.0.1
 ```
 
-Then open:
+Open `http://127.0.0.1:4173`.
 
-```text
-http://127.0.0.1:4173
-```
+## Deploy
 
-## GitHub Pages
-
-This repository includes a GitHub Actions workflow for Pages. After pushing to `main`, make sure the repository uses:
-
-```text
-Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
-```
-
-## Note
-
-This is a fan project for reading and preservation-like browsing. Add only text you have permission to use.
+Pushing to `main` deploys the site through GitHub Pages Actions.
