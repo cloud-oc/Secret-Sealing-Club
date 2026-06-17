@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-timeline-v2");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-live-orbit-v1");
 
 let albums = baseAlbums;
 
@@ -10,8 +10,15 @@ const state = {
   isPlaying: false,
 };
 
-let homeCarouselTimer = 0;
-const homeCarouselDelay = 5200;
+let homeOrbitAnimationFrame = 0;
+let homeOrbitLastTime = 0;
+let homeOrbitAngle = 0;
+let homeOrbitTargetAngle = 0;
+let homeOrbitIsSettling = false;
+let homeOrbitResumeAt = 0;
+const homeOrbitSpeed = 9.6;
+const homeOrbitSettleRate = 8.5;
+const homeOrbitFrameDelay = 32;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let starAnimationFrame = 0;
 let starCanvasWidth = 0;
@@ -240,17 +247,15 @@ function renderHome() {
 }
 
 function albumCarousel() {
-  const activeAlbum = albums[state.homeAlbumIndex] || albums[0];
   return `
     <section class="album-carousel orbit-timeline" id="albums" aria-label="${tr("albumCarousel")}" aria-roledescription="carousel">
-      <div class="carousel-hud" aria-hidden="true">
-        <span>${activeAlbum?.catalog || "ZCDS"}</span>
-        <span>${String(state.homeAlbumIndex + 1).padStart(2, "0")} / ${String(albums.length).padStart(2, "0")}</span>
-      </div>
       <div class="orbit-mask" aria-hidden="true"></div>
       <div class="orbit-core" aria-hidden="true">
         <canvas id="earth-canvas"></canvas>
         <div class="earth-fallback"><span></span></div>
+      </div>
+      <div class="orbit-progress" role="tablist" aria-label="${tr("albumCarousel")}">
+        ${albums.map(carouselDot).join("")}
       </div>
       <div class="orbit-guide" aria-hidden="true">
         <span class="orbit-ring orbit-ring-main"></span>
@@ -259,9 +264,6 @@ function albumCarousel() {
       </div>
       <div class="carousel-viewport">
         ${albums.map(albumPoster).join("")}
-      </div>
-      <div class="carousel-dots" role="tablist" aria-label="${tr("albumCarousel")}">
-        ${albums.map(carouselDot).join("")}
       </div>
     </section>
   `;
@@ -289,7 +291,7 @@ function albumPoster(album, index) {
 function carouselDot(album, index) {
   const isActive = index === state.homeAlbumIndex;
   return `
-    <button class="carousel-dot ${isActive ? "is-active" : ""}" type="button" role="tab" data-carousel-index="${index}" aria-label="${album.title[state.lang]}" aria-selected="${String(isActive)}">
+    <button class="orbit-progress-button ${isActive ? "is-active" : ""}" type="button" role="tab" data-carousel-index="${index}" aria-label="${album.title[state.lang]}" aria-selected="${String(isActive)}">
       <span></span>
       <em>${String(index + 1).padStart(2, "0")}</em>
     </button>
@@ -401,6 +403,11 @@ function renderNotFound() {
 }
 
 function bindHomeCarousel() {
+  stopHomeOrbit();
+  homeOrbitAngle = indexToOrbitAngle(state.homeAlbumIndex);
+  homeOrbitTargetAngle = homeOrbitAngle;
+  homeOrbitLastTime = 0;
+  homeOrbitIsSettling = false;
   updateHomeCarousel();
   initEarth();
 
@@ -410,15 +417,7 @@ function bindHomeCarousel() {
     });
   });
 
-  const carousel = document.querySelector(".album-carousel");
-  carousel?.addEventListener("mouseenter", stopHomeCarouselTimer);
-  carousel?.addEventListener("mouseleave", startHomeCarouselTimer);
-  carousel?.addEventListener("focusin", stopHomeCarouselTimer);
-  carousel?.addEventListener("focusout", () => {
-    if (!carousel.contains(document.activeElement)) startHomeCarouselTimer();
-  });
-
-  startHomeCarouselTimer();
+  startHomeOrbit();
 }
 
 function carouselOffset(index) {
@@ -435,42 +434,44 @@ function shiftHomeCarousel(direction, userInitiated = false) {
 
 function setHomeCarouselIndex(index, userInitiated = false) {
   state.homeAlbumIndex = (index + albums.length) % albums.length;
+  homeOrbitTargetAngle = indexToOrbitAngle(state.homeAlbumIndex);
+  homeOrbitIsSettling = true;
+  homeOrbitResumeAt = performance.now() + (userInitiated ? 2600 : 1200);
   updateHomeCarousel();
-  if (userInitiated) restartHomeCarouselTimer();
 }
 
 function updateHomeCarousel() {
   const slides = document.querySelectorAll("[data-carousel-slide]");
   const dots = document.querySelectorAll("[data-carousel-index]");
   const activeAlbum = albums[state.homeAlbumIndex];
-  const hud = document.querySelector(".carousel-hud");
+  const step = 360 / albums.length;
+  const focusedAngle = normalizeAngle(homeOrbitAngle);
 
   slides.forEach((slide) => {
     const index = Number(slide.dataset.carouselSlide);
-    const offset = carouselOffset(index);
-    const distance = Math.abs(offset);
-    const isActive = offset === 0;
     const isCompact = window.innerWidth <= 760;
-    const step = 360 / albums.length;
-    const angle = -offset * step;
+    const angle = normalizeAngle(index * step + focusedAngle);
+    const slotDistance = circularDistance(angle, 0);
+    const distance = Math.round(slotDistance / step);
+    const isActive = index === state.homeAlbumIndex;
     const radians = (angle * Math.PI) / 180;
     const carousel = document.querySelector(".album-carousel");
     const carouselWidth = carousel?.clientWidth || window.innerWidth;
     const carouselHeight = carousel?.clientHeight || window.innerHeight;
-    const centerRatio = isCompact ? 0.5 : window.innerWidth <= 1060 ? 0.44 : 0.38;
-    const cardEstimate = isCompact ? Math.min(window.innerWidth * 0.47, 190) : Math.min(Math.max(window.innerWidth * 0.21, 220), 280);
+    const centerRatio = isCompact ? 0.5 : window.innerWidth <= 1060 ? 0.46 : 0.42;
+    const cardEstimate = isCompact ? Math.min(window.innerWidth * 0.42, 160) : Math.min(Math.max(window.innerWidth * 0.12, 142), 186);
     const availableRight = carouselWidth * (1 - centerRatio);
-    const orbitRadiusX = isCompact ? 0 : Math.max(146, Math.min(210, availableRight - cardEstimate / 2 - 26));
-    const orbitRadiusY = isCompact ? 0 : Math.max(210, Math.min(276, carouselHeight * 0.42));
+    const orbitRadiusX = isCompact ? 0 : Math.max(182, Math.min(274, availableRight - cardEstimate / 2 - 14));
+    const orbitRadiusY = isCompact ? 0 : Math.max(192, Math.min(262, carouselHeight * 0.41));
     const x = isCompact ? 0 : Math.cos(radians) * orbitRadiusX;
-    const y = isCompact ? 78 : Math.sin(radians) * orbitRadiusY;
-    const isHiddenSide = !isCompact && Math.cos(radians) < -0.08;
+    const y = isCompact ? 70 : Math.sin(radians) * orbitRadiusY;
+    const isHiddenSide = !isCompact && Math.cos(radians) < -0.2;
     const frontness = (Math.cos(radians) + 1) / 2;
-    const opacity = isCompact ? (isActive ? 1 : 0) : isHiddenSide ? 0 : Math.max(0.24, frontness);
-    const scale = isCompact ? (isActive ? 1 : 0.92) : 0.72 + frontness * 0.28;
-    const pointerEnabled = isCompact ? isActive : isActive || (!isHiddenSide && distance <= 1);
+    const opacity = isCompact ? (isActive ? 1 : 0) : isHiddenSide ? 0 : Math.max(0.22, 0.3 + frontness * 0.7);
+    const scale = isCompact ? (isActive ? 1 : 0.9) : 0.62 + frontness * 0.28;
+    const pointerEnabled = isCompact ? isActive : !isHiddenSide && frontness > 0.58;
 
-    slide.dataset.offset = String(offset);
+    slide.dataset.offset = String(Math.round(signedCircularDistance(angle, 0) / step));
     slide.dataset.side = isHiddenSide ? "hidden" : "visible";
     slide.dataset.interactive = String(pointerEnabled);
     slide.style.setProperty("--poster-x", `${x}px`);
@@ -494,14 +495,23 @@ function updateHomeCarousel() {
     dot.setAttribute("aria-selected", String(isActive));
   });
 
-  if (activeAlbum && hud) {
-    hud.innerHTML = `
-      <span>${activeAlbum.catalog}</span>
-      <span>${String(state.homeAlbumIndex + 1).padStart(2, "0")} / ${String(albums.length).padStart(2, "0")}</span>
-    `;
-  }
-
   if (!state.albumId && activeAlbum) syncPlayerAlbumLink(activeAlbum);
+}
+
+function indexToOrbitAngle(index) {
+  return -index * (360 / albums.length);
+}
+
+function normalizeAngle(angle) {
+  return ((angle % 360) + 360) % 360;
+}
+
+function signedCircularDistance(from, to) {
+  return ((((to - from) % 360) + 540) % 360) - 180;
+}
+
+function circularDistance(from, to) {
+  return Math.abs(signedCircularDistance(from, to));
 }
 
 async function initEarth() {
@@ -522,7 +532,7 @@ async function initEarth() {
     earthGroup = new THREE.Group();
     earthScene.add(earthGroup);
 
-    const earthGeometry = new THREE.SphereGeometry(1.36, 96, 96);
+    const earthGeometry = new THREE.SphereGeometry(1.22, 96, 96);
     const earthMaterial = new THREE.MeshStandardMaterial({
       color: 0x2b8794,
       roughness: 0.78,
@@ -533,26 +543,14 @@ async function initEarth() {
     const earth = new THREE.Mesh(earthGeometry, earthMaterial);
     earthGroup.add(earth);
 
-    const landMaterial = new THREE.MeshStandardMaterial({
-      color: 0xb8f5cf,
-      roughness: 0.96,
-      metalness: 0.02,
-      emissive: 0x123e3b,
-      emissiveIntensity: 0.34,
-      transparent: true,
-      opacity: 0.78,
-      side: THREE.DoubleSide,
-    });
-    makeLandMasses(THREE, landMaterial).forEach((mass) => earthGroup.add(mass));
-
     const atmosphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1.43, 96, 96),
+      new THREE.SphereGeometry(1.28, 96, 96),
       new THREE.MeshBasicMaterial({ color: 0x76ead8, transparent: true, opacity: 0.12, side: THREE.BackSide }),
     );
     earthGroup.add(atmosphere);
 
     const wire = new THREE.Mesh(
-      new THREE.SphereGeometry(1.375, 32, 16),
+      new THREE.SphereGeometry(1.235, 32, 16),
       new THREE.MeshBasicMaterial({ color: 0xece6d7, wireframe: true, transparent: true, opacity: 0.08 }),
     );
     earthGroup.add(wire);
@@ -574,33 +572,6 @@ async function initEarth() {
   } catch {
     canvas.closest(".orbit-core")?.classList.add("is-fallback");
   }
-}
-
-function makeLandMasses(THREE, material) {
-  const masses = [
-    { lat: 34, lon: 18, sx: 0.5, sy: 0.2, rz: -0.45 },
-    { lat: 8, lon: 96, sx: 0.42, sy: 0.18, rz: 0.24 },
-    { lat: -19, lon: 138, sx: 0.34, sy: 0.16, rz: -0.28 },
-    { lat: 48, lon: -96, sx: 0.46, sy: 0.2, rz: 0.2 },
-    { lat: -18, lon: -62, sx: 0.3, sy: 0.42, rz: 0.12 },
-    { lat: 57, lon: 130, sx: 0.34, sy: 0.14, rz: 0.42 },
-  ];
-
-  return masses.map(({ lat, lon, sx, sy, rz }) => {
-    const mesh = new THREE.Mesh(new THREE.CircleGeometry(1, 40), material);
-    const phi = ((90 - lat) * Math.PI) / 180;
-    const theta = ((lon + 180) * Math.PI) / 180;
-    const radius = 1.372;
-    mesh.position.set(
-      -radius * Math.sin(phi) * Math.cos(theta),
-      radius * Math.cos(phi),
-      radius * Math.sin(phi) * Math.sin(theta),
-    );
-    mesh.lookAt(0, 0, 0);
-    mesh.rotateZ(rz);
-    mesh.scale.set(sx, sy, 1);
-    return mesh;
-  });
 }
 
 function resizeEarth() {
@@ -628,15 +599,61 @@ function animateEarth(time = performance.now()) {
 }
 
 function startHomeCarouselTimer() {
-  stopHomeCarouselTimer();
-  if (prefersReducedMotion.matches || !document.querySelector(".album-carousel")) return;
-  homeCarouselTimer = window.setInterval(() => shiftHomeCarousel(1), homeCarouselDelay);
+  startHomeOrbit();
 }
 
 function stopHomeCarouselTimer() {
-  if (!homeCarouselTimer) return;
-  window.clearInterval(homeCarouselTimer);
-  homeCarouselTimer = 0;
+  stopHomeOrbit();
+}
+
+function startHomeOrbit() {
+  stopHomeOrbit();
+  if (!document.querySelector(".album-carousel")) return;
+  homeOrbitLastTime = 0;
+  homeOrbitAnimationFrame = window.requestAnimationFrame(animateHomeOrbit);
+}
+
+function stopHomeOrbit() {
+  window.cancelAnimationFrame(homeOrbitAnimationFrame);
+  window.clearTimeout(homeOrbitAnimationFrame);
+  homeOrbitAnimationFrame = 0;
+}
+
+function animateHomeOrbit(time = performance.now()) {
+  if (!document.querySelector(".album-carousel")) {
+    stopHomeOrbit();
+    return;
+  }
+
+  if (document.hidden) {
+    homeOrbitAnimationFrame = window.setTimeout(() => animateHomeOrbit(performance.now()), 250);
+    return;
+  }
+
+  if (!homeOrbitLastTime) homeOrbitLastTime = time;
+  const delta = Math.min(48, time - homeOrbitLastTime) / 1000;
+  homeOrbitLastTime = time;
+
+  if (prefersReducedMotion.matches) {
+    homeOrbitAngle = homeOrbitTargetAngle;
+  } else if (homeOrbitIsSettling) {
+    const remaining = signedCircularDistance(homeOrbitAngle, homeOrbitTargetAngle);
+    homeOrbitAngle += remaining * Math.min(1, delta * homeOrbitSettleRate);
+    if (Math.abs(remaining) < 0.08) {
+      homeOrbitAngle = homeOrbitTargetAngle;
+      homeOrbitIsSettling = false;
+    }
+  } else if (time >= homeOrbitResumeAt) {
+    homeOrbitAngle += homeOrbitSpeed * delta;
+    const nearestIndex = Math.round(-homeOrbitAngle / (360 / albums.length));
+    const nextIndex = ((nearestIndex % albums.length) + albums.length) % albums.length;
+    if (nextIndex !== state.homeAlbumIndex) state.homeAlbumIndex = nextIndex;
+  }
+
+  updateHomeCarousel();
+  homeOrbitAnimationFrame = prefersReducedMotion.matches
+    ? window.setTimeout(() => animateHomeOrbit(performance.now()), 250)
+    : window.requestAnimationFrame(animateHomeOrbit);
 }
 
 function disposeEarth() {

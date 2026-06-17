@@ -605,12 +605,12 @@ main {
 .hero::after {
   content: "SECRET SEALING CLUB";
   position: absolute;
-  right: clamp(14px, 3vw, 48px);
-  bottom: calc(var(--player-h) + 34px);
-  color: rgba(244, 240, 231, 0.075);
-  font-size: clamp(3.6rem, 13vw, 11rem);
+  right: clamp(14px, 3vw, 46px);
+  bottom: calc(var(--player-h) + 8px);
+  color: rgba(244, 240, 231, 0.068);
+  font-size: clamp(2.2rem, 7.6vw, 6.9rem);
   font-weight: 900;
-  line-height: 0.75;
+  line-height: 0.9;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -743,29 +743,17 @@ h1 {
 .album-carousel {
   position: relative;
   z-index: 2;
-  min-height: min(66vh, 680px);
+  min-height: min(60vh, 600px);
   isolation: isolate;
   border-left: 0;
   padding-left: 0;
   perspective: 1400px;
   overflow: hidden;
-  --orbit-center-x: 38%;
+  --orbit-center-x: 42%;
 }
 
 .carousel-hud {
-  position: absolute;
-  top: clamp(4px, 1vw, 12px);
-  right: clamp(10px, 2vw, 20px);
-  left: clamp(10px, 2vw, 20px);
-  z-index: 28;
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  color: rgba(244, 240, 231, 0.72);
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  pointer-events: none;
+  display: none;
 }
 
 .orbit-timeline::before {
@@ -785,9 +773,9 @@ h1 {
   inset: 0 calc(100% - var(--orbit-center-x)) 0 0;
   z-index: 18;
   background:
-    linear-gradient(90deg, rgba(4, 7, 17, 0.99), rgba(4, 7, 17, 0.95) 72%, rgba(4, 7, 17, 0.76));
-  border-right: 1px solid rgba(244, 240, 231, 0.2);
-  box-shadow: 22px 0 46px rgba(4, 7, 17, 0.54);
+    linear-gradient(90deg, rgba(4, 7, 17, 0), rgba(4, 7, 17, 0.2) 70%, rgba(4, 7, 17, 0.42));
+  border-right: 1px solid rgba(244, 240, 231, 0.12);
+  box-shadow: none;
   pointer-events: none;
 }
 
@@ -797,8 +785,8 @@ h1 {
   top: 50%;
   z-index: 22;
   display: grid;
-  width: clamp(160px, 18vw, 248px);
-  height: clamp(160px, 18vw, 248px);
+  width: clamp(136px, 14vw, 198px);
+  height: clamp(136px, 14vw, 198px);
   aspect-ratio: 1;
   place-items: center;
   border: 1px solid rgba(244, 240, 231, 0.22);
@@ -807,7 +795,7 @@ h1 {
     radial-gradient(circle at 35% 26%, rgba(244, 240, 231, 0.16), transparent 0 16%, rgba(96, 217, 200, 0.08) 17% 34%, transparent 35%),
     #05080d;
   box-shadow:
-    0 0 0 12px rgba(4, 7, 17, 0.72),
+    0 0 0 9px rgba(4, 7, 17, 0.48),
     0 0 56px rgba(96, 217, 200, 0.22),
     inset 0 0 0 1px rgba(96, 217, 200, 0.18);
   transform: translate(-50%, -50%);
@@ -818,13 +806,13 @@ h1 {
 .orbit-core::after {
   content: "";
   position: absolute;
-  inset: -18px;
+  inset: -14px;
   border: 1px solid rgba(96, 217, 200, 0.13);
   border-radius: 50%;
 }
 
 .orbit-core::after {
-  inset: 13%;
+  inset: 14%;
   border-color: rgba(244, 240, 231, 0.14);
   transform: rotateX(68deg);
 }
@@ -872,8 +860,8 @@ h1 {
   position: absolute;
   left: var(--orbit-center-x);
   top: 50%;
-  width: min(76%, 680px);
-  height: min(82%, 560px);
+  width: min(86%, 720px);
+  height: min(74%, 470px);
   border: 1px solid rgba(96, 217, 200, 0.18);
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -900,11 +888,11 @@ h1 {
 
 .album-card {
   position: relative;
-  min-height: 310px;
+  min-height: 240px;
   overflow: hidden;
   border: 1px solid rgba(244, 240, 231, 0.34);
   border-radius: var(--radius-card);
-  padding: clamp(16px, 2.2vw, 24px);
+  padding: clamp(12px, 1.6vw, 18px);
   background:
     linear-gradient(90deg, rgba(244, 240, 231, 0.07) 1px, transparent 1px),
     repeating-linear-gradient(0deg, rgba(244, 240, 231, 0.036) 0 1px, transparent 1px 9px),
@@ -930,10 +918,10 @@ h1 {
 }
 
 .album-card::before {
-  top: 18px;
-  right: 18px;
-  width: 74px;
-  height: 74px;
+  top: 13px;
+  right: 13px;
+  width: 46px;
+  height: 46px;
   border-top: 1px solid rgba(244, 240, 231, 0.36);
   border-right: 1px solid rgba(244, 240, 231, 0.36);
 }
@@ -952,7 +940,6 @@ h1 {
 }
 
 .album-card:hover {
-  transform: translateY(-2px);
   border-color: rgba(244, 240, 231, 0.5);
 }
 
@@ -968,8 +955,8 @@ h1 {
   top: 50%;
   left: var(--orbit-center-x);
   display: flex;
-  width: clamp(226px, 22vw, 292px);
-  min-height: 158px;
+  width: clamp(142px, 13vw, 186px);
+  min-height: 112px;
   flex-direction: column;
   transform:
     translate3d(calc(var(--poster-x, 0) - 50%), calc(var(--poster-y, 0) - 50%), calc(var(--poster-z-depth, 0) * 1px))
@@ -980,8 +967,7 @@ h1 {
   opacity: var(--poster-opacity, 1);
   z-index: var(--poster-z, 1);
   transition:
-    opacity 0.7s ease,
-    transform 0.82s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.2s ease,
     border-color 0.3s ease;
 }
 
@@ -995,11 +981,7 @@ h1 {
 
 .album-poster:hover,
 .album-poster:focus-visible {
-  transform:
-    translate3d(calc(var(--poster-x, 0) - 50%), calc(var(--poster-y, 0) - 50% - 4px), calc(var(--poster-z-depth, 0) * 1px))
-    scale(var(--poster-scale, 1))
-    rotateY(var(--poster-rotate-y, 0deg))
-    rotateZ(var(--poster-rotate, 0deg));
+  border-color: rgba(96, 217, 200, 0.7);
 }
 
 .poster-glow {
@@ -1016,15 +998,15 @@ h1 {
   display: inline-flex;
   width: fit-content;
   border-bottom: 1px solid rgba(96, 217, 200, 0.5);
-  padding-bottom: 7px;
+  padding-bottom: 5px;
 }
 
 .album-card.album-poster h2 {
   margin: 0;
   overflow: hidden;
   max-width: 100%;
-  font-size: clamp(1.45rem, 2.6vw, 2.35rem);
-  line-height: 1.02;
+  font-size: clamp(0.92rem, 1.42vw, 1.24rem);
+  line-height: 1.08;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-wrap: nowrap;
@@ -1032,9 +1014,9 @@ h1 {
 
 .poster-title-block {
   display: grid;
-  gap: 10px;
+  gap: 6px;
   margin-top: auto;
-  margin-bottom: 18px;
+  margin-bottom: 10px;
 }
 
 .album-poster p {
@@ -1043,15 +1025,16 @@ h1 {
   max-width: 42ch;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  font-size: 0.92rem;
-  line-height: 1.62;
+  -webkit-line-clamp: 1;
+  font-size: 0.7rem;
+  line-height: 1.45;
 }
 
 .timeline-stem {
   position: absolute;
-  left: -72px;
+  left: -42px;
   top: 50%;
-  width: 58px;
+  width: 34px;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(244, 240, 231, 0.4), rgba(96, 217, 200, 0.68));
   transform: translateY(-50%);
@@ -1069,34 +1052,38 @@ h1 {
   box-shadow: 0 0 14px rgba(96, 217, 200, 0.62);
 }
 
-.carousel-dots {
+.carousel-dots,
+.orbit-progress {
   position: absolute;
-  right: clamp(16px, 3vw, 34px);
-  bottom: clamp(12px, 2vw, 24px);
-  left: auto;
+  left: calc(var(--orbit-center-x) - clamp(138px, 15vw, 210px));
+  top: 50%;
   z-index: 26;
-  display: flex;
+  display: grid;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
+  transform: translate(-50%, -50%);
 }
 
-.carousel-dot {
+.carousel-dot,
+.orbit-progress-button {
   display: grid;
-  width: 22px;
-  height: 22px;
+  grid-template-columns: 16px 24px;
+  width: 46px;
+  height: 20px;
   place-items: center;
   border: 0;
   padding: 0;
   color: rgba(244, 240, 231, 0.58);
   background: transparent;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 900;
   letter-spacing: 0.08em;
 }
 
-.carousel-dot span {
-  width: 7px;
-  height: 7px;
+.carousel-dot span,
+.orbit-progress-button span {
+  width: 6px;
+  height: 6px;
   border: 1px solid rgba(244, 240, 231, 0.35);
   border-radius: 50%;
   background: rgba(244, 240, 231, 0.16);
@@ -1107,23 +1094,31 @@ h1 {
     background 0.28s ease;
 }
 
-.carousel-dot.is-active span {
-  width: 18px;
-  border-radius: var(--radius-pill);
+.carousel-dot.is-active span,
+.orbit-progress-button.is-active span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
   border-color: var(--accent);
   background: var(--accent);
 }
 
-.carousel-dot em {
-  display: none;
+.carousel-dot em,
+.orbit-progress-button em {
+  display: block;
+  color: rgba(244, 240, 231, 0.48);
+  font-style: normal;
 }
 
-.carousel-dot.is-active {
+.carousel-dot.is-active,
+.orbit-progress-button.is-active {
   color: var(--accent);
 }
 
 .carousel-dot:hover span,
-.carousel-dot:focus-visible span {
+.carousel-dot:focus-visible span,
+.orbit-progress-button:hover span,
+.orbit-progress-button:focus-visible span {
   border-color: rgba(96, 217, 200, 0.82);
 }
 
@@ -1820,21 +1815,22 @@ input[type="range"]::-webkit-slider-thumb {
     border-top: 1px solid var(--line-strong);
     padding-left: 0;
     padding-top: 28px;
-    --orbit-center-x: 44%;
+    --orbit-center-x: 46%;
   }
 
   .orbit-core {
-    width: clamp(138px, 24vw, 210px);
+    width: clamp(128px, 20vw, 176px);
+    height: clamp(128px, 20vw, 176px);
   }
 
   .orbit-ring {
-    width: min(82%, 620px);
-    height: min(76%, 500px);
+    width: min(90%, 620px);
+    height: min(68%, 420px);
   }
 
   .album-poster {
-    width: clamp(220px, 38vw, 320px);
-    min-height: 150px;
+    width: clamp(142px, 24vw, 186px);
+    min-height: 112px;
     transform:
       translate3d(calc(var(--poster-x, 0) - 50%), calc(var(--poster-y, 0) - 50%), calc(var(--poster-z-depth, 0) * 1px))
       scale(var(--poster-scale, 1))
@@ -1852,9 +1848,8 @@ input[type="range"]::-webkit-slider-thumb {
   }
 
   .carousel-dots {
-    right: 18px;
-    bottom: 22px;
-    transform: none;
+    right: auto;
+    bottom: auto;
   }
 
   .album-page {
@@ -1967,7 +1962,7 @@ input[type="range"]::-webkit-slider-thumb {
   }
 
   .album-carousel {
-    min-height: 430px;
+    min-height: 408px;
     overflow: hidden;
     padding-top: 16px;
     --orbit-center-x: 50%;
@@ -1982,13 +1977,13 @@ input[type="range"]::-webkit-slider-thumb {
   }
 
   .orbit-mask {
-    background: linear-gradient(90deg, rgba(4, 7, 17, 0.98), rgba(4, 7, 17, 0.86) 74%, rgba(4, 7, 17, 0.42));
+    background: linear-gradient(90deg, rgba(4, 7, 17, 0), rgba(4, 7, 17, 0.12) 74%, rgba(4, 7, 17, 0.26));
   }
 
   .orbit-core {
     top: 48%;
-    width: 112px;
-    height: 112px;
+    width: 96px;
+    height: 96px;
     box-shadow:
       0 0 0 8px rgba(4, 7, 17, 0.72),
       0 0 40px rgba(96, 217, 200, 0.22),
@@ -1997,7 +1992,7 @@ input[type="range"]::-webkit-slider-thumb {
 
   .orbit-ring {
     width: 92%;
-    height: 76%;
+    height: 66%;
   }
 
   .carousel-viewport {
@@ -2006,9 +2001,9 @@ input[type="range"]::-webkit-slider-thumb {
 
   .album-poster {
     top: 48%;
-    width: min(47vw, 190px);
-    min-height: 154px;
-    padding: 13px;
+    width: min(40vw, 154px);
+    min-height: 112px;
+    padding: 11px;
     opacity: 1;
     transition:
       transform 0.52s cubic-bezier(0.16, 1, 0.3, 1),
@@ -2039,7 +2034,7 @@ input[type="range"]::-webkit-slider-thumb {
 
   .album-card.album-poster h2 {
     margin-bottom: 8px;
-    font-size: clamp(1rem, 5.4vw, 1.55rem);
+    font-size: clamp(0.92rem, 4.8vw, 1.26rem);
   }
 
   .album-poster p {
@@ -2047,34 +2042,41 @@ input[type="range"]::-webkit-slider-thumb {
     overflow: hidden;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    font-size: 0.78rem;
+    font-size: 0.72rem;
     line-height: 1.5;
   }
 
   .timeline-stem {
-    left: -34px;
-    width: 28px;
+    left: -24px;
+    width: 20px;
   }
 
   .carousel-dots {
-    right: 50%;
-    bottom: 18px;
-    transform: translateX(50%);
+    right: auto;
+    bottom: auto;
+    left: calc(var(--orbit-center-x) - 92px);
+    top: 50%;
+    transform: translate(-50%, -50%);
     gap: 5px;
   }
 
-  .carousel-dot {
-    width: 24px;
-    height: 24px;
+  .carousel-dot,
+  .orbit-progress-button {
+    grid-template-columns: 12px 20px;
+    width: 34px;
+    height: 18px;
   }
 
-  .carousel-dot span {
+  .carousel-dot span,
+  .orbit-progress-button span {
     width: 7px;
     height: 7px;
   }
 
-  .carousel-dot.is-active span {
-    width: 18px;
+  .carousel-dot.is-active span,
+  .orbit-progress-button.is-active span {
+    width: 10px;
+    height: 10px;
   }
 
   .hero-system {
