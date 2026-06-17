@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-live-orbit-v1");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v1");
 
 let albums = baseAlbums;
 
@@ -279,7 +279,6 @@ function albumPoster(album, index) {
       <span class="poster-title-block">
         <h2>${album.title[state.lang]}</h2>
       </span>
-      <p>${album.summary[state.lang]}</p>
       <span class="album-meta">
         <span>${album.year}</span>
         <span>${album.tracks.length}${tr("trackUnit")}</span>
@@ -465,9 +464,17 @@ function updateHomeCarousel() {
     const orbitRadiusY = isCompact ? 0 : Math.max(192, Math.min(262, carouselHeight * 0.41));
     const x = isCompact ? 0 : Math.cos(radians) * orbitRadiusX;
     const y = isCompact ? 70 : Math.sin(radians) * orbitRadiusY;
-    const isHiddenSide = !isCompact && Math.cos(radians) < -0.2;
-    const frontness = (Math.cos(radians) + 1) / 2;
-    const opacity = isCompact ? (isActive ? 1 : 0) : isHiddenSide ? 0 : Math.max(0.22, 0.3 + frontness * 0.7);
+    const orbitCos = Math.cos(radians);
+    const isHiddenSide = !isCompact && orbitCos < -0.52;
+    const frontness = (orbitCos + 1) / 2;
+    const axisDissolve = 1 - Math.pow(Math.min(1, Math.abs(orbitCos) / 0.42), 1.7);
+    const behindFade = isCompact ? 1 : 1 - smoothStep(0.06, 0.48, -orbitCos);
+    const dissolveOpacity = 1 - axisDissolve * 0.76;
+    const dissolveCut = 5 + axisDissolve * 32;
+    const dissolveGrain = 1 - axisDissolve;
+    const dissolveSaturate = 1 - axisDissolve * 0.28;
+    const dissolveBlur = axisDissolve * 2;
+    const opacity = isCompact ? (isActive ? 1 : 0) : Math.max(0, (0.24 + frontness * 0.76) * dissolveOpacity * behindFade);
     const scale = isCompact ? (isActive ? 1 : 0.9) : 0.62 + frontness * 0.28;
     const pointerEnabled = isCompact ? isActive : !isHiddenSide && frontness > 0.58;
 
@@ -478,6 +485,11 @@ function updateHomeCarousel() {
     slide.style.setProperty("--poster-y", `${y}px`);
     slide.style.setProperty("--poster-scale", String(scale));
     slide.style.setProperty("--poster-opacity", String(opacity));
+    slide.style.setProperty("--poster-dissolve", axisDissolve.toFixed(3));
+    slide.style.setProperty("--poster-dissolve-cut", `${dissolveCut.toFixed(2)}%`);
+    slide.style.setProperty("--poster-dissolve-grain", dissolveGrain.toFixed(3));
+    slide.style.setProperty("--poster-saturate", dissolveSaturate.toFixed(3));
+    slide.style.setProperty("--poster-blur", `${dissolveBlur.toFixed(2)}px`);
     slide.style.setProperty("--poster-rotate", `${isCompact ? 0 : Math.sin(radians) * 2.5}deg`);
     slide.style.setProperty("--poster-rotate-y", "0deg");
     slide.style.setProperty("--poster-z-depth", "0");
@@ -512,6 +524,11 @@ function signedCircularDistance(from, to) {
 
 function circularDistance(from, to) {
   return Math.abs(signedCircularDistance(from, to));
+}
+
+function smoothStep(edge0, edge1, value) {
+  const x = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
+  return x * x * (3 - 2 * x);
 }
 
 async function initEarth() {
