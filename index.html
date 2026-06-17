@@ -9,7 +9,7 @@
     />
     <title>秘封俱乐部 | 夜行读本</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260617-archive-autoplay-v6" />
+    <link rel="stylesheet" href="./styles.css?v=20260617-intro-panel-v8" />
   </head>
   <body>
     <canvas id="starfield" aria-hidden="true"></canvas>
@@ -25,8 +25,9 @@
         <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
       </symbol>
       <symbol id="icon-info" viewBox="0 0 24 24">
-        <path d="M12 19v-8" />
-        <path d="M12 7h.01" />
+        <circle cx="12" cy="12" r="8.25" />
+        <path d="M12 11v5.5" />
+        <path d="M12 7.5h.01" />
       </symbol>
       <symbol id="icon-language" viewBox="0 0 24 24">
         <path d="M9 6.371c0 4.418 -2.239 6.629 -5 6.629" />
@@ -87,26 +88,20 @@
       </symbol>
     </svg>
 
-    <section class="archive-gate" id="archive-gate" role="dialog" aria-modal="true" aria-labelledby="archive-gate-title">
+    <section class="archive-gate" id="archive-gate" role="dialog" aria-modal="true" aria-label="点击进入">
       <div class="archive-gate-field" aria-hidden="true">
         <span></span>
         <span></span>
         <span></span>
       </div>
       <div class="archive-angel-line" aria-hidden="true">
-        <span>⟊⟟⟒⟔⟁⟐⟡⟠⟑⟓⟒⟊⟟⟒⟔⟁⟐⟡⟠⟑⟓⟒</span>
+        <span title="SECRET SEALING CLUB / BOUNDARY OBSERVATION">⟊⟟⟒⟔⟁⟐⟡⟠⟑⟓⟒ ⟊⟒⟔⟟⟐⟁⟠⟡⟓⟑ ⟔⟒⟊⟟⟡⟁⟐⟠⟑⟓ ⟊⟟⟒⟔⟁⟐⟡⟠⟑⟓⟒ ⟊⟒⟔⟟⟐⟁⟠⟡⟓⟑</span>
       </div>
-      <button class="archive-orb" id="archive-enter" type="button" aria-describedby="archive-gate-body">
+      <button class="archive-orb" id="archive-enter" type="button">
         <span class="archive-orb-aura" aria-hidden="true"></span>
         <span class="archive-orb-core" aria-hidden="true"></span>
-        <span class="archive-orb-ring" aria-hidden="true"></span>
-        <span class="archive-enter-label" id="archive-enter-label">开封进入</span>
+        <span class="archive-enter-label" id="archive-enter-label">点击进入</span>
       </button>
-      <div class="archive-caption">
-        <p class="archive-kicker" id="archive-gate-kicker">HIFUU ARCHIVE</p>
-        <h2 id="archive-gate-title">封存档案</h2>
-        <p id="archive-gate-body">上次的观测记录已经归档。开封后，音乐会从停下的地方继续响起。</p>
-      </div>
     </section>
 
     <header class="site-header">
@@ -121,20 +116,6 @@
       </a>
 
       <nav class="top-nav" aria-label="主导航">
-        <button
-          class="info-button nav-icon-button"
-          id="info-toggle"
-          type="button"
-          aria-label="关于这个网站"
-          aria-haspopup="dialog"
-          aria-expanded="false"
-          aria-controls="site-intro"
-          title="关于这个网站"
-        >
-          <span class="icon-chip" aria-hidden="true">
-            <svg class="ui-icon"><use href="#icon-info"></use></svg>
-          </span>
-        </button>
         <div class="language-switcher">
           <button
             class="language-trigger nav-icon-button"
@@ -162,18 +143,20 @@
             </button>
           </div>
         </div>
-        <a
-          class="github-button nav-icon-button"
-          href="https://github.com/cloud-oc/Secret-Sealing-Club"
-          target="_blank"
-          rel="noreferrer"
-          aria-label="GitHub"
-          title="GitHub"
+        <button
+          class="info-button nav-icon-button"
+          id="info-toggle"
+          type="button"
+          aria-label="关于这个网站"
+          aria-haspopup="dialog"
+          aria-expanded="false"
+          aria-controls="site-intro"
+          title="关于这个网站"
         >
           <span class="icon-chip" aria-hidden="true">
-            <svg class="ui-icon"><use href="#icon-github"></use></svg>
+            <svg class="ui-icon"><use href="#icon-info"></use></svg>
           </span>
-        </a>
+        </button>
       </nav>
     </header>
 
@@ -181,11 +164,37 @@
 
     <div class="intro-backdrop" id="intro-backdrop" hidden></div>
     <section class="site-intro" id="site-intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
-      <button class="intro-close" id="intro-close" type="button" aria-label="关闭简介">×</button>
-      <h2 id="intro-title">夜行读本</h2>
-      <p id="intro-body">
-        这里收录着九张秘封俱乐部的音乐 CD 读本。选一张专辑，曲目会带着对应的故事段落一起亮起，就像深夜的列车窗外闪烁的星星。
-      </p>
+      <div class="intro-heading">
+        <span class="intro-mark" aria-hidden="true">
+          <svg class="ui-icon"><use href="#icon-info"></use></svg>
+        </span>
+        <p class="intro-kicker" id="intro-kicker">HIFUU READER</p>
+        <h2 id="intro-title">夜行读本</h2>
+      </div>
+      <div class="intro-copy">
+        <p id="intro-about">
+          秘封俱乐部是《东方Project》及其衍生作品中登场的一个架空的秘密结社。这里收录着九张秘封俱乐部的音乐 CD 读本。
+        </p>
+        <p id="intro-experience">
+          选一张专辑，曲目会带着对应的故事段落一起亮起，就像驶在太空的列车行窗外闪烁的星星。
+        </p>
+        <p id="intro-note">
+          阅读进度、语言与播放位置会保存在你的浏览器里。再次打开时，可以从上次停下的地方继续观测。
+        </p>
+        <p id="intro-repo">
+          该项目位于 <a href="https://github.com/cloud-oc/Secret-Sealing-Club" target="_blank" rel="noreferrer">GitHub</a> 上。喜欢就加个 Star 吧！欢迎贡献。
+        </p>
+        <p id="intro-feedback">
+          在这里发送你的使用反馈或报告 Bug。
+        </p>
+      </div>
+      <div class="intro-actions">
+        <a class="intro-link" href="https://github.com/cloud-oc/Secret-Sealing-Club/issues" target="_blank" rel="noreferrer">
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-github"></use></svg>
+          <span id="intro-feedback-label">反馈 / Bug</span>
+        </a>
+        <button class="intro-close" id="intro-close" type="button" aria-label="关闭简介">关闭</button>
+      </div>
     </section>
 
     <div class="player-shell" id="player-shell" aria-label="音乐播放器">
@@ -239,6 +248,6 @@
       <div class="playlist-panel" id="playlist-panel" hidden></div>
     </div>
 
-    <script type="module" src="./src/main.js?v=20260617-archive-autoplay-v6"></script>
+    <script type="module" src="./src/main.js?v=20260617-intro-panel-v8"></script>
   </body>
 </html>

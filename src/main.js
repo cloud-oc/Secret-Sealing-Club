@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-archive-autoplay-v6");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-intro-panel-v8");
 
 let albums = baseAlbums;
 
@@ -70,14 +70,17 @@ const intro = {
   panel: document.querySelector("#site-intro"),
   backdrop: document.querySelector("#intro-backdrop"),
   close: document.querySelector("#intro-close"),
+  kicker: document.querySelector("#intro-kicker"),
   title: document.querySelector("#intro-title"),
-  body: document.querySelector("#intro-body"),
+  about: document.querySelector("#intro-about"),
+  experience: document.querySelector("#intro-experience"),
+  note: document.querySelector("#intro-note"),
+  repo: document.querySelector("#intro-repo"),
+  feedback: document.querySelector("#intro-feedback"),
+  feedbackLabel: document.querySelector("#intro-feedback-label"),
 };
 const archiveGate = {
   shell: document.querySelector("#archive-gate"),
-  kicker: document.querySelector("#archive-gate-kicker"),
-  title: document.querySelector("#archive-gate-title"),
-  body: document.querySelector("#archive-gate-body"),
   enter: document.querySelector("#archive-enter"),
   enterLabel: document.querySelector("#archive-enter-label"),
 };
@@ -105,13 +108,19 @@ const t = {
     netease: "网易云",
     languageToggle: "切换语言",
     infoToggle: "关于这个网站",
+    introKicker: "HIFUU READER",
     introTitle: "夜行读本",
-    introBody: "这里收录着九张秘封俱乐部的音乐 CD 读本。选一张专辑，曲目会带着对应的故事段落一起亮起，就像深夜的列车窗外闪烁的星星。",
+    introAbout: "秘封俱乐部是《东方Project》及其衍生作品中登场的一个架空的秘密结社。这里收录着九张秘封俱乐部的音乐 CD 读本。",
+    introExperience: "选一张专辑，曲目会带着对应的故事段落一起亮起，就像驶在太空的列车行窗外闪烁的星星。",
+    introNote: "阅读进度、语言与播放位置会保存在你的浏览器里。再次打开时，可以从上次停下的地方继续观测。",
+    introRepoPrefix: "该项目位于 ",
+    introRepoLink: "GitHub",
+    introRepoSuffix: " 上。喜欢就加个 Star 吧！欢迎贡献。",
+    introFeedbackPrefix: "在这里发送你的使用反馈或报告 Bug。",
+    introFeedbackLabel: "反馈 / Bug",
     closeIntro: "关闭简介",
-    gateKicker: "HIFUU ARCHIVE",
-    gateTitle: "封存档案",
-    gateBody: "上次的观测记录已经归档。开封后，音乐会从停下的地方继续响起。",
-    gateEnter: "开封进入",
+    closeIntroButton: "关闭",
+    gateEnter: "点击进入",
     emptyStory: "这一页还在社团抽屉里。填入正文后，它会随曲目一起亮起。",
     notFoundTitle: "未观测到这个坐标",
     notFoundBody: "回到藏书目，重新选择一份秘封记录。",
@@ -138,13 +147,19 @@ const t = {
     netease: "网易云",
     languageToggle: "言語を切り替える",
     infoToggle: "このサイトについて",
+    introKicker: "HIFUU READER",
     introTitle: "夜行読本",
-    introBody: "ここには秘封倶楽部の九枚の音楽 CD 読本を収めています。一枚を選ぶと、曲に寄り添う物語の断片が、深夜列車の窓の外でまたたく星のように灯ります。",
+    introAbout: "秘封倶楽部は『東方Project』およびその派生作品に登場する架空の秘密結社です。ここには秘封倶楽部の九枚の音楽 CD 読本を収めています。",
+    introExperience: "一枚を選ぶと、曲に寄り添う物語の断片が、宇宙を走る列車の窓の外でまたたく星のように灯ります。",
+    introNote: "読書位置、言語、再生位置はブラウザに保存されます。次に開いたときも、前回止まった場所から観測を続けられます。",
+    introRepoPrefix: "このプロジェクトは ",
+    introRepoLink: "GitHub",
+    introRepoSuffix: " にあります。気に入ったら Star をどうぞ。コントリビューションも歓迎します。",
+    introFeedbackPrefix: "感想や不具合報告はこちらから送れます。",
+    introFeedbackLabel: "フィードバック / Bug",
     closeIntro: "説明を閉じる",
-    gateKicker: "HIFUU ARCHIVE",
-    gateTitle: "封印記録",
-    gateBody: "前回の観測記録は保管されています。開封すると、音楽は止まった場所からまた流れ始めます。",
-    gateEnter: "開封する",
+    closeIntroButton: "閉じる",
+    gateEnter: "クリックして入る",
     emptyStory: "この頁はまだ部室の引き出しの中です。本文を入れると、曲と一緒に灯ります。",
     notFoundTitle: "この座標は観測できません",
     notFoundBody: "蔵書目録へ戻って、もう一度秘封記録を選んでください。",
@@ -1246,9 +1261,7 @@ function syncShellText() {
 
 function syncArchiveGateText() {
   if (!archiveGate.shell) return;
-  if (archiveGate.kicker) archiveGate.kicker.textContent = tr("gateKicker");
-  if (archiveGate.title) archiveGate.title.textContent = tr("gateTitle");
-  if (archiveGate.body) archiveGate.body.textContent = tr("gateBody");
+  archiveGate.shell.setAttribute("aria-label", tr("gateEnter"));
   if (archiveGate.enterLabel) archiveGate.enterLabel.textContent = tr("gateEnter");
 }
 
@@ -1284,8 +1297,19 @@ function syncIntroText() {
   intro.toggle?.setAttribute("aria-label", tr("infoToggle"));
   intro.toggle?.setAttribute("title", tr("infoToggle"));
   intro.close?.setAttribute("aria-label", tr("closeIntro"));
+  if (intro.kicker) intro.kicker.textContent = tr("introKicker");
   if (intro.title) intro.title.textContent = tr("introTitle");
-  if (intro.body) intro.body.textContent = tr("introBody");
+  if (intro.about) intro.about.textContent = tr("introAbout");
+  if (intro.experience) intro.experience.textContent = tr("introExperience");
+  if (intro.note) intro.note.textContent = tr("introNote");
+  if (intro.repo) {
+    intro.repo.innerHTML = `${tr("introRepoPrefix")}<a href="https://github.com/cloud-oc/Secret-Sealing-Club" target="_blank" rel="noreferrer">${tr("introRepoLink")}</a>${tr("introRepoSuffix")}`;
+  }
+  if (intro.feedback) {
+    intro.feedback.innerHTML = `<a href="https://github.com/cloud-oc/Secret-Sealing-Club/issues" target="_blank" rel="noreferrer">${tr("introFeedbackPrefix")}</a>`;
+  }
+  if (intro.feedbackLabel) intro.feedbackLabel.textContent = tr("introFeedbackLabel");
+  if (intro.close) intro.close.textContent = tr("closeIntroButton");
 }
 
 function setIntroOpen(isOpen) {
