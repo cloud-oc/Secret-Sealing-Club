@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v6");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v7");
 
 let albums = baseAlbums;
 
@@ -16,7 +16,7 @@ let homeOrbitAngle = 0;
 let homeOrbitTargetAngle = 0;
 let homeOrbitIsSettling = false;
 let homeOrbitResumeAt = 0;
-const homeOrbitSpeed = 9.6;
+const homeOrbitSpeed = -9.6;
 const homeOrbitSettleRate = 8.5;
 const homeOrbitFrameDelay = 32;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -32,7 +32,7 @@ let earthGroup = null;
 let earthClockStart = 0;
 let playerSignalAnimationFrame = 0;
 let playerSignalStart = 0;
-const playerSignalTrailCount = 16;
+const playerSignalTrailCount = 9;
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -144,23 +144,36 @@ function route() {
   const hash = location.hash.replace(/^#\/?/, "");
   const [kind, id] = hash.split("/");
 
-  if (!kind) {
-    renderHome();
+  const render = () => {
+    if (!kind) {
+      renderHome();
+      return;
+    }
+
+    if (kind === "albums") {
+      renderHome();
+      requestAnimationFrame(() => document.querySelector("#albums")?.scrollIntoView({ block: "start" }));
+      return;
+    }
+
+    if (kind === "album" && id) {
+      renderAlbum(id);
+      return;
+    }
+
+    renderNotFound();
+  };
+
+  transitionRoute(render);
+}
+
+function transitionRoute(render) {
+  if (prefersReducedMotion.matches || !document.startViewTransition) {
+    render();
     return;
   }
 
-  if (kind === "albums") {
-    renderHome();
-    requestAnimationFrame(() => document.querySelector("#albums")?.scrollIntoView({ block: "start" }));
-    return;
-  }
-
-  if (kind === "album" && id) {
-    renderAlbum(id);
-    return;
-  }
-
-  renderNotFound();
+  document.startViewTransition(render);
 }
 
 async function loadContentOverrides() {
@@ -478,12 +491,14 @@ function updateHomeCarousel() {
     const carouselWidth = carousel?.clientWidth || window.innerWidth;
     const carouselHeight = carousel?.clientHeight || window.innerHeight;
     const centerRatio = isCompact ? 0.5 : window.innerWidth <= 1060 ? 0.46 : 0.42;
-    const cardEstimate = isCompact ? Math.min(window.innerWidth * 0.42, 160) : Math.min(Math.max(window.innerWidth * 0.12, 142), 186);
+    const cardEstimate = isCompact ? Math.min(window.innerWidth * 0.34, 136) : Math.min(Math.max(window.innerWidth * 0.12, 142), 186);
     const availableRight = carouselWidth * (1 - centerRatio);
-    const orbitRadiusX = isCompact ? 0 : Math.max(182, Math.min(274, availableRight - cardEstimate / 2 - 14));
-    const orbitRadiusY = isCompact ? 0 : Math.max(192, Math.min(262, carouselHeight * 0.41));
-    const x = isCompact ? 0 : Math.cos(radians) * orbitRadiusX;
-    const y = isCompact ? 70 : Math.sin(radians) * orbitRadiusY;
+    const orbitRadiusX = isCompact
+      ? Math.max(104, Math.min(132, carouselWidth * 0.3))
+      : Math.max(182, Math.min(274, availableRight - cardEstimate / 2 - 14));
+    const orbitRadiusY = isCompact ? Math.max(110, Math.min(138, carouselHeight * 0.31)) : Math.max(192, Math.min(262, carouselHeight * 0.41));
+    const x = Math.cos(radians) * orbitRadiusX;
+    const y = Math.sin(radians) * orbitRadiusY;
     const orbitCos = Math.cos(radians);
     const isHiddenSide = !isCompact && orbitCos < -0.52;
     const frontness = (orbitCos + 1) / 2;
@@ -494,9 +509,12 @@ function updateHomeCarousel() {
     const dissolveGrain = 1 - axisDissolve;
     const dissolveSaturate = 1 - axisDissolve * 0.28;
     const dissolveBlur = axisDissolve * 2;
-    const opacity = isCompact ? (isActive ? 1 : 0) : Math.max(0, (0.24 + frontness * 0.76) * dissolveOpacity * behindFade);
-    const scale = isCompact ? (isActive ? 1 : 0.9) : 0.62 + frontness * 0.28;
-    const pointerEnabled = isCompact ? isActive : !isHiddenSide && frontness > 0.58;
+    const compactDistanceFade = Math.max(0, 1 - distance * 0.22);
+    const opacity = isCompact
+      ? Math.max(0.12, (0.2 + frontness * 0.8) * compactDistanceFade)
+      : Math.max(0, (0.24 + frontness * 0.76) * dissolveOpacity * behindFade);
+    const scale = isCompact ? 0.52 + frontness * 0.3 : 0.62 + frontness * 0.28;
+    const pointerEnabled = isCompact ? isActive || frontness > 0.78 : !isHiddenSide && frontness > 0.58;
 
     slide.dataset.offset = String(Math.round(signedCircularDistance(angle, 0) / step));
     slide.dataset.side = isHiddenSide ? "hidden" : "visible";
@@ -516,7 +534,7 @@ function updateHomeCarousel() {
     slide.style.setProperty("--poster-z", String(Math.round(10 + frontness * 20 - distance)));
     slide.classList.toggle("is-active", isActive);
     slide.classList.toggle("is-near", distance === 1 && !isHiddenSide);
-    slide.classList.toggle("is-far", !isActive && (isCompact || distance > 1 || isHiddenSide));
+    slide.classList.toggle("is-far", !isActive && (distance > 1 || isHiddenSide));
     slide.setAttribute("aria-hidden", String(!pointerEnabled));
     slide.tabIndex = pointerEnabled ? 0 : -1;
   });

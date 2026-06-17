@@ -189,6 +189,24 @@ body::after {
   animation: interface-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.hero-copy {
+  animation-name: page-copy-in;
+}
+
+.album-carousel {
+  animation-name: page-orbit-in;
+  animation-delay: 0.08s;
+}
+
+.album-aside {
+  animation-name: album-aside-in;
+}
+
+.lyric-reader {
+  animation-name: reader-panel-in;
+  animation-delay: 0.08s;
+}
+
 a {
   color: inherit;
   text-decoration: none;
@@ -228,6 +246,48 @@ button {
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
+}
+
+::view-transition-old(root) {
+  animation: page-leave 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::view-transition-new(root) {
+  animation: page-enter 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes page-leave {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(-12px) scale(0.985);
+  }
+}
+
+@keyframes page-enter {
+  0% {
+    opacity: 0;
+    clip-path: inset(42% 0 42% 0);
+    filter: blur(12px) saturate(1.35);
+    transform: translateY(18px) scale(1.012);
+  }
+
+  54% {
+    clip-path: inset(0 0 0 0);
+  }
+
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    filter: blur(0) saturate(1);
+    transform: translateY(0) scale(1);
+  }
 }
 
 .icon-chip {
@@ -588,6 +648,64 @@ button {
     opacity: 1;
     transform: translateY(0);
     filter: blur(0);
+  }
+}
+
+@keyframes page-copy-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateX(-28px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+  }
+}
+
+@keyframes page-orbit-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateX(28px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes album-aside-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateX(-24px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes reader-panel-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 0 0 72%);
+    filter: blur(8px);
+    transform: translateX(28px);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+    filter: blur(0);
+    transform: translateX(0);
   }
 }
 
@@ -2056,7 +2174,7 @@ input[type="range"]::-moz-range-thumb {
     gap: 18px;
     overflow: visible;
     padding-top: 20px;
-    padding-bottom: 18px;
+    padding-bottom: 88px;
   }
 
   .hero::before {
@@ -2069,9 +2187,9 @@ input[type="range"]::-moz-range-thumb {
 
   .hero::after {
     left: 12px;
-    bottom: calc(var(--player-h) - 18px);
-    font-size: clamp(1.85rem, 12vw, 3.65rem);
-    opacity: 0.46;
+    bottom: calc(var(--player-h) + 8px);
+    font-size: clamp(2.2rem, 13vw, 4.2rem);
+    opacity: 0.36;
   }
 
   h1 {
@@ -2089,9 +2207,9 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .album-carousel {
-    min-height: 408px;
+    min-height: 460px;
     overflow: visible;
-    padding-top: 16px;
+    padding-top: 18px;
     --orbit-center-x: 50%;
   }
 
@@ -2104,9 +2222,9 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .orbit-core {
-    top: 48%;
-    width: 96px;
-    height: 96px;
+    top: 50%;
+    width: 104px;
+    height: 104px;
     box-shadow:
       0 0 0 8px rgba(4, 7, 17, 0.72),
       0 0 40px rgba(96, 217, 200, 0.22),
@@ -2123,28 +2241,19 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .album-poster {
-    top: 48%;
-    width: min(40vw, 154px);
-    min-height: 112px;
+    top: 50%;
+    width: min(34vw, 132px);
+    min-height: 96px;
     padding: 11px;
-    opacity: 1;
+    opacity: var(--poster-opacity, 1);
     border: 0;
+    filter: saturate(var(--poster-saturate, 1)) blur(var(--poster-blur, 0));
     transition:
-      transform 0.52s cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 0.3s ease;
-  }
-
-  .album-poster:not(.is-active),
-  .album-poster.is-near,
-  .album-poster.is-far,
-  .album-poster[aria-hidden="true"] {
-    opacity: 0 !important;
-    pointer-events: none;
-    visibility: hidden;
+      opacity 0.2s ease,
+      filter 0.2s ease;
   }
 
   .album-poster.is-active {
-    opacity: 1 !important;
     visibility: visible !important;
     animation: none !important;
   }
@@ -2164,8 +2273,8 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .timeline-stem {
-    left: -24px;
-    width: 20px;
+    left: -18px;
+    width: 16px;
   }
 
   .carousel-dots {
@@ -2175,6 +2284,10 @@ input[type="range"]::-moz-range-thumb {
     top: 50%;
     transform: translate(-50%, -50%);
     gap: 5px;
+  }
+
+  .orbit-progress {
+    left: calc(var(--orbit-center-x) - 134px);
   }
 
   .carousel-dot,
@@ -2197,13 +2310,14 @@ input[type="range"]::-moz-range-thumb {
   }
 
   .hero-system {
-    grid-template-columns: auto 1fr auto;
-    max-width: 100%;
+    grid-template-columns: auto 1fr auto 1fr auto;
+    max-width: min(100%, 520px);
+    margin-bottom: clamp(118px, 28vw, 156px);
   }
 
   .hero-system span:nth-of-type(3),
   .hero-system i:nth-of-type(2) {
-    display: none;
+    display: block;
   }
 
   .album-page {
