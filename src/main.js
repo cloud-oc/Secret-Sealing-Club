@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-intro-panel-v8");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-space-log-v9");
 
 let albums = baseAlbums;
 
@@ -39,6 +39,7 @@ let earthGroup = null;
 let earthClockStart = 0;
 let playerSignalAnimationFrame = 0;
 let playerSignalStart = 0;
+let githubStars;
 const playerSignalTrailCount = 9;
 
 const app = document.querySelector("#app");
@@ -70,14 +71,13 @@ const intro = {
   panel: document.querySelector("#site-intro"),
   backdrop: document.querySelector("#intro-backdrop"),
   close: document.querySelector("#intro-close"),
-  kicker: document.querySelector("#intro-kicker"),
   title: document.querySelector("#intro-title"),
+  stars: document.querySelector("#intro-stars"),
   about: document.querySelector("#intro-about"),
   experience: document.querySelector("#intro-experience"),
   note: document.querySelector("#intro-note"),
   repo: document.querySelector("#intro-repo"),
   feedback: document.querySelector("#intro-feedback"),
-  feedbackLabel: document.querySelector("#intro-feedback-label"),
 };
 const archiveGate = {
   shell: document.querySelector("#archive-gate"),
@@ -87,9 +87,9 @@ const archiveGate = {
 
 const t = {
   zh: {
-    siteTitle: "秘封俱乐部 | 夜行读本",
+    siteTitle: "秘封俱乐部 | 太空观测记录",
     brand: "秘封俱乐部",
-    brandSub: "夜行读本",
+    brandSub: "太空观测记录",
     heroKicker: "欢迎来到秘封俱乐部",
     heroTitleA: "在科学世纪",
     heroTitleB: "听见秘封",
@@ -108,8 +108,9 @@ const t = {
     netease: "网易云",
     languageToggle: "切换语言",
     infoToggle: "关于这个网站",
-    introKicker: "HIFUU READER",
-    introTitle: "夜行读本",
+    introTitle: "太空观测记录",
+    introStarsLoading: "GitHub Stars --",
+    introStars: "GitHub Stars",
     introAbout: "秘封俱乐部是《东方Project》及其衍生作品中登场的一个架空的秘密结社。这里收录着九张秘封俱乐部的音乐 CD 读本。",
     introExperience: "选一张专辑，曲目会带着对应的故事段落一起亮起，就像驶在太空的列车行窗外闪烁的星星。",
     introNote: "阅读进度、语言与播放位置会保存在你的浏览器里。再次打开时，可以从上次停下的地方继续观测。",
@@ -117,7 +118,6 @@ const t = {
     introRepoLink: "GitHub",
     introRepoSuffix: " 上。喜欢就加个 Star 吧！欢迎贡献。",
     introFeedbackPrefix: "在这里发送你的使用反馈或报告 Bug。",
-    introFeedbackLabel: "反馈 / Bug",
     closeIntro: "关闭简介",
     closeIntroButton: "关闭",
     gateEnter: "点击进入",
@@ -126,9 +126,9 @@ const t = {
     notFoundBody: "回到藏书目，重新选择一份秘封记录。",
   },
   ja: {
-    siteTitle: "秘封倶楽部 | 夜行読本",
+    siteTitle: "秘封倶楽部 | 宇宙観測記録",
     brand: "秘封倶楽部",
-    brandSub: "夜行読本",
+    brandSub: "宇宙観測記録",
     heroKicker: "秘封倶楽部へようこそ",
     heroTitleA: "科学世紀で",
     heroTitleB: "秘封を聴く",
@@ -147,8 +147,9 @@ const t = {
     netease: "网易云",
     languageToggle: "言語を切り替える",
     infoToggle: "このサイトについて",
-    introKicker: "HIFUU READER",
-    introTitle: "夜行読本",
+    introTitle: "宇宙観測記録",
+    introStarsLoading: "GitHub Stars --",
+    introStars: "GitHub Stars",
     introAbout: "秘封倶楽部は『東方Project』およびその派生作品に登場する架空の秘密結社です。ここには秘封倶楽部の九枚の音楽 CD 読本を収めています。",
     introExperience: "一枚を選ぶと、曲に寄り添う物語の断片が、宇宙を走る列車の窓の外でまたたく星のように灯ります。",
     introNote: "読書位置、言語、再生位置はブラウザに保存されます。次に開いたときも、前回止まった場所から観測を続けられます。",
@@ -156,7 +157,6 @@ const t = {
     introRepoLink: "GitHub",
     introRepoSuffix: " にあります。気に入ったら Star をどうぞ。コントリビューションも歓迎します。",
     introFeedbackPrefix: "感想や不具合報告はこちらから送れます。",
-    introFeedbackLabel: "フィードバック / Bug",
     closeIntro: "説明を閉じる",
     closeIntroButton: "閉じる",
     gateEnter: "クリックして入る",
@@ -1297,8 +1297,8 @@ function syncIntroText() {
   intro.toggle?.setAttribute("aria-label", tr("infoToggle"));
   intro.toggle?.setAttribute("title", tr("infoToggle"));
   intro.close?.setAttribute("aria-label", tr("closeIntro"));
-  if (intro.kicker) intro.kicker.textContent = tr("introKicker");
   if (intro.title) intro.title.textContent = tr("introTitle");
+  updateIntroStars();
   if (intro.about) intro.about.textContent = tr("introAbout");
   if (intro.experience) intro.experience.textContent = tr("introExperience");
   if (intro.note) intro.note.textContent = tr("introNote");
@@ -1308,8 +1308,29 @@ function syncIntroText() {
   if (intro.feedback) {
     intro.feedback.innerHTML = `<a href="https://github.com/cloud-oc/Secret-Sealing-Club/issues" target="_blank" rel="noreferrer">${tr("introFeedbackPrefix")}</a>`;
   }
-  if (intro.feedbackLabel) intro.feedbackLabel.textContent = tr("introFeedbackLabel");
   if (intro.close) intro.close.textContent = tr("closeIntroButton");
+}
+
+function updateIntroStars() {
+  if (!intro.stars) return;
+  intro.stars.textContent = typeof githubStars === "number" ? `${tr("introStars")} ${githubStars.toLocaleString()}` : tr("introStarsLoading");
+}
+
+async function loadGithubStars() {
+  if (!intro.stars) return;
+  try {
+    const response = await fetch("https://api.github.com/repos/cloud-oc/Secret-Sealing-Club", {
+      headers: { Accept: "application/vnd.github+json" },
+    });
+    if (!response.ok) throw new Error(`GitHub API ${response.status}`);
+    const data = await response.json();
+    if (typeof data.stargazers_count === "number") {
+      githubStars = data.stargazers_count;
+      updateIntroStars();
+    }
+  } catch {
+    updateIntroStars();
+  }
 }
 
 function setIntroOpen(isOpen) {
@@ -1454,5 +1475,6 @@ restartPlayerSignal();
 await loadContentOverrides();
 applySavedPlaybackRoute();
 syncShellText();
+loadGithubStars();
 route();
 setupArchiveGate();

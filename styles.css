@@ -872,41 +872,22 @@ body.archive-opening .archive-angel-line {
 
 .intro-heading {
   display: grid;
-  grid-template-columns: 46px 1fr;
-  column-gap: 14px;
-  align-items: center;
-}
-
-.intro-mark {
-  display: grid;
-  width: 46px;
-  height: 46px;
-  place-items: center;
-  border: 1px solid rgba(96, 217, 200, 0.42);
-  border-radius: 50%;
-  color: #67e2cc;
-  background: rgba(96, 217, 200, 0.08);
-  box-shadow: 0 0 22px rgba(96, 217, 200, 0.16);
-}
-
-.intro-mark .ui-icon {
-  width: 24px;
-  height: 24px;
-}
-
-.intro-kicker {
-  margin: 0 0 4px;
-  color: #67e2cc;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.28em;
+  gap: 8px;
+  align-items: start;
 }
 
 .site-intro h2 {
-  grid-column: 2;
   margin: 0;
   font-size: clamp(1.78rem, 4vw, 2.7rem);
   line-height: 1.05;
+  text-align: left;
+}
+
+.intro-stars {
+  color: #67e2cc;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
 .intro-copy {
@@ -935,14 +916,6 @@ body.archive-opening .archive-angel-line {
   text-underline-offset: 0.18em;
 }
 
-.intro-actions {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: center;
-}
-
-.intro-link,
 .intro-close {
   display: inline-flex;
   min-height: 42px;
@@ -957,25 +930,14 @@ body.archive-opening .archive-angel-line {
   text-decoration: none;
 }
 
-.intro-link {
-  color: #67e2cc;
-  background: rgba(96, 217, 200, 0.11);
-}
-
-.intro-link .ui-icon {
-  width: 18px;
-  height: 18px;
-}
-
 .intro-close {
+  justify-self: end;
   color: var(--ink);
   background: rgba(244, 240, 231, 0.09);
 }
 
 .intro-close:hover,
-.intro-close:focus-visible,
-.intro-link:hover,
-.intro-link:focus-visible {
+.intro-close:focus-visible {
   color: #fff;
   background: rgba(96, 217, 200, 0.18);
 }
@@ -2609,20 +2571,6 @@ input[type="range"]::-moz-range-thumb {
     width: calc(100vw - 24px);
     gap: 18px;
     padding: 22px;
-  }
-
-  .intro-heading {
-    grid-template-columns: 40px 1fr;
-    column-gap: 12px;
-  }
-
-  .intro-mark {
-    width: 40px;
-    height: 40px;
-  }
-
-  .intro-actions {
-    grid-template-columns: 1fr;
   }
 
   .hero {

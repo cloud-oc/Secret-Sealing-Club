@@ -2,7 +2,7 @@
   <img src="./favicon.svg" alt="秘封倶楽部アイコン" width="88" height="88" />
 </p>
 
-<h1 align="center">秘封倶楽部｜夜行読本</h1>
+<h1 align="center">秘封倶楽部｜宇宙観測記録</h1>
 
 <p align="center">
   <a href="README.md">English</a> · <a href="README.zh-CN.md">简体中文</a> · <a href="README.ja.md">日本語</a>

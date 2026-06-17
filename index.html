@@ -7,9 +7,9 @@
       name="description"
       content="秘封俱乐部同人阅读室：在夜色、铁路、星图和旧科学的气味里，边听音乐边读专辑附带故事。"
     />
-    <title>秘封俱乐部 | 夜行读本</title>
+    <title>秘封俱乐部 | 太空观测记录</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260617-intro-panel-v8" />
+    <link rel="stylesheet" href="./styles.css?v=20260617-space-log-v9" />
   </head>
   <body>
     <canvas id="starfield" aria-hidden="true"></canvas>
@@ -111,7 +111,7 @@
         </span>
         <span>
           <strong>秘封俱乐部</strong>
-          <small>夜行读本</small>
+          <small>太空观测记录</small>
         </span>
       </a>
 
@@ -165,11 +165,8 @@
     <div class="intro-backdrop" id="intro-backdrop" hidden></div>
     <section class="site-intro" id="site-intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" hidden>
       <div class="intro-heading">
-        <span class="intro-mark" aria-hidden="true">
-          <svg class="ui-icon"><use href="#icon-info"></use></svg>
-        </span>
-        <p class="intro-kicker" id="intro-kicker">HIFUU READER</p>
-        <h2 id="intro-title">夜行读本</h2>
+        <h2 id="intro-title">太空观测记录</h2>
+        <p class="intro-stars" id="intro-stars">GitHub Stars --</p>
       </div>
       <div class="intro-copy">
         <p id="intro-about">
@@ -188,13 +185,7 @@
           在这里发送你的使用反馈或报告 Bug。
         </p>
       </div>
-      <div class="intro-actions">
-        <a class="intro-link" href="https://github.com/cloud-oc/Secret-Sealing-Club/issues" target="_blank" rel="noreferrer">
-          <svg class="ui-icon" aria-hidden="true"><use href="#icon-github"></use></svg>
-          <span id="intro-feedback-label">反馈 / Bug</span>
-        </a>
-        <button class="intro-close" id="intro-close" type="button" aria-label="关闭简介">关闭</button>
-      </div>
+      <button class="intro-close" id="intro-close" type="button" aria-label="关闭简介">关闭</button>
     </section>
 
     <div class="player-shell" id="player-shell" aria-label="音乐播放器">
@@ -248,6 +239,6 @@
       <div class="playlist-panel" id="playlist-panel" hidden></div>
     </div>
 
-    <script type="module" src="./src/main.js?v=20260617-intro-panel-v8"></script>
+    <script type="module" src="./src/main.js?v=20260617-space-log-v9"></script>
   </body>
 </html>
