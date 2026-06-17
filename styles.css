@@ -319,7 +319,7 @@ button {
   color: var(--ink);
 }
 
-.github-button {
+.nav-icon-button {
   display: grid;
   width: 44px;
   min-height: 42px;
@@ -331,16 +331,22 @@ button {
   background: transparent;
 }
 
-.github-button .icon-chip,
+.nav-icon-button .icon-chip,
 .language-trigger .icon-chip {
   border-color: transparent;
   background: transparent;
 }
 
-.github-button:hover,
-.github-button:focus-visible {
+.nav-icon-button:hover,
+.nav-icon-button:focus-visible,
+.nav-icon-button.is-active {
   color: var(--ink);
   background: transparent;
+}
+
+.info-button .ui-icon {
+  width: 17px;
+  height: 17px;
 }
 
 .visually-hidden {
@@ -443,6 +449,82 @@ button {
   background: rgba(96, 217, 200, 0.14);
 }
 
+.intro-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  background: rgba(2, 5, 10, 0.42);
+  backdrop-filter: blur(3px);
+}
+
+.intro-backdrop[hidden],
+.site-intro[hidden] {
+  display: none;
+}
+
+.site-intro {
+  position: fixed;
+  top: min(18vh, 148px);
+  right: clamp(16px, 4vw, 54px);
+  z-index: 49;
+  width: min(410px, calc(100vw - 32px));
+  border: 0;
+  border-radius: var(--radius-card);
+  padding: 24px 24px 22px;
+  color: var(--ink);
+  background:
+    linear-gradient(135deg, rgba(96, 217, 200, 0.1), transparent 34%),
+    linear-gradient(180deg, rgba(244, 240, 231, 0.055), transparent 54%),
+    #080c12;
+  box-shadow: 0 26px 58px rgba(0, 0, 0, 0.46);
+  animation: intro-rise 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.site-intro .kicker {
+  margin-bottom: 12px;
+}
+
+.site-intro h2 {
+  margin-bottom: 14px;
+  font-size: clamp(1.58rem, 4vw, 2.4rem);
+  line-height: 1.05;
+}
+
+.site-intro p {
+  color: #e4dccd;
+  line-height: 1.78;
+  text-align: justify;
+  text-justify: inter-ideograph;
+}
+
+.site-intro .intro-note {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.intro-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  font-size: 1.32rem;
+  line-height: 1;
+}
+
+.intro-close:hover,
+.intro-close:focus-visible {
+  color: #fff;
+  background: rgba(244, 240, 231, 0.08);
+}
+
 @keyframes scan-drift {
   from {
     transform: translateY(-18px);
@@ -488,6 +570,20 @@ button {
   45% {
     opacity: 0.58;
     translate: 4vw 0;
+  }
+}
+
+@keyframes intro-rise {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
   }
 }
 
@@ -709,10 +805,10 @@ h1 {
   display: inline-block;
   margin-top: 0.14em;
   color: transparent;
+  -webkit-text-fill-color: transparent;
   -webkit-text-stroke: clamp(1px, 0.12vw, 2px) var(--signal);
-  text-shadow:
-    0 0 20px rgba(93, 185, 223, 0.2),
-    0 0 1px rgba(93, 185, 223, 0.34);
+  paint-order: stroke fill;
+  text-shadow: 0 0 18px rgba(93, 185, 223, 0.18);
 }
 
 .hero p {
@@ -945,6 +1041,30 @@ h1 {
 .album-poster:hover,
 .album-poster:focus-visible {
   filter: saturate(var(--poster-saturate, 1)) blur(var(--poster-blur, 0)) brightness(1.08);
+}
+
+.poster-cover {
+  position: absolute;
+  inset: 9px 9px auto auto;
+  width: 48px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle, #05080d 0 17%, transparent 18%),
+    repeating-radial-gradient(circle, rgba(244, 240, 231, 0.22) 0 1px, transparent 1px 7px),
+    conic-gradient(from 30deg, rgba(96, 217, 200, 0.64), var(--album-color, rgba(215, 179, 99, 0.36)), rgba(244, 240, 231, 0.12), rgba(96, 217, 200, 0.64));
+  box-shadow: inset 0 0 0 1px rgba(244, 240, 231, 0.14);
+  opacity: 0.86;
+  pointer-events: none;
+}
+
+.album-poster.has-cover .poster-cover {
+  background-image: var(--album-cover);
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    0 12px 22px rgba(0, 0, 0, 0.28),
+    inset 0 0 0 1px rgba(244, 240, 231, 0.16);
 }
 
 .poster-glow {
@@ -1238,6 +1358,24 @@ h1 {
   animation: disc-drift 18s linear infinite;
 }
 
+.album-cover.has-cover .cover-disc {
+  overflow: hidden;
+  border-radius: 12px;
+  background-image: var(--album-cover);
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(244, 240, 231, 0.18);
+  animation: none;
+}
+
+.album-cover.has-cover .cover-disc::before,
+.album-cover.has-cover .cover-disc::after,
+.album-cover.has-cover .cover-disc span {
+  display: none;
+}
+
 .cover-disc::before,
 .cover-disc::after {
   content: "";
@@ -1511,18 +1649,35 @@ h1 {
 }
 
 .player-shell::before {
-  content: "";
+  content: none;
+}
+
+.player-signal-dot {
   position: absolute;
-  left: var(--player-signal-x, 18px);
-  top: var(--player-signal-y, 0);
-  width: var(--player-signal-length, 96px);
-  height: 2px;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, transparent, rgba(96, 217, 200, 0.95), transparent);
-  opacity: 0.94;
-  transform: translate(-50%, -50%) rotate(var(--player-signal-rotation, 0deg));
-  transform-origin: center;
+  left: var(--signal-x, 0);
+  top: var(--signal-y, 0);
+  z-index: 3;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(96, 217, 200, 0.96);
+  opacity: var(--signal-alpha, 0.5);
+  filter: blur(var(--signal-blur, 0));
+  box-shadow:
+    0 0 10px rgba(96, 217, 200, 0.9),
+    0 0 22px rgba(96, 217, 200, 0.34);
+  transform: translate(-50%, -50%) scale(var(--signal-scale, 1));
   pointer-events: none;
+}
+
+.player-signal-dot.is-head {
+  width: 9px;
+  height: 9px;
+  background: #eafff9;
+  box-shadow:
+    0 0 0 3px rgba(96, 217, 200, 0.16),
+    0 0 16px rgba(96, 217, 200, 0.95),
+    0 0 32px rgba(96, 217, 200, 0.42);
 }
 
 .player-now {
@@ -1550,6 +1705,22 @@ h1 {
     conic-gradient(from 30deg, rgba(96, 217, 200, 0.62), var(--album-color, rgba(215, 179, 99, 0.36)), rgba(244, 240, 231, 0.12), rgba(96, 217, 200, 0.62));
   box-shadow: inset 0 0 0 8px rgba(7, 10, 17, 0.35);
   animation: disc-drift 18s linear infinite;
+}
+
+.player-art.has-cover {
+  border-radius: 12px;
+  background-image: var(--album-cover);
+  background-size: cover;
+  background-position: center;
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(244, 240, 231, 0.18);
+  animation: none;
+}
+
+.player-art.has-cover::before,
+.player-art.has-cover span {
+  display: none;
 }
 
 .player-art::before {
@@ -2223,7 +2394,7 @@ input[type="range"]::-moz-range-thumb {
     width: auto;
   }
 
-  .github-button {
+  .nav-icon-button {
     width: 44px;
     min-height: 44px;
     padding: 0;

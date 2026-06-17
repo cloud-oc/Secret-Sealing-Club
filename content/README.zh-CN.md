@@ -7,6 +7,7 @@
 ```json
 {
   "id": "ghostly-field-club",
+  "cover": "https://example.com/cover.jpg",
   "story": [
     {
       "track": 1,
@@ -16,5 +17,7 @@
   ]
 }
 ```
+
+`cover` 可选，用来显示专辑卡片、专辑页和播放器左侧的封面图；不填时网站会使用默认唱片视觉。
 
 `track` 用来把故事段落和内置曲目列表、网易云播放源对应起来。

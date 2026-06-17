@@ -7,6 +7,7 @@
 ```json
 {
   "id": "ghostly-field-club",
+  "cover": "https://example.com/cover.jpg",
   "story": [
     {
       "track": 1,
@@ -16,5 +17,7 @@
   ]
 }
 ```
+
+`cover` は任意です。アルバムカード、アルバムページ、プレイヤー左側のジャケット画像として使われます。未設定の場合は既定のレコード風ビジュアルに戻ります。
 
 `track` は物語セクションを、内蔵された曲目リストと NetEase Cloud Music の再生元に対応させるために使います。

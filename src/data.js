@@ -38,6 +38,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=2091288",
     },
+    cover: "https://upload.thbwiki.cc/thumb/0/00/%E8%8E%B2%E5%8F%B0%E9%87%8E%E5%A4%9C%E8%A1%8C%E5%B0%81%E9%9D%A2.png/300px-%E8%8E%B2%E5%8F%B0%E9%87%8E%E5%A4%9C%E8%A1%8C%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "莲台野夜行",
       ja: "蓮台野夜行",
@@ -77,6 +78,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=2091287",
     },
+    cover: "https://upload.thbwiki.cc/thumb/c/ce/%E6%A2%A6%E8%BF%9D%E7%A7%91%E5%AD%A6%E4%B8%96%E7%BA%AA%E5%B0%81%E9%9D%A2.png/300px-%E6%A2%A6%E8%BF%9D%E7%A7%91%E5%AD%A6%E4%B8%96%E7%BA%AA%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "梦违科学世纪",
       ja: "夢違科学世紀",
@@ -115,6 +117,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=2091285",
     },
+    cover: "https://upload.thbwiki.cc/thumb/0/0c/%E5%8D%AF%E9%85%89%E4%B8%9C%E6%B5%B7%E9%81%93%E5%B0%81%E9%9D%A2.png/300px-%E5%8D%AF%E9%85%89%E4%B8%9C%E6%B5%B7%E9%81%93%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "卯酉东海道",
       ja: "卯酉東海道",
@@ -153,6 +156,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=2091284",
     },
+    cover: "https://upload.thbwiki.cc/thumb/b/b9/%E5%A4%A7%E7%A9%BA%E9%AD%94%E6%9C%AF%E5%B0%81%E9%9D%A2.png/300px-%E5%A4%A7%E7%A9%BA%E9%AD%94%E6%9C%AF%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "大空魔术",
       ja: "大空魔術",
@@ -190,6 +194,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=48357",
     },
+    cover: "https://upload.thbwiki.cc/thumb/c/c8/%E9%B8%9F%E8%88%B9%E9%81%97%E8%BF%B9%E5%B0%81%E9%9D%A2.png/300px-%E9%B8%9F%E8%88%B9%E9%81%97%E8%BF%B9%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "鸟船遗迹",
       ja: "鳥船遺跡",
@@ -227,6 +232,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=2091281",
     },
+    cover: "https://upload.thbwiki.cc/thumb/4/4a/%E4%BC%8A%E5%A5%98%E8%AF%BA%E7%89%A9%E8%B4%A8%E5%B0%81%E9%9D%A2.png/300px-%E4%BC%8A%E5%A5%98%E8%AF%BA%E7%89%A9%E8%B4%A8%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "伊奘诺物质",
       ja: "伊弉諾物質",
@@ -264,6 +270,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=34678981",
     },
+    cover: "https://upload.thbwiki.cc/thumb/0/01/%E7%87%95%E7%9F%B3%E5%8D%9A%E7%89%A9%E5%BF%97%E5%B0%81%E9%9D%A2.png/300px-%E7%87%95%E7%9F%B3%E5%8D%9A%E7%89%A9%E5%BF%97%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "燕石博物志",
       ja: "燕石博物誌",
@@ -302,6 +309,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=34818027",
     },
+    cover: "https://upload.thbwiki.cc/thumb/e/ed/%E6%97%A7%E7%BA%A6%E9%85%92%E9%A6%86%E5%B0%81%E9%9D%A2.png/300px-%E6%97%A7%E7%BA%A6%E9%85%92%E9%A6%86%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "旧约酒馆",
       ja: "旧約酒場",
@@ -339,6 +347,7 @@ const albumsBase = [
     links: {
       netease: "https://music.163.com/#/album?id=195480254",
     },
+    cover: "https://upload.thbwiki.cc/thumb/0/0c/%E4%B8%83%E5%A4%95%E5%9D%82%E6%A2%A6%E5%B9%BB%E8%83%BD%E5%B0%81%E9%9D%A2.png/300px-%E4%B8%83%E5%A4%95%E5%9D%82%E6%A2%A6%E5%B9%BB%E8%83%BD%E5%B0%81%E9%9D%A2.png",
     title: {
       zh: "七夕坂梦幻能",
       ja: "七夕坂夢幻能",

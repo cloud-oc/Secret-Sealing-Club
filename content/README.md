@@ -7,6 +7,7 @@ Album JSON files in `content/albums/` are loaded directly by the site. Keep one 
 ```json
 {
   "id": "ghostly-field-club",
+  "cover": "https://example.com/cover.jpg",
   "story": [
     {
       "track": 1,
@@ -16,5 +17,7 @@ Album JSON files in `content/albums/` are loaded directly by the site. Keep one 
   ]
 }
 ```
+
+The optional `cover` value is used for album cards, album pages, and the player artwork. When omitted, the site falls back to its default disc visual.
 
 The `track` value links a story section to the built-in track list and NetEase Cloud Music playback source.

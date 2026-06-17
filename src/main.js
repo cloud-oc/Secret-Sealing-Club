@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v4");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v5");
 
 let albums = baseAlbums;
 
@@ -32,6 +32,7 @@ let earthGroup = null;
 let earthClockStart = 0;
 let playerSignalAnimationFrame = 0;
 let playerSignalStart = 0;
+const playerSignalTrailCount = 16;
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -49,12 +50,23 @@ const player = {
   seek: document.querySelector("#seek"),
   current: document.querySelector("#current-time"),
   duration: document.querySelector("#duration"),
+  signalDots: [],
 };
 const language = {
   toggle: document.querySelector("#lang-toggle"),
   current: document.querySelector("#language-current"),
   menu: document.querySelector("#language-menu"),
   options: document.querySelectorAll("[data-language]"),
+};
+const intro = {
+  toggle: document.querySelector("#info-toggle"),
+  panel: document.querySelector("#site-intro"),
+  backdrop: document.querySelector("#intro-backdrop"),
+  close: document.querySelector("#intro-close"),
+  kicker: document.querySelector("#intro-kicker"),
+  title: document.querySelector("#intro-title"),
+  body: document.querySelector("#intro-body"),
+  note: document.querySelector("#intro-note"),
 };
 
 const t = {
@@ -79,6 +91,12 @@ const t = {
     nextAlbum: "下一张",
     netease: "网易云",
     languageToggle: "切换语言",
+    infoToggle: "关于这个网站",
+    introKicker: "秘封俱乐部",
+    introTitle: "夜行读本",
+    introBody: "这里收着九张秘封音乐 CD 的读本。选一张专辑，曲目会带着对应的故事段落一起亮起，像深夜车窗外忽然对上的星。",
+    introNote: "可在中文与日本語之间切换；播放器中的曲名会通向网易云音乐。",
+    closeIntro: "关闭简介",
     emptyStory: "这一页还在社团抽屉里。填入正文后，它会随曲目一起亮起。",
     notFoundTitle: "未观测到这个坐标",
     notFoundBody: "回到藏书目，重新选择一份秘封记录。",
@@ -104,6 +122,12 @@ const t = {
     nextAlbum: "次の一枚",
     netease: "网易云",
     languageToggle: "言語を切り替える",
+    infoToggle: "このサイトについて",
+    introKicker: "秘封倶楽部",
+    introTitle: "夜行読本",
+    introBody: "九枚の秘封音楽 CD に添えられた読本をしまっています。一枚を選ぶと、曲に寄り添う物語の断片が、夜汽車の窓に映る星のように灯ります。",
+    introNote: "中文と日本語を切り替えられます。プレイヤーの曲名は网易云音乐へつながります。",
+    closeIntro: "説明を閉じる",
     emptyStory: "この頁はまだ部室の引き出しの中です。本文を入れると、曲と一緒に灯ります。",
     notFoundTitle: "この座標は観測できません",
     notFoundBody: "蔵書目録へ戻って、もう一度秘封記録を選んでください。",
@@ -116,6 +140,10 @@ function tr(key) {
 
 function icon(name) {
   return `<svg class="ui-icon" aria-hidden="true"><use href="#icon-${name}"></use></svg>`;
+}
+
+function cssUrl(value) {
+  return String(value).replace(/[\s()"']/g, encodeURIComponent);
 }
 
 function route() {
@@ -167,7 +195,7 @@ function mergeAlbums(sourceAlbums, overrideAlbums) {
 
     return {
       ...album,
-      ...pickDefined(override, ["source", "color", "catalog", "year"]),
+      ...pickDefined(override, ["source", "color", "catalog", "year", "cover"]),
       links: { ...(album.links || {}), ...(override.links || {}) },
       title: { ...album.title, ...(override.title || {}) },
       summary: { ...album.summary, ...(override.summary || {}) },
@@ -273,8 +301,10 @@ function albumCarousel() {
 
 function albumPoster(album, index) {
   const offset = carouselOffset(index);
+  const coverStyle = album.cover ? `--album-cover: url(${cssUrl(album.cover)});` : "";
   return `
-    <a class="album-card album-poster timeline-card" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
+    <a class="album-card album-poster timeline-card ${album.cover ? "has-cover" : ""}" href="#/album/${album.id}" style="--album-color: ${album.color}; ${coverStyle}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
+      <span class="poster-cover" aria-hidden="true"></span>
       <span class="poster-glow" aria-hidden="true"></span>
       <span class="timeline-stem" aria-hidden="true"></span>
       <span class="album-number">${album.year} · HIFUU ${String(index + 1).padStart(2, "0")}</span>
@@ -328,7 +358,7 @@ function renderAlbum(id) {
           <a class="album-switch-button" href="#/album/${previousAlbum.id}" data-album-jump="${previousAlbum.id}" aria-label="${tr("prevAlbum")}: ${previousAlbum.title[state.lang]}">${icon("chevron-left")}</a>
           <a class="album-switch-button" href="#/album/${nextAlbum.id}" data-album-jump="${nextAlbum.id}" aria-label="${tr("nextAlbum")}: ${nextAlbum.title[state.lang]}">${icon("chevron-right")}</a>
         </div>
-        <div class="album-cover">
+        <div class="album-cover ${album.cover ? "has-cover" : ""}" style="${album.cover ? `--album-cover: url(${cssUrl(album.cover)});` : ""}">
           <p class="kicker">${album.catalog}</p>
           <div class="cover-disc"><span></span></div>
         </div>
@@ -768,6 +798,9 @@ function syncPlayerAlbumLink(album) {
   if (!album) return;
   player.art.href = `#/album/${album.id}`;
   player.art.style.setProperty("--album-color", album.color);
+  if (album.cover) player.art.style.setProperty("--album-cover", `url(${cssUrl(album.cover)})`);
+  else player.art.style.removeProperty("--album-cover");
+  player.art.classList.toggle("has-cover", Boolean(album.cover));
   player.art.setAttribute("aria-label", `${tr("openAlbum")}: ${album.title[state.lang]}`);
 }
 
@@ -926,9 +959,9 @@ window.addEventListener("resize", updateSeekProgress);
 
 function animatePlayerSignal(time = performance.now()) {
   if (!playerSignalStart) playerSignalStart = time;
+  ensurePlayerSignalTrail();
   const rect = player.shell.getBoundingClientRect();
-  const segment = 96;
-  const radius = 16;
+  const radius = Math.min(18, Math.max(12, parseFloat(getComputedStyle(player.shell).borderRadius) || 16));
   const inset = 1;
 
   if (rect.width && rect.height) {
@@ -938,22 +971,36 @@ function animatePlayerSignal(time = performance.now()) {
     const straightY = Math.max(1, height - radius * 2);
     const corner = (Math.PI * radius) / 2;
     const perimeter = Math.max(1, straightX * 2 + straightY * 2 + corner * 4);
-    const distance = (((time - playerSignalStart) * 0.036) % perimeter + perimeter) % perimeter;
-    const point = roundedRectPoint(distance, { inset, width, height, radius, straightX, straightY, corner });
-    let { x, y } = point;
-    let rotation = 0;
-    const ahead = roundedRectPoint((distance + 1) % perimeter, { inset, width, height, radius, straightX, straightY, corner });
-    rotation = (Math.atan2(ahead.y - y, ahead.x - x) * 180) / Math.PI;
+    const distance = (((time - playerSignalStart) * 0.038) % perimeter + perimeter) % perimeter;
+    const spacing = Math.min(11, perimeter / 52);
 
-    player.shell.style.setProperty("--player-signal-x", `${x}px`);
-    player.shell.style.setProperty("--player-signal-y", `${y}px`);
-    player.shell.style.setProperty("--player-signal-rotation", `${rotation}deg`);
-    player.shell.style.setProperty("--player-signal-length", `${Math.min(segment, perimeter / 3)}px`);
+    player.signalDots.forEach((dot, index) => {
+      const trailDistance = (distance - index * spacing + perimeter) % perimeter;
+      const point = roundedRectPoint(trailDistance, { inset, width, height, radius, straightX, straightY, corner });
+      const falloff = index / Math.max(1, playerSignalTrailCount - 1);
+      dot.style.setProperty("--signal-x", `${point.x}px`);
+      dot.style.setProperty("--signal-y", `${point.y}px`);
+      dot.style.setProperty("--signal-alpha", `${Math.max(0.06, 1 - falloff * 1.04)}`);
+      dot.style.setProperty("--signal-scale", `${Math.max(0.32, 1 - falloff * 0.62)}`);
+      dot.style.setProperty("--signal-blur", `${falloff * 1.8}px`);
+    });
   }
 
   playerSignalAnimationFrame = prefersReducedMotion.matches
     ? window.setTimeout(() => animatePlayerSignal(performance.now()), 250)
     : window.requestAnimationFrame(animatePlayerSignal);
+}
+
+function ensurePlayerSignalTrail() {
+  if (player.signalDots.length === playerSignalTrailCount) return;
+  player.shell.querySelectorAll(".player-signal-dot").forEach((dot) => dot.remove());
+  player.signalDots = Array.from({ length: playerSignalTrailCount }, (_, index) => {
+    const dot = document.createElement("span");
+    dot.className = `player-signal-dot ${index === 0 ? "is-head" : ""}`;
+    dot.setAttribute("aria-hidden", "true");
+    player.shell.append(dot);
+    return dot;
+  });
 }
 
 function restartPlayerSignal() {
@@ -1026,8 +1073,15 @@ document.addEventListener("click", (event) => {
   setLanguageMenuOpen(false);
 });
 
+intro.toggle?.addEventListener("click", () => setIntroOpen(intro.panel.hidden));
+intro.close?.addEventListener("click", () => setIntroOpen(false));
+intro.backdrop?.addEventListener("click", () => setIntroOpen(false));
+
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") setLanguageMenuOpen(false);
+  if (event.key === "Escape") {
+    setLanguageMenuOpen(false);
+    setIntroOpen(false);
+  }
 });
 
 function syncShellText() {
@@ -1037,7 +1091,33 @@ function syncShellText() {
   if (brandTitle) brandTitle.textContent = tr("brand");
   if (brandSub) brandSub.textContent = tr("brandSub");
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+  syncIntroText();
   updateLanguageButtons();
+}
+
+function syncIntroText() {
+  intro.toggle?.setAttribute("aria-label", tr("infoToggle"));
+  intro.toggle?.setAttribute("title", tr("infoToggle"));
+  intro.close?.setAttribute("aria-label", tr("closeIntro"));
+  if (intro.kicker) intro.kicker.textContent = tr("introKicker");
+  if (intro.title) intro.title.textContent = tr("introTitle");
+  if (intro.body) intro.body.textContent = tr("introBody");
+  if (intro.note) intro.note.textContent = tr("introNote");
+}
+
+function setIntroOpen(isOpen) {
+  if (!intro.panel || !intro.backdrop) return;
+  const wasOpen = !intro.panel.hidden;
+  intro.panel.hidden = !isOpen;
+  intro.backdrop.hidden = !isOpen;
+  intro.toggle?.classList.toggle("is-active", isOpen);
+  intro.toggle?.setAttribute("aria-expanded", String(isOpen));
+  if (isOpen) {
+    setLanguageMenuOpen(false);
+    requestAnimationFrame(() => intro.close?.focus());
+  } else if (wasOpen) {
+    intro.toggle?.focus({ preventScroll: true });
+  }
 }
 
 function setLanguageMenuOpen(isOpen) {
