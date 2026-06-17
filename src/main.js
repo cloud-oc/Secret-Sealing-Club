@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-space-log-v9");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-archive-sky-v10");
 
 let albums = baseAlbums;
 
