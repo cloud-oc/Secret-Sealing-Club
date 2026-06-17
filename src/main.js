@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v1");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v2");
 
 let albums = baseAlbums;
 
@@ -734,6 +734,7 @@ function updatePlayer(album, index, autoplay) {
     audio.dataset.src = source;
     audio.src = source;
     player.seek.value = 0;
+    updateSeekProgress();
     player.current.textContent = "0:00";
     player.duration.textContent = "0:00";
   }
@@ -829,6 +830,7 @@ player.next.addEventListener("click", () => {
 });
 
 player.seek.addEventListener("input", () => {
+  updateSeekProgress();
   if (!audio.duration) return;
   audio.currentTime = (Number(player.seek.value) / 1000) * audio.duration;
 });
@@ -845,12 +847,14 @@ audio.addEventListener("pause", () => {
 
 audio.addEventListener("loadedmetadata", () => {
   player.duration.textContent = formatTime(audio.duration);
+  updateSeekProgress();
 });
 
 audio.addEventListener("timeupdate", () => {
   player.current.textContent = formatTime(audio.currentTime);
   if (audio.duration) {
     player.seek.value = Math.round((audio.currentTime / audio.duration) * 1000);
+    updateSeekProgress();
   }
 });
 
@@ -912,6 +916,16 @@ function updatePlayButton() {
   player.play.innerHTML = icon(state.isPlaying ? "pause" : "play");
 }
 
+function updateSeekProgress() {
+  const progress = Math.max(0, Math.min(100, Number(player.seek.value || 0) / 10));
+  player.seek.style.setProperty("--seek-progress", `${progress}%`);
+  const timeline = player.seek.closest(".player-timeline");
+  const dotX = player.seek.offsetLeft + player.seek.clientWidth * (progress / 100);
+  timeline?.style.setProperty("--seek-dot-x", `${dotX}px`);
+}
+
+window.addEventListener("resize", updateSeekProgress);
+
 language.toggle.addEventListener("click", () => {
   setLanguageMenuOpen(language.menu.hidden);
 });
@@ -934,8 +948,10 @@ document.addEventListener("keydown", (event) => {
 
 function syncShellText() {
   document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "ja";
-  document.querySelector(".brand strong").textContent = tr("brand");
-  document.querySelector(".brand small").textContent = tr("brandSub");
+  const brandTitle = document.querySelector(".brand strong");
+  const brandSub = document.querySelector(".brand small");
+  if (brandTitle) brandTitle.textContent = tr("brand");
+  if (brandSub) brandSub.textContent = tr("brandSub");
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
   updateLanguageButtons();
 }
