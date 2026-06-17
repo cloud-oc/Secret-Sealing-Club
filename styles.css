@@ -601,7 +601,7 @@ main {
   content: "SECRET SEALING\A CLUB";
   position: absolute;
   left: clamp(16px, 5vw, 70px);
-  bottom: calc(var(--player-h) - 18px);
+  bottom: calc(var(--player-h) - 60px);
   z-index: 0;
   color: rgba(244, 240, 231, 0.06);
   font-size: clamp(2rem, 6.2vw, 5.7rem);
@@ -700,15 +700,19 @@ h1 {
   margin-bottom: 22px;
   font-size: clamp(3.25rem, 8.4vw, 6rem);
   font-weight: 900;
-  line-height: 0.88;
+  line-height: 0.98;
   letter-spacing: 0;
   text-wrap: balance;
 }
 
 .jp-title {
-  color: var(--signal);
-  -webkit-text-stroke: 0;
-  text-shadow: 0 0 22px rgba(93, 185, 223, 0.22);
+  display: inline-block;
+  margin-top: 0.14em;
+  color: transparent;
+  -webkit-text-stroke: clamp(1px, 0.12vw, 2px) var(--signal);
+  text-shadow:
+    0 0 20px rgba(93, 185, 223, 0.2),
+    0 0 1px rgba(93, 185, 223, 0.34);
 }
 
 .hero p {
@@ -974,7 +978,7 @@ h1 {
 .poster-title-block {
   display: grid;
   gap: 6px;
-  margin-top: 22px;
+  margin-top: 9px;
   margin-bottom: auto;
 }
 
@@ -1101,7 +1105,7 @@ h1 {
 .album-meta {
   position: absolute;
   right: 20px;
-  bottom: 18px;
+  bottom: 14px;
   left: 20px;
   display: flex;
   justify-content: space-between;
@@ -1389,21 +1393,6 @@ h1 {
   opacity: 0.55;
 }
 
-.reader-hud {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  left: 18px;
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  color: rgba(244, 240, 231, 0.54);
-  font-size: 0.72rem;
-  font-weight: 900;
-  letter-spacing: 0.1em;
-  pointer-events: none;
-}
-
 .lyric-reader .story {
   display: block;
 }
@@ -1511,6 +1500,7 @@ h1 {
   border: 0;
   border-radius: var(--radius-card);
   padding: 14px;
+  overflow: visible;
   background:
     repeating-linear-gradient(90deg, rgba(244, 240, 231, 0.035) 0 1px, transparent 1px 26px),
     linear-gradient(90deg, rgba(96, 217, 200, 0.08), transparent 14%, transparent 86%, rgba(215, 179, 99, 0.06)),
@@ -1942,7 +1932,7 @@ input[type="range"]::-moz-range-thumb {
 
   .hero::after {
     left: 12px;
-    bottom: calc(var(--player-h) - 4px);
+    bottom: calc(var(--player-h) - 18px);
     font-size: clamp(1.85rem, 12vw, 3.65rem);
     opacity: 0.46;
   }
@@ -2187,12 +2177,6 @@ input[type="range"]::-moz-range-thumb {
 
   .story-track {
     writing-mode: horizontal-tb;
-  }
-
-  .reader-hud {
-    top: 10px;
-    right: 12px;
-    left: 12px;
   }
 
   .story-card p {

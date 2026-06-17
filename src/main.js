@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v3");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v4");
 
 let albums = baseAlbums;
 
@@ -349,10 +349,6 @@ function renderAlbum(id) {
       </aside>
 
       <section class="reader lyric-reader">
-        <div class="reader-hud" aria-hidden="true">
-          <span>${album.catalog}</span>
-          <span>${album.year}</span>
-        </div>
         <div class="story">
           ${album.story.map((section, index) => storySection(album, section, index)).join("")}
         </div>
@@ -932,34 +928,22 @@ function animatePlayerSignal(time = performance.now()) {
   if (!playerSignalStart) playerSignalStart = time;
   const rect = player.shell.getBoundingClientRect();
   const segment = 96;
-  const inset = 12;
+  const radius = 16;
+  const inset = 1;
 
   if (rect.width && rect.height) {
-    const width = Math.max(0, rect.width - inset * 2);
-    const height = Math.max(0, rect.height - inset * 2);
-    const perimeter = Math.max(1, (width + height) * 2);
+    const width = Math.max(1, rect.width - inset * 2);
+    const height = Math.max(1, rect.height - inset * 2);
+    const straightX = Math.max(1, width - radius * 2);
+    const straightY = Math.max(1, height - radius * 2);
+    const corner = (Math.PI * radius) / 2;
+    const perimeter = Math.max(1, straightX * 2 + straightY * 2 + corner * 4);
     const distance = (((time - playerSignalStart) * 0.036) % perimeter + perimeter) % perimeter;
-    let x = inset;
-    let y = inset;
+    const point = roundedRectPoint(distance, { inset, width, height, radius, straightX, straightY, corner });
+    let { x, y } = point;
     let rotation = 0;
-
-    if (distance < width) {
-      x = inset + distance;
-      y = inset;
-      rotation = 0;
-    } else if (distance < width + height) {
-      x = inset + width;
-      y = inset + distance - width;
-      rotation = 90;
-    } else if (distance < width * 2 + height) {
-      x = inset + width - (distance - width - height);
-      y = inset + height;
-      rotation = 180;
-    } else {
-      x = inset;
-      y = inset + height - (distance - width * 2 - height);
-      rotation = 270;
-    }
+    const ahead = roundedRectPoint((distance + 1) % perimeter, { inset, width, height, radius, straightX, straightY, corner });
+    rotation = (Math.atan2(ahead.y - y, ahead.x - x) * 180) / Math.PI;
 
     player.shell.style.setProperty("--player-signal-x", `${x}px`);
     player.shell.style.setProperty("--player-signal-y", `${y}px`);
@@ -978,6 +962,52 @@ function restartPlayerSignal() {
   playerSignalAnimationFrame = 0;
   playerSignalStart = 0;
   animatePlayerSignal();
+}
+
+function roundedRectPoint(distance, metrics) {
+  const { inset, width, height, radius, straightX, straightY, corner } = metrics;
+  let d = distance;
+  const right = inset + width;
+  const bottom = inset + height;
+  const left = inset;
+  const top = inset;
+
+  if (d < straightX) return { x: left + radius + d, y: top };
+  d -= straightX;
+
+  if (d < corner) {
+    const t = d / corner;
+    const angle = -Math.PI / 2 + t * (Math.PI / 2);
+    return { x: right - radius + Math.cos(angle) * radius, y: top + radius + Math.sin(angle) * radius };
+  }
+  d -= corner;
+
+  if (d < straightY) return { x: right, y: top + radius + d };
+  d -= straightY;
+
+  if (d < corner) {
+    const t = d / corner;
+    const angle = t * (Math.PI / 2);
+    return { x: right - radius + Math.cos(angle) * radius, y: bottom - radius + Math.sin(angle) * radius };
+  }
+  d -= corner;
+
+  if (d < straightX) return { x: right - radius - d, y: bottom };
+  d -= straightX;
+
+  if (d < corner) {
+    const t = d / corner;
+    const angle = Math.PI / 2 + t * (Math.PI / 2);
+    return { x: left + radius + Math.cos(angle) * radius, y: bottom - radius + Math.sin(angle) * radius };
+  }
+  d -= corner;
+
+  if (d < straightY) return { x: left, y: bottom - radius - d };
+  d -= straightY;
+
+  const t = Math.min(1, d / corner);
+  const angle = Math.PI + t * (Math.PI / 2);
+  return { x: left + radius + Math.cos(angle) * radius, y: top + radius + Math.sin(angle) * radius };
 }
 
 language.toggle.addEventListener("click", () => {
