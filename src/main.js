@@ -12,7 +12,7 @@ const state = {
   homeAlbumIndex: 0,
   isPlaying: false,
   resumeTime: Number.isFinite(savedPlayback.currentTime) ? savedPlayback.currentTime : 0,
-  wantsAutoplay: savedPlayback.wasPlaying !== false,
+  wantsAutoplay: false,
   hasEnteredArchive: false,
   restoringPlayback: true,
 };
@@ -39,7 +39,6 @@ let earthGroup = null;
 let earthClockStart = 0;
 let playerSignalAnimationFrame = 0;
 let playerSignalStart = 0;
-let githubStars;
 const playerSignalTrailCount = 9;
 
 const app = document.querySelector("#app");
@@ -72,7 +71,6 @@ const intro = {
   backdrop: document.querySelector("#intro-backdrop"),
   close: document.querySelector("#intro-close"),
   title: document.querySelector("#intro-title"),
-  stars: document.querySelector("#intro-stars"),
   about: document.querySelector("#intro-about"),
   experience: document.querySelector("#intro-experience"),
   note: document.querySelector("#intro-note"),
@@ -109,8 +107,6 @@ const t = {
     languageToggle: "切换语言",
     infoToggle: "关于这个网站",
     introTitle: "太空观测记录",
-    introStarsLoading: "GitHub Stars --",
-    introStars: "GitHub Stars",
     introAbout: "秘封俱乐部是《东方Project》及其衍生作品中登场的一个架空的秘密结社。这里收录着九张秘封俱乐部的音乐 CD 读本。",
     introExperience: "选一张专辑，曲目会带着对应的故事段落一起亮起，就像驶在太空的列车行窗外闪烁的星星。",
     introNote: "阅读进度、语言与播放位置会保存在你的浏览器里。再次打开时，可以从上次停下的地方继续观测。",
@@ -148,8 +144,6 @@ const t = {
     languageToggle: "言語を切り替える",
     infoToggle: "このサイトについて",
     introTitle: "宇宙観測記録",
-    introStarsLoading: "GitHub Stars --",
-    introStars: "GitHub Stars",
     introAbout: "秘封倶楽部は『東方Project』およびその派生作品に登場する架空の秘密結社です。ここには秘封倶楽部の九枚の音楽 CD 読本を収めています。",
     introExperience: "一枚を選ぶと、曲に寄り添う物語の断片が、宇宙を走る列車の窓の外でまたたく星のように灯ります。",
     introNote: "読書位置、言語、再生位置はブラウザに保存されます。次に開いたときも、前回止まった場所から観測を続けられます。",
@@ -186,7 +180,7 @@ function savePlaybackState() {
     albumId: state.albumId,
     trackIndex: state.trackIndex,
     currentTime: pendingResumeTime || (Number.isFinite(audio.currentTime) ? audio.currentTime : state.resumeTime || 0),
-    wasPlaying: state.isPlaying || state.wantsAutoplay,
+    wasPlaying: false,
     updatedAt: Date.now(),
   };
   localStorage.setItem(playbackStorageKey, JSON.stringify(payload));
@@ -1283,8 +1277,6 @@ function enterArchive() {
   document.body.classList.add("archive-opening");
   document.body.classList.remove("archive-locked");
 
-  if (state.wantsAutoplay) playAudioFromGesture();
-
   window.setTimeout(() => {
     archiveGate.shell.hidden = true;
     document.body.classList.remove("archive-opening");
@@ -1298,7 +1290,6 @@ function syncIntroText() {
   intro.toggle?.setAttribute("title", tr("infoToggle"));
   intro.close?.setAttribute("aria-label", tr("closeIntro"));
   if (intro.title) intro.title.textContent = tr("introTitle");
-  updateIntroStars();
   if (intro.about) intro.about.textContent = tr("introAbout");
   if (intro.experience) intro.experience.textContent = tr("introExperience");
   if (intro.note) intro.note.textContent = tr("introNote");
@@ -1309,28 +1300,6 @@ function syncIntroText() {
     intro.feedback.innerHTML = `<a href="https://github.com/cloud-oc/Secret-Sealing-Club/issues" target="_blank" rel="noreferrer">${tr("introFeedbackPrefix")}</a>`;
   }
   if (intro.close) intro.close.textContent = tr("closeIntroButton");
-}
-
-function updateIntroStars() {
-  if (!intro.stars) return;
-  intro.stars.textContent = typeof githubStars === "number" ? `${tr("introStars")} ${githubStars.toLocaleString()}` : tr("introStarsLoading");
-}
-
-async function loadGithubStars() {
-  if (!intro.stars) return;
-  try {
-    const response = await fetch("https://api.github.com/repos/cloud-oc/Secret-Sealing-Club", {
-      headers: { Accept: "application/vnd.github+json" },
-    });
-    if (!response.ok) throw new Error(`GitHub API ${response.status}`);
-    const data = await response.json();
-    if (typeof data.stargazers_count === "number") {
-      githubStars = data.stargazers_count;
-      updateIntroStars();
-    }
-  } catch {
-    updateIntroStars();
-  }
 }
 
 function setIntroOpen(isOpen) {
@@ -1475,6 +1444,5 @@ restartPlayerSignal();
 await loadContentOverrides();
 applySavedPlaybackRoute();
 syncShellText();
-loadGithubStars();
 route();
 setupArchiveGate();

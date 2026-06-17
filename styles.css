@@ -915,10 +915,14 @@ body.archive-opening .archive-angel-line {
 }
 
 .intro-stars {
-  color: #67e2cc;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  display: inline-flex;
+  width: fit-content;
+  line-height: 0;
+}
+
+.intro-stars img {
+  display: block;
+  height: 28px;
 }
 
 .intro-copy {
