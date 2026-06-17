@@ -1,4 +1,4 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v2");
+const { albums: baseAlbums } = await import("./data.js?v=20260617-orbit-polish-v3");
 
 let albums = baseAlbums;
 
@@ -30,6 +30,8 @@ let earthScene = null;
 let earthCamera = null;
 let earthGroup = null;
 let earthClockStart = 0;
+let playerSignalAnimationFrame = 0;
+let playerSignalStart = 0;
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -61,7 +63,7 @@ const t = {
     brand: "秘封俱乐部",
     brandSub: "夜行读本",
     heroKicker: "欢迎来到秘封俱乐部",
-    heroTitleA: "科学世纪",
+    heroTitleA: "在科学世纪",
     heroTitleB: "听见秘封",
     start: "回到首页",
     tracks: "曲目",
@@ -86,7 +88,7 @@ const t = {
     brand: "秘封倶楽部",
     brandSub: "夜行読本",
     heroKicker: "秘封倶楽部へようこそ",
-    heroTitleA: "科学世紀",
+    heroTitleA: "科学世紀で",
     heroTitleB: "秘封を聴く",
     start: "表紙へ戻る",
     tracks: "トラック",
@@ -926,6 +928,58 @@ function updateSeekProgress() {
 
 window.addEventListener("resize", updateSeekProgress);
 
+function animatePlayerSignal(time = performance.now()) {
+  if (!playerSignalStart) playerSignalStart = time;
+  const rect = player.shell.getBoundingClientRect();
+  const segment = 96;
+  const inset = 12;
+
+  if (rect.width && rect.height) {
+    const width = Math.max(0, rect.width - inset * 2);
+    const height = Math.max(0, rect.height - inset * 2);
+    const perimeter = Math.max(1, (width + height) * 2);
+    const distance = (((time - playerSignalStart) * 0.036) % perimeter + perimeter) % perimeter;
+    let x = inset;
+    let y = inset;
+    let rotation = 0;
+
+    if (distance < width) {
+      x = inset + distance;
+      y = inset;
+      rotation = 0;
+    } else if (distance < width + height) {
+      x = inset + width;
+      y = inset + distance - width;
+      rotation = 90;
+    } else if (distance < width * 2 + height) {
+      x = inset + width - (distance - width - height);
+      y = inset + height;
+      rotation = 180;
+    } else {
+      x = inset;
+      y = inset + height - (distance - width * 2 - height);
+      rotation = 270;
+    }
+
+    player.shell.style.setProperty("--player-signal-x", `${x}px`);
+    player.shell.style.setProperty("--player-signal-y", `${y}px`);
+    player.shell.style.setProperty("--player-signal-rotation", `${rotation}deg`);
+    player.shell.style.setProperty("--player-signal-length", `${Math.min(segment, perimeter / 3)}px`);
+  }
+
+  playerSignalAnimationFrame = prefersReducedMotion.matches
+    ? window.setTimeout(() => animatePlayerSignal(performance.now()), 250)
+    : window.requestAnimationFrame(animatePlayerSignal);
+}
+
+function restartPlayerSignal() {
+  window.cancelAnimationFrame(playerSignalAnimationFrame);
+  window.clearTimeout(playerSignalAnimationFrame);
+  playerSignalAnimationFrame = 0;
+  playerSignalStart = 0;
+  animatePlayerSignal();
+}
+
 language.toggle.addEventListener("click", () => {
   setLanguageMenuOpen(language.menu.hidden);
 });
@@ -1064,14 +1118,18 @@ window.addEventListener("hashchange", route);
 window.addEventListener("resize", () => {
   resetStars();
   updateHomeCarousel();
+  updateSeekProgress();
+  restartPlayerSignal();
 });
 prefersReducedMotion.addEventListener("change", () => {
   resetStars();
   window.cancelAnimationFrame(earthAnimationFrame);
   if (document.querySelector("#earth-canvas")) animateEarth();
+  restartPlayerSignal();
 });
 
 animateStars();
+restartPlayerSignal();
 await loadContentOverrides();
 syncShellText();
 route();
