@@ -258,7 +258,7 @@ async function loadContentOverrides() {
   albums = mergeAlbums(baseAlbums, overrides);
 }
 
-function applySavedPlaybackRoute() {
+function applySavedPlaybackState() {
   if (!savedPlayback.albumId) return;
   const album = albums.find((item) => item.id === savedPlayback.albumId);
   if (!album) return;
@@ -266,10 +266,6 @@ function applySavedPlaybackRoute() {
   state.albumId = album.id;
   state.trackIndex = Math.min(Math.max(0, state.trackIndex), album.tracks.length - 1);
   state.homeAlbumIndex = Math.max(0, albums.findIndex((item) => item.id === album.id));
-
-  if (!location.hash || location.hash === "#/") {
-    history.replaceState(null, "", `#/album/${album.id}`);
-  }
 }
 
 function mergeAlbums(sourceAlbums, overrideAlbums) {
@@ -1442,7 +1438,7 @@ prefersReducedMotion.addEventListener("change", () => {
 animateStars();
 restartPlayerSignal();
 await loadContentOverrides();
-applySavedPlaybackRoute();
+applySavedPlaybackState();
 syncShellText();
 route();
 setupArchiveGate();
