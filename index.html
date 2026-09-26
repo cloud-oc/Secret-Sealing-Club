@@ -8,8 +8,11 @@
       content="秘封俱乐部同人阅读室：在夜色、铁路、星图和旧科学的气味里，边听音乐边读专辑附带故事。"
     />
     <title>秘封俱乐部 | 太空观测记录</title>
+    <link rel="preconnect" href="https://upload.thbwiki.cc" />
+    <link rel="preconnect" href="https://music.163.com" />
+    <link rel="preload" href="./assets/visuals/moon.svg" as="image" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="stylesheet" href="./styles.css?v=20260926-lunar-v4" />
+    <link rel="stylesheet" href="./styles.css?v=20260926-lunar-v5" />
   </head>
   <body>
     <canvas id="starfield" aria-hidden="true"></canvas>
@@ -18,54 +21,51 @@
         <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
       </symbol>
       <symbol id="icon-info" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="8.25" />
-        <path d="M12 11v5.5" />
-        <path d="M12 7.5h.01" />
-      </symbol>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M12 16v-4" />
+  <path d="M12 8h.01" />
+</symbol>
       <symbol id="icon-language" viewBox="0 0 24 24">
-        <path d="M9 6.371c0 4.418 -2.239 6.629 -5 6.629" />
-        <path d="M4 6.371h7" />
-        <path d="M5 9c0 2.144 2.252 3.908 6 4" />
-        <path d="M12 20l4 -9l4 9" />
-        <path d="M19.1 18h-6.2" />
-        <path d="M6.694 3l.793 .582" />
-      </symbol>
+  <path d="m5 8 6 6" />
+  <path d="m4 14 6-6 2-3" />
+  <path d="M2 5h12" />
+  <path d="M7 2h1" />
+  <path d="m22 22-5-10-5 10" />
+  <path d="M14 18h6" />
+</symbol>
       <symbol id="icon-list-music" viewBox="0 0 24 24">
-        <path d="M4 6h14" />
-        <path d="M4 11h10" />
-        <path d="M4 16h7" />
-        <path d="M18 14v5" />
-        <path d="M18 19a2 2 0 1 0 0 -4" />
-      </symbol>
+  <path d="M16 5H3" />
+  <path d="M11 12H3" />
+  <path d="M11 19H3" />
+  <path d="M21 16V5" />
+  <circle cx="18" cy="16" r="3" />
+</symbol>
       <symbol id="icon-play" viewBox="0 0 24 24">
-        <path d="M7 4v16l13 -8z" />
-      </symbol>
+  <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+</symbol>
       <symbol id="icon-pause" viewBox="0 0 24 24">
-        <path d="M7 5v14" />
-        <path d="M17 5v14" />
-      </symbol>
+  <rect x="14" y="3" width="5" height="18" rx="1" />
+  <rect x="5" y="3" width="5" height="18" rx="1" />
+</symbol>
       <symbol id="icon-chevron-left" viewBox="0 0 24 24">
-        <path d="M15 6l-6 6l6 6" />
-      </symbol>
+  <path d="m15 18-6-6 6-6" />
+</symbol>
       <symbol id="icon-chevron-right" viewBox="0 0 24 24">
-        <path d="M9 6l6 6l-6 6" />
-      </symbol>
+  <path d="m9 18 6-6-6-6" />
+</symbol>
       <symbol id="icon-chevron-down" viewBox="0 0 24 24">
-        <path d="M6 9l6 6l6 -6" />
-      </symbol>
+  <path d="m6 9 6 6 6-6" />
+</symbol>
       <symbol id="icon-book" viewBox="0 0 24 24">
-        <path d="M19 4v16h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12" />
-        <path d="M19 16h-12a2 2 0 0 0 -2 2" />
-        <path d="M9 8h6" />
-      </symbol>
+  <path d="M12 5v16" />
+  <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" />
+</symbol>
       <symbol id="icon-turntable" viewBox="0 0 24 24">
-        <path d="M4 5h16v14h-16z" />
-        <path d="M9.5 12m-3.5 0a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0 -7 0" />
-        <path d="M9.5 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M16 9l2 2" />
-        <path d="M18 11l-3 3" />
-        <path d="M15 14l-2 2" />
-      </symbol>
+  <circle cx="12" cy="12" r="10" />
+  <path d="M6 12c0-1.7.7-3.2 1.8-4.2" />
+  <circle cx="12" cy="12" r="2" />
+  <path d="M18 12c0 1.7-.7 3.2-1.8 4.2" />
+</symbol>
       <symbol id="icon-hifuu" viewBox="0 0 48 48">
         <circle cx="24" cy="24" r="17" />
         <circle cx="24" cy="24" r="4" />
@@ -79,20 +79,63 @@
         <path d="M19.5 28.5l-7 7" />
         <path d="M16 24c2.8 -4.5 5.5 -6.8 8 -6.8s5.2 2.3 8 6.8c-2.8 4.5 -5.5 6.8 -8 6.8s-5.2 -2.3 -8 -6.8z" />
       </symbol>
+      <symbol id="icon-arrow-up-right" viewBox="0 0 24 24">
+  <path d="M7 7h10v10" />
+  <path d="M7 17 17 7" />
+</symbol>
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+  <path d="m12 19-7-7 7-7" />
+  <path d="M19 12H5" />
+</symbol>
+      <symbol id="icon-sparkle" viewBox="0 0 24 24">
+  <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+</symbol>
+      <symbol id="icon-plus" viewBox="0 0 24 24">
+  <path d="M5 12h14" />
+  <path d="M12 5v14" />
+</symbol>
+      <symbol id="icon-motion" viewBox="0 0 24 24">
+  <path d="M20.341 6.484A10 10 0 0 1 10.266 21.85" />
+  <path d="M3.659 17.516A10 10 0 0 1 13.74 2.152" />
+  <circle cx="12" cy="12" r="3" />
+  <circle cx="19" cy="5" r="2" />
+  <circle cx="5" cy="19" r="2" />
+</symbol>
+      <symbol id="icon-skip-back" viewBox="0 0 24 24">
+  <path d="M17.971 4.285A2 2 0 0 1 21 6v12a2 2 0 0 1-3.029 1.715l-9.997-5.998a2 2 0 0 1-.003-3.432z" />
+  <path d="M3 20V4" />
+</symbol>
+      <symbol id="icon-skip-forward" viewBox="0 0 24 24">
+  <path d="M21 4v16" />
+  <path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z" />
+</symbol>
+      <symbol id="icon-loader" viewBox="0 0 24 24">
+  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+</symbol>
+      <symbol id="icon-retry" viewBox="0 0 24 24">
+  <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+  <path d="M21 3v5h-5" />
+</symbol>
+      <symbol id="icon-external" viewBox="0 0 24 24">
+  <path d="M15 3h6v6" />
+  <path d="M10 14 21 3" />
+  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+</symbol>
     </svg>
 
     <dialog class="archive-gate" id="archive-gate" aria-label="点击进入">
+      <div class="gate-radiance" aria-hidden="true"></div>
       <div class="gate-stars" aria-hidden="true"></div>
       <div class="gate-orbits" aria-hidden="true"><span></span><span></span><span></span></div>
       <div class="gate-content">
         <button class="archive-orb" id="archive-enter" type="button" aria-label="点击进入">
           <span class="orb-halo" aria-hidden="true"></span>
           <img src="./assets/visuals/moon.svg" alt="" aria-hidden="true">
-          <span class="orb-seal" aria-hidden="true">✧</span>
+          <span class="orb-seal" aria-hidden="true"><svg class="ui-icon"><use href="#icon-sparkle"></use></svg></span>
         </button>
         <button class="gate-enter-label" id="gate-enter-label" type="button">点击进入</button>
       </div>
-      <a class="gate-footnote" id="gate-footnote" href="./LICENSE" target="_blank" rel="noopener">本网站代码基于 MIT 协议开源</a>
+      <div class="gate-footnote"><a id="gate-license" href="./LICENSE" target="_blank" rel="noopener">© 2026 Cloud09. Website code released under the MIT License.</a><span>An unofficial Touhou Project fan work. Not affiliated with or endorsed by Team Shanghai Alice.</span><span>Touhou Project © ZUN / Team Shanghai Alice. Music, artwork and texts are not covered by the MIT License.</span><span><a href="https://touhou-project.news/guideline/" target="_blank" rel="noopener">Official Fan Content Guidelines</a></span></div>
     </dialog>
 
     <header class="site-header">
@@ -108,7 +151,7 @@
 
       <span class="header-motto" aria-hidden="true">音乐与幻想，通往彼侧的边界。</span>
       <nav class="top-nav" aria-label="主导航">
-        <button class="nav-icon-button motion-toggle" id="motion-toggle" type="button" aria-pressed="false" aria-label="暂停动态效果" title="暂停动态效果"><span aria-hidden="true">◌</span></button>
+        <button class="nav-icon-button motion-toggle" id="motion-toggle" type="button" aria-pressed="false" aria-label="暂停动态效果" title="暂停动态效果"><svg class="ui-icon" aria-hidden="true"><use href="#icon-motion"></use></svg></button>
         <div class="language-switcher">
           <button
             class="language-trigger nav-icon-button"
@@ -161,7 +204,7 @@
       <div class="intro-heading">
         <h2 id="intro-title">太空观测记录</h2>
         <a class="intro-stars" href="https://github.com/cloud-oc/Secret-Sealing-Club" target="_blank" rel="noreferrer" aria-label="GitHub Stars">
-          <img src="https://img.shields.io/github/stars/cloud-oc/Secret-Sealing-Club?style=for-the-badge&logo=github&label=Stars&color=56d6bd&labelColor=16252b" alt="GitHub Stars" />
+          <svg class="ui-icon" aria-hidden="true"><use href="#icon-external"></use></svg><span>GitHub</span>
         </a>
       </div>
       <div class="intro-copy">
@@ -181,11 +224,13 @@
           在这里发送你的使用反馈或报告 Bug。
         </p>
       </div>
+      <p class="rights-note">Unofficial Touhou Project fan work. Touhou Project © ZUN / Team Shanghai Alice. The MIT License covers this website’s code only; music, artwork and texts retain their respective rights. <a href="https://touhou-project.news/guideline/" target="_blank" rel="noopener">Official guidelines</a> · <a href="./RIGHTS.md" target="_blank" rel="noopener">Rights &amp; credits</a></p>
       <button class="gate-replay" id="gate-replay" type="button">重播开场动画</button>
       <button class="intro-close" id="intro-close" type="button" aria-label="关闭简介">关闭</button>
     </section>
 
     <div class="player-shell" id="player-shell" aria-label="音乐播放器">
+      <span class="playback-state visually-hidden" id="playback-state" role="status" aria-live="polite"></span>
       <div class="player-now">
         <a class="player-art" id="player-art" href="#/" aria-label="打开当前专辑">
           <span></span>
@@ -202,13 +247,13 @@
       <div class="player-center">
         <div class="player-controls">
           <button class="icon-button" id="prev-track" type="button" aria-label="上一首">
-            <svg class="ui-icon" aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-skip-back"></use></svg>
           </button>
           <button class="play-button" id="play-toggle" type="button" aria-label="播放或暂停">
             <svg class="ui-icon" aria-hidden="true"><use href="#icon-play"></use></svg>
           </button>
           <button class="icon-button" id="next-track" type="button" aria-label="下一首">
-            <svg class="ui-icon" aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+            <svg class="ui-icon" aria-hidden="true"><use href="#icon-skip-forward"></use></svg>
           </button>
         </div>
 
@@ -231,12 +276,12 @@
         <svg class="ui-icon" aria-hidden="true"><use href="#icon-list-music"></use></svg>
       </button>
 
-      <p class="playback-message" id="playback-message" role="status" hidden></p>
+      <div class="playback-message" id="playback-message" role="status" hidden></div>
       <audio id="audio" preload="metadata"></audio>
 
       <div class="playlist-panel" id="playlist-panel" hidden></div>
     </div>
 
-    <script type="module" src="./src/main.js?v=20260926-lunar-v4"></script>
+    <script type="module" src="./src/main.js?v=20260926-lunar-v5"></script>
   </body>
 </html>

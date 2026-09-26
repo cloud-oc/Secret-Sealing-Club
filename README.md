@@ -59,3 +59,5 @@ Pushing to `main` deploys the site through GitHub Pages Actions.
 ## License
 
 Website code is released under the [MIT License](LICENSE). Music, album artwork and booklet text retain their respective owners’ rights.
+
+[Rights and credits](RIGHTS.md) · [Lucide icon license](licenses/lucide.txt)

@@ -400,5 +400,45 @@ img { display: block; max-width: 100%; }
   .custom-cursor, .custom-cursor * { cursor: none !important; }
 }
 @media (prefers-reduced-motion: reduce), (hover: none), (pointer: coarse) { .astral-cursor { display: none; } }
-.gate-footnote:hover { color: var(--accent); }
+.gate-footnote a:hover { color: var(--accent); }
 .gate-content { padding-bottom: 40px; }
+
+.gate-footnote { line-height: 1.8; letter-spacing: .035em; }
+.gate-footnote span { display: block; margin-top: 4px; }
+
+/* A single luminous swell connects the lunar gate to the observatory. */
+.gate-radiance { position: absolute; pointer-events: none; inset: 0; opacity: 0; background: radial-gradient(ellipse at 50% 44%, #edfdf0 0%, #c7eadecc 10%, #b7d9e870 24%, #7a91be20 45%, transparent 72%); transform: scale(.25); }
+.is-departing .gate-radiance { animation: gate-dawn 1050ms cubic-bezier(.22,1,.36,1) both; }
+.is-departing .orb-halo { animation: none; opacity: 1; transform: scale(1.35); transition: transform .8s; }
+.is-departing .gate-content { animation: gate-dissolve 900ms ease-out both; }
+@keyframes gate-dawn { 0% { opacity: 0; transform: scale(.25); } 42% { opacity: .9; } 65% { opacity: .7; } 100% { opacity: 0; transform: scale(2.6); } }
+@keyframes gate-dissolve { 0%,25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+.ui-icon { stroke-width: 1.65; }
+.orb-seal .ui-icon { width: 38px; height: 38px; }
+.section-symbol, .cover-corner, .record-indicator { display: inline-flex; align-items: center; justify-content: center; }
+.record-indicator .ui-icon { width: 13px; height: 13px; }
+.cover-corner .ui-icon, .collection-footer .ui-icon { width: 16px; height: 16px; }
+.back-link { gap: 8px; }
+.intro-stars { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--accent); }
+.rights-note { color: var(--muted); font-size: 11px; line-height: 1.9; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.rights-note a { text-decoration: underline; text-underline-offset: 3px; color: var(--accent); }
+.gate-footnote { max-width: 760px; margin-inline: auto; font-size: 9px; }
+.gate-footnote span { margin-top: 2px; }
+.content-status { min-height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--muted); font-size: 13px; line-height: 1.8; text-align: center; }
+.content-status svg:has(use[href="#icon-loader"]), .play-button[aria-busy="true"] .ui-icon { animation: loading-orbit 1.4s linear infinite; }
+@keyframes loading-orbit { to { transform: rotate(360deg); } }
+.playback-message { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; justify-content: center; }
+.playback-message .quiet-link { min-height: 36px; color: var(--accent); }
+.playback-state:not(:empty) { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: auto; height: auto; clip: auto; overflow: visible; margin: 0; white-space: nowrap; background: var(--surface); color: var(--accent); font-size: 10px; padding: 5px 12px; border: 1px solid var(--line); }
+@media (max-height: 620px) {
+  .archive-orb { width: 160px; margin: 12px auto; }
+  .gate-content { padding: 0 0 115px; }
+  .gate-enter-label { margin-top: 0; }
+  .gate-footnote { bottom: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gate-radiance { display: none; }
+  .play-button[aria-busy="true"] { background: #93bdba; }
+}
+
+.has-cover .cover-disc, .player-art.has-cover { background-image: var(--album-cover), url("./assets/visuals/cover-fallback.svg"); }

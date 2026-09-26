@@ -1,13 +1,19 @@
+import { createStorage, fetchAlbum, createAudioController } from "./resilience.mjs";
+const storage = createStorage(() => localStorage);
 import { setupAstralCursor } from "./cursor.js?v=20260926-v1";
-const { albums: baseAlbums } = await import("./data.js?v=20260926-lunar-v1");
+import { albums as baseAlbums } from "./data.js?v=20260926-lunar-v1";
 
 let albums = baseAlbums;
+const contentStates = new Map();
+const contentRequests = new Map();
+let lastSavedAt = 0;
+let playbackStatus = "paused";
 
 const playbackStorageKey = "ssc-playback";
 const savedPlayback = readPlaybackState();
 
 const state = {
-  lang: localStorage.getItem("ssc-language") || "zh",
+  lang: storage.get("ssc-language") === "ja" ? "ja" : "zh",
   albumId: savedPlayback.albumId || "",
   trackIndex: Number.isInteger(savedPlayback.trackIndex) ? savedPlayback.trackIndex : 0,
   homeAlbumIndex: 0,
@@ -18,7 +24,7 @@ const state = {
 };
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-let motionPaused = localStorage.getItem("ssc-motion-paused") === "true";
+let motionPaused = storage.get("ssc-motion-paused") === "true";
 const gate = document.querySelector("#archive-gate");
 let gateClosing = false;
 let gateReturnFocus = null;
@@ -66,7 +72,6 @@ const intro = {
 const t = {
   zh: {
     gateAction: "点击进入",
-    gateLicense: "本网站代码基于 MIT 协议开源",
     gateReplay: "重播开场动画",
     motionPause: "暂停动态效果",
     motionResume: "开启动态效果",
@@ -120,7 +125,6 @@ const t = {
   },
   ja: {
     gateAction: "クリックして入る",
-    gateLicense: "本サイトのコードは MIT ライセンスで公開しています",
     gateReplay: "オープニングをもう一度",
     motionPause: "動きを一時停止",
     motionResume: "動きを再開",
@@ -180,7 +184,7 @@ function tr(key) {
 
 function readPlaybackState() {
   try {
-    const saved = JSON.parse(localStorage.getItem(playbackStorageKey) || "{}");
+    const saved = JSON.parse(storage.get(playbackStorageKey) || "{}");
     return saved && typeof saved === "object" ? saved : {};
   } catch {
     return {};
@@ -197,7 +201,7 @@ function savePlaybackState() {
     wasPlaying: false,
     updatedAt: Date.now(),
   };
-  localStorage.setItem(playbackStorageKey, JSON.stringify(payload));
+  storage.set(playbackStorageKey, JSON.stringify(payload));
 }
 
 function icon(name) {
@@ -255,23 +259,34 @@ function transitionRoute(render) {
   document.startViewTransition(render);
 }
 
-async function loadContentOverrides() {
-  const overrides = [];
+async function ensureAlbumContent(id) {
+  if (contentStates.get(id) === "ready") return;
+  if (contentRequests.has(id)) return contentRequests.get(id);
+  contentStates.set(id, "loading");
+  const request = fetchAlbum(id).then(override => {
+    albums = mergeAlbums(albums, [override]);
+    contentStates.set(id, "ready");
+  }).catch(() => { contentStates.set(id, "error"); }).finally(() => {
+    contentRequests.delete(id);
+    const album = albums.find(item => item.id === id);
+    if (location.hash === `#/album/${id}`) {
+      const y = window.scrollY;
+      renderAlbum(id);
+      window.scrollTo({ top: y, behavior: "instant" });
+    } else if (document.body.dataset.view === "home") {
+      if (albums[state.homeAlbumIndex]?.id === id) updateHomeCarousel();
+      if (state.albumId === id) { renderPlaylist(album); updatePlayer(album, state.trackIndex, false); }
+    }
+  });
+  contentRequests.set(id, request);
+  return request;
+}
 
-  try {
-    await Promise.all(
-      baseAlbums.map(async (album) => {
-        const response = await fetch(`./content/albums/${album.id}.json`, { cache: "no-store" });
-        if (!response.ok) return;
-        overrides.push(await response.json());
-      }),
-    );
-  } catch {
-    albums = baseAlbums;
-    return;
-  }
-
-  albums = mergeAlbums(baseAlbums, overrides);
+async function warmAlbumContent() {
+  const queue = albums.map(album => album.id);
+  await Promise.all([0, 1].map(async () => {
+    while (queue.length) await ensureAlbumContent(queue.shift());
+  }));
 }
 
 function applySavedPlaybackState() {
@@ -342,19 +357,19 @@ function renderHome() {
         <p class="observatory-label"><span></span> ${tr("brand")} <span class="label-year">2003 — 2024</span></p>
         <h1>${state.lang === "zh" ? "在科学世纪，<br>聆听<span>另一侧。</span>" : "科学世紀で、<br><span>向こう側</span>を聴く。"}</h1>
         <p class="hero-description">${state.lang === "zh" ? "越过常识的结界，循着旋律与星轨。<br>和莲子、梅莉一起，重访那些不可思议的夜晚。" : "常識の結界を越え、旋律と星の軌道を辿る。<br>蓮子とメリーと、不思議な夜をもう一度。"}</p>
-        <div class="hero-actions"><a class="primary-link" href="#/album/${albums[state.homeAlbumIndex].id}" id="hero-open">${icon("play")} ${state.lang === "zh" ? "聆听与阅读" : "音楽と物語へ"}</a><a class="quiet-link" href="#albums">${state.lang === "zh" ? "浏览全部专辑" : "すべてのアルバム"}<span>↗</span></a></div>
+        <div class="hero-actions"><a class="primary-link" href="#/album/${albums[state.homeAlbumIndex].id}" id="hero-open">${icon("play")} ${state.lang === "zh" ? "聆听与阅读" : "音楽と物語へ"}</a><a class="quiet-link" href="#albums">${state.lang === "zh" ? "浏览全部专辑" : "すべてのアルバム"}${icon("arrow-up-right")}</a></div>
         <div class="observer-signature"><span>${tr("renko")}</span><i>×</i><span>${tr("merry")}</span><small>${tr("observerNote")}</small></div>
       </div>
       <div class="lunar-stage">
-        <div class="lunar-map" aria-hidden="true"><div class="lunar-orbit orbit-outer"></div><div class="lunar-orbit orbit-inner"></div><img class="moon" src="./assets/visuals/moon.svg" alt=""><span class="orbit-star star-one">✦</span><span class="orbit-star star-two">+</span><span class="moon-coordinate">${tr("lunarObservation")}</span><span class="moon-vertical">${tr("boundary")}</span></div>
+        <div class="lunar-map" aria-hidden="true"><div class="lunar-orbit orbit-outer"></div><div class="lunar-orbit orbit-inner"></div><img class="moon" src="./assets/visuals/moon.svg" alt=""><span class="orbit-star star-one">${icon("sparkle")}</span><span class="orbit-star star-two">${icon("plus")}</span><span class="moon-coordinate">${tr("lunarObservation")}</span><span class="moon-vertical">${tr("boundary")}</span></div>
         <div class="featured-album" id="featured-album"></div>
         <div class="feature-controls"><button class="icon-button" type="button" data-feature-step="-1" aria-label="${tr("prevAlbum")}">${icon("chevron-left")}</button><span id="feature-count"></span><button class="icon-button" type="button" data-feature-step="1" aria-label="${tr("nextAlbum")}">${icon("chevron-right")}</button></div>
       </div>
     </section>
     <section class="collection" id="albums" aria-labelledby="collection-title">
-      <div class="collection-heading"><div><span class="section-symbol" aria-hidden="true">✧</span><h2 id="collection-title">${state.lang === "zh" ? "秘封音乐藏品" : "秘封音楽コレクション"}</h2><span class="collection-total">${String(albums.length).padStart(2,"0")} ${tr("recordUnit")}</span></div><p>${state.lang === "zh" ? "每一张唱片，都是一次越界。" : "一枚の音楽から、境界の向こうへ。"}</p></div>
-      <div class="record-shelf">${albums.map((album,index)=>`<button class="record" type="button" data-record="${index}" aria-pressed="false" aria-label="${tr("observeAlbum")}: ${escapeHtml(album.title[state.lang])}"><span class="record-art"><img src="${escapeHtml(album.cover)}" alt="" loading="lazy"><span class="record-number">${String(index+1).padStart(2,"0")}</span><span class="record-indicator" aria-hidden="true">↗</span></span><span class="record-title">${escapeHtml(album.title[state.lang])}</span><span class="record-caption">${album.year}<span>${album.tracks.length} ${tr("trackUnit")}</span></span></button>`).join("")}</div>
-      <footer class="collection-footer"><span>${tr("creator")} <i> / </i> ${tr("musicCollection")}</span><span>${state.lang === "zh" ? "非官方同人音乐阅读室" : "非公式ファン音楽読書室"} <span aria-hidden="true">✦</span></span></footer>
+      <div class="collection-heading"><div><span class="section-symbol" aria-hidden="true">${icon("sparkle")}</span><h2 id="collection-title">${state.lang === "zh" ? "秘封音乐藏品" : "秘封音楽コレクション"}</h2><span class="collection-total">${String(albums.length).padStart(2,"0")} ${tr("recordUnit")}</span></div><p>${state.lang === "zh" ? "每一张唱片，都是一次越界。" : "一枚の音楽から、境界の向こうへ。"}</p></div>
+      <div class="record-shelf">${albums.map((album,index)=>`<button class="record" type="button" data-record="${index}" aria-pressed="false" aria-label="${tr("observeAlbum")}: ${escapeHtml(album.title[state.lang])}"><span class="record-art"><img src="${escapeHtml(album.cover)}" alt="" loading="lazy" decoding="async" width="300" height="300"><span class="record-number">${String(index+1).padStart(2,"0")}</span><span class="record-indicator" aria-hidden="true">${icon("arrow-up-right")}</span></span><span class="record-title">${escapeHtml(album.title[state.lang])}</span><span class="record-caption">${album.year}<span>${album.tracks.length} ${tr("trackUnit")}</span></span></button>`).join("")}</div>
+      <footer class="collection-footer"><span>${tr("creator")} <i> / </i> ${tr("musicCollection")}</span><span>${state.lang === "zh" ? "非官方同人音乐阅读室" : "非公式ファン音楽読書室"} <span aria-hidden="true">${icon("sparkle")}</span></span></footer>
     </section>`;
   updateHomeCarousel();
   document.querySelectorAll("[data-record]").forEach(button => button.addEventListener("click", () => {
@@ -377,7 +392,7 @@ function updateHomeCarousel() {
   const feature = document.querySelector("#featured-album");
   if (!feature) return;
   const album = albums[state.homeAlbumIndex];
-  feature.innerHTML = `<a class="featured-cover" href="#/album/${album.id}" aria-label="${tr("openAlbum")}: ${escapeHtml(album.title[state.lang])}"><span class="record-disc" aria-hidden="true"></span><img src="${escapeHtml(album.cover)}" alt="${escapeHtml(album.title[state.lang])}"><span class="cover-corner" aria-hidden="true">↗</span></a><div class="featured-caption"><span>${album.catalog} <i> / </i> ${album.year}</span><h2><a href="#/album/${album.id}">${escapeHtml(album.title[state.lang])}</a></h2><p>${escapeHtml(album.summary[state.lang])}</p></div>`;
+  feature.innerHTML = `<a class="featured-cover" href="#/album/${album.id}" aria-label="${tr("openAlbum")}: ${escapeHtml(album.title[state.lang])}"><span class="record-disc" aria-hidden="true"></span><img src="${escapeHtml(album.cover)}" alt="${escapeHtml(album.title[state.lang])}" width="300" height="300" decoding="async" fetchpriority="high"><span class="cover-corner" aria-hidden="true">${icon("arrow-up-right")}</span></a><div class="featured-caption"><span>${album.catalog} <i> / </i> ${album.year}</span><h2><a href="#/album/${album.id}">${escapeHtml(album.title[state.lang])}</a></h2><p>${escapeHtml(album.summary[state.lang])}</p></div>`;
   if (!motionIsReduced()) feature.animate([{ opacity: .45, transform: "translateY(7px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: 320, easing: "cubic-bezier(.16,1,.3,1)" });
   document.querySelector("#feature-count").innerHTML = `<strong>${String(state.homeAlbumIndex+1).padStart(2,"0")}</strong><span> / ${String(albums.length).padStart(2,"0")}</span>`;
   document.querySelector("#hero-open").href = `#/album/${album.id}`;
@@ -385,6 +400,7 @@ function updateHomeCarousel() {
 }
 
 function renderAlbum(id) {
+  if (!contentStates.has(id) && albums.some(album => album.id === id)) void ensureAlbumContent(id);
   const album = albums.find((item) => item.id === id);
   if (!album) {
     renderNotFound();
@@ -403,7 +419,7 @@ function renderAlbum(id) {
   app.innerHTML = `
     <article class="album-page" style="--album-color: ${album.color}">
       <aside class="album-aside">
-        <a class="back-link" href="#/">← ${state.lang === "zh" ? "返回音乐藏品" : "コレクションへ"}</a>
+        <a class="back-link" href="#/">${icon("arrow-left")} ${state.lang === "zh" ? "返回音乐藏品" : "コレクションへ"}</a>
         <div class="album-aside-signal" aria-hidden="true">
           <span></span>
           <span></span>
@@ -437,7 +453,7 @@ function renderAlbum(id) {
       <section class="reader lyric-reader">
         <div class="reader-heading"><span>${state.lang === "zh" ? "专辑附带故事" : "アルバムの物語"}</span><span>${album.catalog}</span></div>
         <div class="story">
-          ${album.story.map((section, index) => storySection(album, section, index)).join("")}
+          ${contentStates.get(id) === "ready" ? album.story.map((section, index) => storySection(album, section, index)).join("") : `<div class="content-status" role="status">${icon(contentStates.get(id) === "error" ? "retry" : "loader")}<p>${state.lang === "zh" ? (contentStates.get(id) === "error" ? "故事暂时未能加载，音乐仍可操作。" : "正在打开这张唱片的故事…") : (contentStates.get(id) === "error" ? "物語を読み込めませんでした。音楽の操作は可能です。" : "物語を読み込み中…")}</p>${contentStates.get(id) === "error" ? `<button id="retry-content" class="quiet-link" type="button">${state.lang === "zh" ? "重新加载" : "再読み込み"}</button>` : ""}</div>`}
         </div>
         <div class="reader-navigation"><button class="quiet-link" type="button" data-story-step="-1">${icon("chevron-left")} ${state.lang === "zh" ? "上一篇" : "前の物語"}</button><button class="quiet-link reader-play" type="button" id="story-play">${icon("play")} ${state.lang === "zh" ? "播放本曲" : "この曲を再生"}</button><button class="quiet-link" type="button" data-story-step="1">${state.lang === "zh" ? "下一篇" : "次の物語"} ${icon("chevron-right")}</button></div>
       </section>
@@ -510,11 +526,13 @@ function renderNotFound() {
 }
 
 function bindAlbum(album) {
+  document.querySelector("#retry-content")?.addEventListener("click", () => { void ensureAlbumContent(album.id); renderAlbum(album.id); });
+  document.querySelectorAll("[data-story-step]").forEach(button => { button.disabled = contentStates.get(album.id) !== "ready"; });
   renderPlaylist(album);
   document.querySelectorAll("[data-story-step]").forEach(button => button.addEventListener("click", () => {
     const current = activeStoryIndex(album);
     const next = (current + Number(button.dataset.storyStep) + album.story.length) % album.story.length;
-    selectTrack(album, Math.max(0, album.story[next].track - 1), !audio.paused);
+    selectTrack(album, Math.max(0, album.story[next].track - 1), playback.wanted);
     document.querySelector(".reader").scrollIntoView({ block: "start", behavior: "instant" });
   }));
   document.querySelector("#story-play")?.addEventListener("click", playAudioFromGesture);
@@ -564,9 +582,7 @@ function updatePlayer(album, index, autoplay) {
 
   if (audio.dataset.src !== source) {
     document.querySelector("#playback-message").hidden = true;
-    audio.dataset.src = source;
-    audio.src = source;
-    audio.dataset.resumeTime = restoreTime > 0 ? String(restoreTime) : "";
+    playback.setSource(source, restoreTime);
     player.seek.value = 0;
     updateSeekProgress();
     player.current.textContent = "0:00";
@@ -613,7 +629,7 @@ function syncPlayerAlbumLink(album) {
 
 function setLanguage(lang) {
   state.lang = lang;
-  localStorage.setItem("ssc-language", lang);
+  storage.set("ssc-language", lang);
   syncShellText();
   route();
 }
@@ -648,67 +664,52 @@ function currentAlbum() {
   return albums.find((album) => album.id === state.albumId) || albums[0];
 }
 
-function playAudioFromGesture() {
-  document.querySelector("#playback-message").hidden = true;
-  state.wantsAutoplay = true;
-  return audio.play().catch((error) => {
-    if (error.name === "AbortError") return;
-    showPlaybackError();
-    state.isPlaying = false;
-    state.wantsAutoplay = false;
+const playback = createAudioController(audio, {
+  onState(status, wanted) {
+    playbackStatus = status;
+    state.isPlaying = status === "playing";
+    state.wantsAutoplay = wanted;
+    player.shell.dataset.playback = status;
     updatePlayButton();
-  });
-}
-
-function showPlaybackError() {
-  const message = document.querySelector("#playback-message");
-  message.textContent = state.lang === "zh" ? "暂时无法播放此音源，可点击曲名在网易云收听。" : "音源を再生できません。曲名から网易云でお聴きください。";
-  message.hidden = false;
-}
-
-audio.addEventListener("error", () => {
-  if (state.wantsAutoplay) showPlaybackError();
+    if (status === "playing" || status === "paused") savePlaybackState();
+  },
+  onError: showPlaybackError,
 });
 
+function playAudioFromGesture() {
+  document.querySelector("#playback-message").hidden = true;
+  return playback.play();
+}
+
+function showPlaybackError(reason = "source") {
+  const message = document.querySelector("#playback-message");
+  const copy = state.lang === "zh" ? (reason === "timeout" ? "音源响应较慢，请重试或前往网易云收听。" : "此音源暂时无法播放，请重试或前往网易云收听。") : "音源を再生できません。再試行するか网易云でお聴きください。";
+  message.innerHTML = `<span>${copy}</span><button class="quiet-link" type="button" id="retry-audio">${icon("retry")}${state.lang === "zh" ? "重试" : "再試行"}</button><a class="quiet-link" href="${escapeHtml(player.title.href)}" target="_blank" rel="noopener">${icon("external")}网易云</a>`;
+  message.hidden = false;
+  document.querySelector("#retry-audio").addEventListener("click", playAudioFromGesture);
+}
+
 player.play.addEventListener("click", () => {
-  if (audio.paused) {
-    playAudioFromGesture();
-  } else {
-    state.wantsAutoplay = false;
-    audio.pause();
-  }
+  if (playback.wanted) playback.pause();
+  else void playAudioFromGesture();
 });
 
 player.prev.addEventListener("click", () => {
   const album = currentAlbum();
   const index = (state.trackIndex - 1 + album.tracks.length) % album.tracks.length;
-  selectTrack(album, index, !audio.paused);
+  selectTrack(album, index, playback.wanted);
 });
 
 player.next.addEventListener("click", () => {
   const album = currentAlbum();
   const index = (state.trackIndex + 1) % album.tracks.length;
-  selectTrack(album, index, !audio.paused);
+  selectTrack(album, index, playback.wanted);
 });
 
 player.seek.addEventListener("input", () => {
   updateSeekProgress();
-  if (!audio.duration) return;
+  if (!Number.isFinite(audio.duration) || audio.duration <= 0) return;
   audio.currentTime = (Number(player.seek.value) / 1000) * audio.duration;
-});
-
-audio.addEventListener("play", () => {
-  state.isPlaying = true;
-  state.wantsAutoplay = true;
-  updatePlayButton();
-  savePlaybackState();
-});
-
-audio.addEventListener("pause", () => {
-  state.isPlaying = false;
-  state.wantsAutoplay = false;
-  updatePlayButton();
-  savePlaybackState();
 });
 
 audio.addEventListener("loadedmetadata", () => {
@@ -729,7 +730,7 @@ audio.addEventListener("timeupdate", () => {
     player.seek.value = Math.round((audio.currentTime / audio.duration) * 1000);
     updateSeekProgress();
   }
-  savePlaybackState();
+  if (Date.now() - lastSavedAt > 2000) { lastSavedAt = Date.now(); savePlaybackState(); }
 });
 
 audio.addEventListener("ended", () => {
@@ -789,8 +790,11 @@ function renderPlaylist(album) {
 }
 
 function updatePlayButton() {
-  player.play.innerHTML = icon(state.isPlaying ? "pause" : "play");
-  player.play.setAttribute("aria-label", state.lang === "zh" ? (state.isPlaying ? "暂停" : "播放") : (state.isPlaying ? "一時停止" : "再生"));
+  const pending = playbackStatus === "loading" || playbackStatus === "buffering";
+  player.play.innerHTML = icon(pending ? "loader" : state.isPlaying ? "pause" : "play");
+  player.play.setAttribute("aria-busy", String(pending));
+  document.querySelector("#playback-state").textContent = pending ? (state.lang === "zh" ? "正在缓冲音源…" : "音源を読み込み中…") : "";
+  player.play.setAttribute("aria-label", state.lang === "zh" ? (state.wantsAutoplay ? "暂停" : "播放") : (state.wantsAutoplay ? "一時停止" : "再生"));
   player.shell.classList.toggle("is-playing", state.isPlaying);
 }
 
@@ -929,7 +933,7 @@ function motionIsReduced() {
 }
 
 function syncMotionText() {
-  const labels = { "gate-footnote": "gateLicense", "gate-replay": "gateReplay" };
+  const labels = { "gate-replay": "gateReplay" };
   Object.entries(labels).forEach(([id, key]) => { document.getElementById(id).textContent = tr(key); });
   document.querySelector("#gate-enter-label").textContent = tr("gateAction");
   gate.setAttribute("aria-label", tr("gateAction"));
@@ -959,7 +963,7 @@ async function enterArchive(skip = false) {
   try {
     if (!skip && !motionIsReduced()) {
       gate.classList.add("is-departing");
-      await gate.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 720, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" }).finished;
+      await gate.animate([{ opacity: 1, offset: 0 }, { opacity: 1, offset: .5 }, { opacity: 0, offset: 1 }], { duration: 1050, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" }).finished;
     }
   } catch {
     // A cancelled transition must still release the modal and restore focus.
@@ -982,7 +986,7 @@ document.querySelector("#gate-replay").addEventListener("click", () => openArchi
 gate.addEventListener("cancel", event => { event.preventDefault(); enterArchive(true); });
 document.querySelector("#motion-toggle").addEventListener("click", () => {
   motionPaused = !motionPaused;
-  localStorage.setItem("ssc-motion-paused", String(motionPaused));
+  storage.set("ssc-motion-paused", String(motionPaused));
   syncMotionText();
   resetStars();
 });
@@ -990,7 +994,7 @@ document.querySelector("#motion-toggle").addEventListener("click", () => {
 function drawStars(time = 0) {
   const canvas = document.querySelector("#starfield");
   const context = canvas.getContext("2d");
-  const pixelRatio = window.devicePixelRatio || 1;
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
   const width = window.innerWidth;
   const height = window.innerHeight;
   const slowTime = motionIsReduced() ? 0 : time * 0.00008;
@@ -1072,9 +1076,10 @@ function wrap(value, limit) {
   return ((value % limit) + limit) % limit;
 }
 
+let lastStarDraw = -Infinity;
 function animateStars(time = 0) {
   if (document.hidden) return;
-  drawStars(time);
+  if (time - lastStarDraw >= 33 || time === 0) { drawStars(time); lastStarDraw = time; }
   if (!motionIsReduced()) {
     starAnimationFrame = window.requestAnimationFrame(animateStars);
   }
@@ -1101,10 +1106,19 @@ prefersReducedMotion.addEventListener("change", () => {
 });
 
 animateStars();
-await loadContentOverrides();
 applySavedPlaybackState();
 syncShellText();
 route();
 openArchiveGate();
+void ensureAlbumContent(state.albumId || albums[0].id);
+setTimeout(() => void warmAlbumContent(), 500);
 
 setupAstralCursor(() => !motionIsReduced());
+
+// Capturing handles lazy images too, and falls back only once per image.
+document.addEventListener("error", event => {
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement) || image.dataset.fallback) return;
+  image.dataset.fallback = "true";
+  image.src = "./assets/visuals/cover-fallback.svg";
+}, true);

@@ -39,3 +39,14 @@ A nocturnal lunar observatory for Secret Sealing Club music and booklet stories.
 
 ## Cursor
 Independently implemented white dot, trailing ring, hover expansion, and click ripple matching the AstralCursor visual reference at https://github.com/sunay04/sunay04.github.io. The overlay follows native dialogs into the top layer. Touch, reduced-motion, and paused-motion modes use the system cursor.
+
+
+## September 2026 refinement
+- Local Lucide 1.48.0 SVG sprite for all interface icons; the custom club insignia remains the brand mark. License retained in licenses/lucide.txt.
+- The lunar entrance expands a single soft radiance over 1050ms, then dissolves. Reduced-motion and paused-motion modes enter directly.
+- English rights notice distinguishes MIT software from third-party works and links the official Japanese guidelines. RIGHTS.md records the scope and outstanding permissions.
+- The page and gate render before story requests. Selected content has priority; two background workers warm remaining albums. Requests are deduplicated, bounded by an 8-second timeout and independently recoverable.
+- Audio uses explicit loading, buffering, playing, paused and error states. A 15-second stalled-playback deadline offers manual retry and an external source link. Old play promises cannot change a newer request's state.
+- Position persistence is throttled to two seconds, and unavailable browser storage cannot stop rendering. The starfield is capped at 30fps and 1.5 device pixel ratio.
+
+Validation: `node --test tests/resilience.test.mjs`; browser checks for entry, mobile layout, playback, rapid track selection and retry recovery.

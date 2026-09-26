@@ -59,3 +59,5 @@ python3 -m http.server 4173 --bind 127.0.0.1
 ## ライセンス
 
 サイトのコードは [MIT ライセンス](LICENSE) で公開しています。音楽、ジャケット、ブックレット本文の権利は各権利者に帰属します。
+
+[権利とクレジット](RIGHTS.md) · [Lucide icon license](licenses/lucide.txt)
