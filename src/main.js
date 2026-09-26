@@ -674,6 +674,9 @@ const playback = createAudioController(audio, {
     if (status === "playing" || status === "paused") savePlaybackState();
   },
   onError: showPlaybackError,
+  onEnded() {
+    selectTrack(currentAlbum(), (state.trackIndex + 1) % currentAlbum().tracks.length, true);
+  },
 });
 
 function playAudioFromGesture() {
@@ -733,11 +736,6 @@ audio.addEventListener("timeupdate", () => {
   if (Date.now() - lastSavedAt > 2000) { lastSavedAt = Date.now(); savePlaybackState(); }
 });
 
-audio.addEventListener("ended", () => {
-  state.resumeTime = 0;
-  state.restoringPlayback = false;
-  selectTrack(currentAlbum(), (state.trackIndex + 1) % currentAlbum().tracks.length, true);
-});
 
 player.playlistToggle.addEventListener("click", () => {
   if (player.playlistToggle.disabled) return;

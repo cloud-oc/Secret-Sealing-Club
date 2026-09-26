@@ -17,7 +17,7 @@ export async function fetchAlbum(id, { fetcher = fetch, timeoutMs = 8000 } = {})
   } finally { clearTimeout(timer); }
 }
 
-export function createAudioController(audio, { onState, onError, timeoutMs = 15000 }) {
+export function createAudioController(audio, { onState, onError, onEnded = () => {}, timeoutMs = 15000 }) {
   let epoch = 0, timer = 0, wanted = false, failed = false;
   const clear = () => { clearTimeout(timer); timer = 0; };
   const publish = status => onState(status, wanted);
@@ -33,7 +33,11 @@ export function createAudioController(audio, { onState, onError, timeoutMs = 150
   for (const event of ['waiting', 'stalled']) audio.addEventListener(event, () => { if (wanted) { publish('buffering'); arm(); } });
   audio.addEventListener('pause', () => { if (!wanted) publish(failed ? 'error' : 'paused'); });
   audio.addEventListener('error', () => { if (wanted) fail('source'); });
-  audio.addEventListener('ended', () => { wanted = false; clear(); publish('paused'); });
+  audio.addEventListener('ended', () => {
+    // A queued event from a replaced source must not advance the new track.
+    if (!wanted || !audio.ended) return;
+    wanted = false; clear(); publish('paused'); onEnded();
+  });
   return {
     get wanted() { return wanted; },
     setSource(source, resumeTime = 0) {
@@ -41,6 +45,9 @@ export function createAudioController(audio, { onState, onError, timeoutMs = 150
       audio.dataset.src = source;
       audio.dataset.resumeTime = String(resumeTime || '');
       audio.src = source;
+      // Abort pending play requests and discard the previous media resource now,
+      // before another user gesture can start playback.
+      audio.load();
       publish('paused');
     },
     async play() {

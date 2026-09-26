@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {createStorage, fetchAlbum, createAudioController} from '../src/resilience.mjs';
 
 class FakeAudio extends EventTarget {
-  dataset = {}; src = ''; error = null; paused = true;
+  dataset = {}; src = ''; error = null; paused = true; ended = false;
   implementation = () => { this.paused = false; this.dispatchEvent(new Event('playing')); return Promise.resolve(); };
   play() { return this.implementation(); }
   pause() { this.paused = true; this.dispatchEvent(new Event('pause')); }
-  load() { this.error = null; }
+  load() { this.error = null; this.ended = false; }
 }
 function fixture(timeoutMs = 1000) {
   const audio = new FakeAudio(), states = [], errors = [];
@@ -69,4 +69,44 @@ test('source failures settle error state once', async () => {
 });
 test('stale playing after pause cannot restart sound', () => {
   const {audio,control}=fixture();control.pause();audio.dispatchEvent(new Event('playing'));assert.equal(audio.paused,true);
+});
+
+test('switching tracks releases the active resource before starting the new song', async () => {
+  const {audio,control}=fixture();
+  let activeSource = '', pendingReject;
+  audio.load = () => {
+    assert.equal(audio.paused, true);
+    activeSource = '';
+    pendingReject?.(Object.assign(Error('replaced'), {name:'AbortError'}));
+    pendingReject = null;
+  };
+  audio.implementation = () => {
+    activeSource = audio.src;
+    audio.paused = false;
+    return new Promise((_, reject) => { pendingReject = reject; });
+  };
+  control.setSource('first'); const first = control.play();
+  assert.equal(activeSource, 'first');
+  control.setSource('second');
+  assert.equal(activeSource, '');
+  const second = control.play();
+  control.setSource('third');
+  await Promise.all([first, second]);
+  assert.equal(activeSource, '');
+  assert.equal(audio.src, 'third');
+  control.pause();
+});
+
+test('only the current naturally ended track advances the playlist', async () => {
+  const audio = new FakeAudio(); let advances = 0;
+  const control = createAudioController(audio, {onState(){},onError(){},onEnded(){advances++;}});
+  control.setSource('first'); await control.play();
+  control.setSource('second'); await control.play();
+  audio.dispatchEvent(new Event('ended'));
+  assert.equal(advances, 0);
+  assert.equal(control.wanted, true);
+  audio.ended = true; audio.dispatchEvent(new Event('ended'));
+  audio.dispatchEvent(new Event('ended'));
+  assert.equal(advances, 1);
+  assert.equal(control.wanted, false);
 });
