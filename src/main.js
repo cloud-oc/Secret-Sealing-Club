@@ -944,14 +944,14 @@ function syncMotionText() {
 }
 
 function openArchiveGate(replay = false) {
-  if (gate.open) return;
+  if (gate.open && replay) return;
   gateReturnFocus = replay ? intro.toggle : app;
   if (!intro.panel.hidden) setIntroOpen(false);
   closePlaylist();
   gateClosing = false;
   gate.classList.remove("is-departing");
   document.body.classList.add("archive-locked");
-  gate.showModal();
+  if (!gate.open) gate.showModal();
   document.querySelector("#archive-enter").focus({ preventScroll: true });
 }
 

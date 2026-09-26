@@ -14,7 +14,7 @@
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <link rel="stylesheet" href="./styles.css?v=20260926-lunar-v5" />
   </head>
-  <body>
+  <body class="archive-locked">
     <canvas id="starfield" aria-hidden="true"></canvas>
     <svg class="icon-sprite" aria-hidden="true" focusable="false">
       <symbol id="icon-github" viewBox="0 0 24 24">
@@ -137,6 +137,10 @@
       </div>
       <div class="gate-footnote"><a id="gate-license" href="./LICENSE" target="_blank" rel="noopener">© 2026 Cloud09. Website code released under the MIT License.</a><span>An unofficial Touhou Project fan work. Not affiliated with or endorsed by Team Shanghai Alice.</span><span>Touhou Project © ZUN / Team Shanghai Alice. Music, artwork and texts are not covered by the MIT License.</span><span><a href="https://touhou-project.news/guideline/" target="_blank" rel="noopener">Official Fan Content Guidelines</a></span></div>
     </dialog>
+    <script>
+      // Show the opening screen before the page below can paint or modules load.
+      document.querySelector("#archive-gate").showModal();
+    </script>
 
     <header class="site-header">
       <a class="brand" href="#/">
