@@ -1,4 +1,5 @@
-const { albums: baseAlbums } = await import("./data.js?v=20260617-archive-sky-v10");
+import { setupAstralCursor } from "./cursor.js?v=20260926-v1";
+const { albums: baseAlbums } = await import("./data.js?v=20260926-lunar-v1");
 
 let albums = baseAlbums;
 
@@ -13,33 +14,19 @@ const state = {
   isPlaying: false,
   resumeTime: Number.isFinite(savedPlayback.currentTime) ? savedPlayback.currentTime : 0,
   wantsAutoplay: false,
-  hasEnteredArchive: false,
   restoringPlayback: true,
 };
 
-let homeOrbitAnimationFrame = 0;
-let homeOrbitLastTime = 0;
-let homeOrbitAngle = 0;
-let homeOrbitTargetAngle = 0;
-let homeOrbitIsSettling = false;
-let homeOrbitResumeAt = 0;
-const homeOrbitSpeed = -9.6;
-const homeOrbitSettleRate = 8.5;
-const homeOrbitFrameDelay = 32;
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+let motionPaused = localStorage.getItem("ssc-motion-paused") === "true";
+const gate = document.querySelector("#archive-gate");
+let gateClosing = false;
+let gateReturnFocus = null;
+let entranceTimer = 0;
 let starAnimationFrame = 0;
 let starCanvasWidth = 0;
 let starCanvasHeight = 0;
 let starCanvasPixelRatio = 0;
-let earthAnimationFrame = 0;
-let earthRenderer = null;
-let earthScene = null;
-let earthCamera = null;
-let earthGroup = null;
-let earthClockStart = 0;
-let playerSignalAnimationFrame = 0;
-let playerSignalStart = 0;
-const playerSignalTrailCount = 9;
 
 const app = document.querySelector("#app");
 const audio = document.querySelector("#audio");
@@ -57,7 +44,6 @@ const player = {
   seek: document.querySelector("#seek"),
   current: document.querySelector("#current-time"),
   duration: document.querySelector("#duration"),
-  signalDots: [],
 };
 const language = {
   toggle: document.querySelector("#lang-toggle"),
@@ -77,14 +63,25 @@ const intro = {
   repo: document.querySelector("#intro-repo"),
   feedback: document.querySelector("#intro-feedback"),
 };
-const archiveGate = {
-  shell: document.querySelector("#archive-gate"),
-  enter: document.querySelector("#archive-enter"),
-  enterLabel: document.querySelector("#archive-enter-label"),
-};
-
 const t = {
   zh: {
+    gateAction: "点击进入",
+    gateLicense: "本网站代码基于 MIT 协议开源",
+    gateReplay: "重播开场动画",
+    motionPause: "暂停动态效果",
+    motionResume: "开启动态效果",
+
+    headerMotto: "音乐与幻想，通往彼侧的边界。",
+    renko: "宇佐见 莲子",
+    merry: "玛艾露贝莉·赫恩",
+    observerNote: "两位观测者，一个隐秘的世界。",
+    lunarObservation: "月面观测",
+    boundary: "梦境与现实的边界",
+    recordUnit: "张唱片",
+    creator: "上海爱丽丝幻乐团",
+    musicCollection: "ZUN 音乐藏品",
+    skipContent: "跳转到内容",
+
     siteTitle: "秘封俱乐部 | 太空观测记录",
     brand: "秘封俱乐部",
     brandSub: "太空观测记录",
@@ -122,6 +119,23 @@ const t = {
     notFoundBody: "回到藏书目，重新选择一份秘封记录。",
   },
   ja: {
+    gateAction: "クリックして入る",
+    gateLicense: "本サイトのコードは MIT ライセンスで公開しています",
+    gateReplay: "オープニングをもう一度",
+    motionPause: "動きを一時停止",
+    motionResume: "動きを再開",
+
+    headerMotto: "音楽と幻想、その境界へ。",
+    renko: "宇佐見 蓮子",
+    merry: "マエリベリー・ハーン",
+    observerNote: "二人の観測者、ひとつの隠された世界。",
+    lunarObservation: "月面観測",
+    boundary: "夢と現の境界",
+    recordUnit: "枚のレコード",
+    creator: "上海アリス幻樂団",
+    musicCollection: "ZUNの音楽コレクション",
+    skipContent: "本文へ移動",
+
     siteTitle: "秘封倶楽部 | 宇宙観測記録",
     brand: "秘封倶楽部",
     brandSub: "宇宙観測記録",
@@ -208,6 +222,8 @@ function route() {
   const [kind, id] = hash.split("/");
 
   const render = () => {
+    closePlaylist();
+    if (kind !== "albums") window.scrollTo({ top: 0, behavior: "instant" });
     if (!kind) {
       renderHome();
       return;
@@ -231,7 +247,7 @@ function route() {
 }
 
 function transitionRoute(render) {
-  if (prefersReducedMotion.matches || !document.startViewTransition) {
+  if (motionIsReduced() || !document.startViewTransition) {
     render();
     return;
   }
@@ -318,98 +334,57 @@ function pickDefined(source, keys) {
 }
 
 function renderHome() {
-  stopHomeCarouselTimer();
-  if (state.homeAlbumIndex >= albums.length) state.homeAlbumIndex = 0;
   document.body.dataset.view = "home";
   document.title = tr("siteTitle");
   app.innerHTML = `
-    <section class="hero">
-      <div class="hero-stage" aria-hidden="true">
-        <span class="stage-orbit stage-orbit-a"></span>
-        <span class="stage-orbit stage-orbit-b"></span>
-        <span class="stage-slice stage-slice-a"></span>
-        <span class="stage-slice stage-slice-b"></span>
-      </div>
+    <section class="observatory">
       <div class="hero-copy">
-        <p class="kicker">${tr("heroKicker")}</p>
-        <h1>${tr("heroTitleA")}<br><span class="jp-title">${tr("heroTitleB")}</span></h1>
-        <div class="hero-system" aria-hidden="true">
-          <span>RENKO</span>
-          <i></i>
-          <span>MERRY</span>
-          <i></i>
-          <span>BARRIER FIELD</span>
-        </div>
+        <p class="observatory-label"><span></span> ${tr("brand")} <span class="label-year">2003 — 2024</span></p>
+        <h1>${state.lang === "zh" ? "在科学世纪，<br>聆听<span>另一侧。</span>" : "科学世紀で、<br><span>向こう側</span>を聴く。"}</h1>
+        <p class="hero-description">${state.lang === "zh" ? "越过常识的结界，循着旋律与星轨。<br>和莲子、梅莉一起，重访那些不可思议的夜晚。" : "常識の結界を越え、旋律と星の軌道を辿る。<br>蓮子とメリーと、不思議な夜をもう一度。"}</p>
+        <div class="hero-actions"><a class="primary-link" href="#/album/${albums[state.homeAlbumIndex].id}" id="hero-open">${icon("play")} ${state.lang === "zh" ? "聆听与阅读" : "音楽と物語へ"}</a><a class="quiet-link" href="#albums">${state.lang === "zh" ? "浏览全部专辑" : "すべてのアルバム"}<span>↗</span></a></div>
+        <div class="observer-signature"><span>${tr("renko")}</span><i>×</i><span>${tr("merry")}</span><small>${tr("observerNote")}</small></div>
       </div>
-      ${albumCarousel()}
+      <div class="lunar-stage">
+        <div class="lunar-map" aria-hidden="true"><div class="lunar-orbit orbit-outer"></div><div class="lunar-orbit orbit-inner"></div><img class="moon" src="./assets/visuals/moon.svg" alt=""><span class="orbit-star star-one">✦</span><span class="orbit-star star-two">+</span><span class="moon-coordinate">${tr("lunarObservation")}</span><span class="moon-vertical">${tr("boundary")}</span></div>
+        <div class="featured-album" id="featured-album"></div>
+        <div class="feature-controls"><button class="icon-button" type="button" data-feature-step="-1" aria-label="${tr("prevAlbum")}">${icon("chevron-left")}</button><span id="feature-count"></span><button class="icon-button" type="button" data-feature-step="1" aria-label="${tr("nextAlbum")}">${icon("chevron-right")}</button></div>
+      </div>
     </section>
-  `;
-  const playerAlbum = currentAlbum();
-  if (!state.albumId && playerAlbum) state.albumId = playerAlbum.id;
-  if (playerAlbum) {
-    if (state.trackIndex >= playerAlbum.tracks.length) state.trackIndex = 0;
-    renderPlaylist(playerAlbum);
-    updatePlayer(playerAlbum, state.trackIndex, false);
-  }
-  setPlaylistAvailability(Boolean(playerAlbum));
+    <section class="collection" id="albums" aria-labelledby="collection-title">
+      <div class="collection-heading"><div><span class="section-symbol" aria-hidden="true">✧</span><h2 id="collection-title">${state.lang === "zh" ? "秘封音乐藏品" : "秘封音楽コレクション"}</h2><span class="collection-total">${String(albums.length).padStart(2,"0")} ${tr("recordUnit")}</span></div><p>${state.lang === "zh" ? "每一张唱片，都是一次越界。" : "一枚の音楽から、境界の向こうへ。"}</p></div>
+      <div class="record-shelf">${albums.map((album,index)=>`<button class="record" type="button" data-record="${index}" aria-pressed="false" aria-label="${tr("observeAlbum")}: ${escapeHtml(album.title[state.lang])}"><span class="record-art"><img src="${escapeHtml(album.cover)}" alt="" loading="lazy"><span class="record-number">${String(index+1).padStart(2,"0")}</span><span class="record-indicator" aria-hidden="true">↗</span></span><span class="record-title">${escapeHtml(album.title[state.lang])}</span><span class="record-caption">${album.year}<span>${album.tracks.length} ${tr("trackUnit")}</span></span></button>`).join("")}</div>
+      <footer class="collection-footer"><span>${tr("creator")} <i> / </i> ${tr("musicCollection")}</span><span>${state.lang === "zh" ? "非官方同人音乐阅读室" : "非公式ファン音楽読書室"} <span aria-hidden="true">✦</span></span></footer>
+    </section>`;
+  updateHomeCarousel();
+  document.querySelectorAll("[data-record]").forEach(button => button.addEventListener("click", () => {
+    state.homeAlbumIndex = Number(button.dataset.record);
+    updateHomeCarousel();
+    document.querySelector(".lunar-stage").scrollIntoView({ block: "center", behavior: prefersReducedMotion.matches ? "instant" : "smooth" });
+  }));
+  document.querySelectorAll("[data-feature-step]").forEach(button => button.addEventListener("click", () => {
+    state.homeAlbumIndex = (state.homeAlbumIndex + Number(button.dataset.featureStep) + albums.length) % albums.length;
+    updateHomeCarousel();
+  }));
+  const album = currentAlbum();
+  renderPlaylist(album);
+  updatePlayer(album, state.trackIndex, false);
+  setPlaylistAvailability(true);
   updateLanguageButtons();
-  bindHomeCarousel();
 }
 
-function albumCarousel() {
-  return `
-    <section class="album-carousel orbit-timeline" id="albums" aria-label="${tr("albumCarousel")}" aria-roledescription="carousel">
-      <div class="orbit-mask" aria-hidden="true"></div>
-      <div class="orbit-core" aria-hidden="true">
-        <canvas id="earth-canvas"></canvas>
-        <div class="earth-fallback"><span></span></div>
-      </div>
-      <div class="orbit-progress" role="tablist" aria-label="${tr("albumCarousel")}">
-        ${albums.map(carouselDot).join("")}
-      </div>
-      <div class="orbit-guide" aria-hidden="true">
-        <span class="orbit-ring orbit-ring-main"></span>
-        <span class="orbit-ring orbit-ring-ghost"></span>
-        <span class="orbit-axis"></span>
-      </div>
-      <div class="carousel-viewport">
-        ${albums.map(albumPoster).join("")}
-      </div>
-    </section>
-  `;
-}
-
-function albumPoster(album, index) {
-  const offset = carouselOffset(index);
-  return `
-    <a class="album-card album-poster timeline-card" href="#/album/${album.id}" style="--album-color: ${album.color}" data-carousel-slide="${index}" aria-label="${tr("openAlbum")}: ${album.title[state.lang]}" ${offset === 0 ? "" : 'aria-hidden="true" tabindex="-1"'}>
-      <span class="poster-glow" aria-hidden="true"></span>
-      <span class="timeline-stem" aria-hidden="true"></span>
-      <span class="album-number">HIFUU ${String(index + 1).padStart(2, "0")}</span>
-      <span class="poster-title-block">
-        <h2>${album.title[state.lang]}</h2>
-      </span>
-      <span class="album-meta">
-        <span>${album.year}</span>
-        <span>${album.tracks.length}${tr("trackUnit")}</span>
-      </span>
-    </a>
-  `;
-}
-
-function carouselDot(album, index) {
-  const isActive = index === state.homeAlbumIndex;
-  return `
-    <button class="orbit-progress-button ${isActive ? "is-active" : ""}" type="button" role="tab" data-carousel-index="${index}" aria-label="${album.title[state.lang]}" aria-selected="${String(isActive)}">
-      <span></span>
-      <em>${String(index + 1).padStart(2, "0")}</em>
-    </button>
-  `;
+function updateHomeCarousel() {
+  const feature = document.querySelector("#featured-album");
+  if (!feature) return;
+  const album = albums[state.homeAlbumIndex];
+  feature.innerHTML = `<a class="featured-cover" href="#/album/${album.id}" aria-label="${tr("openAlbum")}: ${escapeHtml(album.title[state.lang])}"><span class="record-disc" aria-hidden="true"></span><img src="${escapeHtml(album.cover)}" alt="${escapeHtml(album.title[state.lang])}"><span class="cover-corner" aria-hidden="true">↗</span></a><div class="featured-caption"><span>${album.catalog} <i> / </i> ${album.year}</span><h2><a href="#/album/${album.id}">${escapeHtml(album.title[state.lang])}</a></h2><p>${escapeHtml(album.summary[state.lang])}</p></div>`;
+  if (!motionIsReduced()) feature.animate([{ opacity: .45, transform: "translateY(7px)" }, { opacity: 1, transform: "translateY(0)" }], { duration: 320, easing: "cubic-bezier(.16,1,.3,1)" });
+  document.querySelector("#feature-count").innerHTML = `<strong>${String(state.homeAlbumIndex+1).padStart(2,"0")}</strong><span> / ${String(albums.length).padStart(2,"0")}</span>`;
+  document.querySelector("#hero-open").href = `#/album/${album.id}`;
+  document.querySelectorAll("[data-record]").forEach(button => button.setAttribute("aria-pressed", String(Number(button.dataset.record) === state.homeAlbumIndex)));
 }
 
 function renderAlbum(id) {
-  stopHomeCarouselTimer();
-  disposeEarth();
   const album = albums.find((item) => item.id === id);
   if (!album) {
     renderNotFound();
@@ -420,6 +395,7 @@ function renderAlbum(id) {
   const previousAlbum = albums[(albumIndex - 1 + albums.length) % albums.length];
   const nextAlbum = albums[(albumIndex + 1) % albums.length];
   document.body.dataset.view = "album";
+  if (state.albumId !== album.id) state.trackIndex = 0;
   state.albumId = album.id;
   if (state.trackIndex >= album.tracks.length) state.trackIndex = 0;
   document.title = `${album.title[state.lang]} | ${tr("brand")}`;
@@ -427,6 +403,7 @@ function renderAlbum(id) {
   app.innerHTML = `
     <article class="album-page" style="--album-color: ${album.color}">
       <aside class="album-aside">
+        <a class="back-link" href="#/">← ${state.lang === "zh" ? "返回音乐藏品" : "コレクションへ"}</a>
         <div class="album-aside-signal" aria-hidden="true">
           <span></span>
           <span></span>
@@ -441,6 +418,7 @@ function renderAlbum(id) {
           <div class="cover-disc"><span></span></div>
         </div>
         <div class="album-info">
+          <p class="album-edition">${album.catalog} · ${album.year} · ${album.tracks.length} ${tr("trackUnit")}</p>
           <h1>${album.title[state.lang]}</h1>
           <p>${album.summary[state.lang]}</p>
           <div class="album-links">
@@ -457,9 +435,11 @@ function renderAlbum(id) {
       </aside>
 
       <section class="reader lyric-reader">
+        <div class="reader-heading"><span>${state.lang === "zh" ? "专辑附带故事" : "アルバムの物語"}</span><span>${album.catalog}</span></div>
         <div class="story">
           ${album.story.map((section, index) => storySection(album, section, index)).join("")}
         </div>
+        <div class="reader-navigation"><button class="quiet-link" type="button" data-story-step="-1">${icon("chevron-left")} ${state.lang === "zh" ? "上一篇" : "前の物語"}</button><button class="quiet-link reader-play" type="button" id="story-play">${icon("play")} ${state.lang === "zh" ? "播放本曲" : "この曲を再生"}</button><button class="quiet-link" type="button" data-story-step="1">${state.lang === "zh" ? "下一篇" : "次の物語"} ${icon("chevron-right")}</button></div>
       </section>
     </article>
   `;
@@ -470,11 +450,17 @@ function renderAlbum(id) {
   updateLanguageButtons();
 }
 
-function trackButton(track, index) {
+function localizedTrackTitle(album, track, index) {
+  if (typeof track.title === "object") return track.title[state.lang] || track.title.ja || "";
+  if (state.lang === "ja") return track.title;
+  return album.story.find(section => section.track === index + 1)?.title?.zh || track.title;
+}
+
+function trackButton(album, track, index) {
   return `
-    <button class="track-button ${index === state.trackIndex ? "is-active" : ""}" type="button" data-track="${index}">
+    <button class="track-button ${index === state.trackIndex ? "is-active" : ""}" type="button" data-track="${index}" aria-current="${index === state.trackIndex ? "true" : "false"}">
       <span class="track-number">${String(index + 1).padStart(2, "0")}</span>
-      <span class="track-title">${track.title}</span>
+      <span class="track-title">${escapeHtml(localizedTrackTitle(album, track, index))}</span>
     </button>
   `;
 }
@@ -501,8 +487,8 @@ function storySection(album, section, index) {
   const track = album.tracks[section.track - 1] || album.tracks[index];
   const title = section.title?.[state.lang] || track?.title || "";
   return `
-    <section class="story-section lyric-section ${index === state.trackIndex ? "is-active" : ""}" id="story-${index}" data-story="${index}">
-      <div class="story-track">TRACK ${String(section.track).padStart(2, "0")}</div>
+    <section class="story-section lyric-section ${index === activeStoryIndex(album) ? "is-active" : ""}" id="story-${index}" data-story="${index}">
+      <div class="story-track">${tr("tracks")} ${String(section.track).padStart(2, "0")}</div>
       <div class="story-card">
         <h2>${escapeHtml(title)}</h2>
         <div class="story-copy">${storyTextHtml(section)}</div>
@@ -512,8 +498,6 @@ function storySection(album, section, index) {
 }
 
 function renderNotFound() {
-  stopHomeCarouselTimer();
-  disposeEarth();
   document.body.dataset.view = "empty";
   app.innerHTML = `
     <section class="empty-state">
@@ -525,309 +509,15 @@ function renderNotFound() {
   setPlaylistAvailability(Boolean(state.albumId));
 }
 
-function bindHomeCarousel() {
-  stopHomeOrbit();
-  homeOrbitAngle = indexToOrbitAngle(state.homeAlbumIndex);
-  homeOrbitTargetAngle = homeOrbitAngle;
-  homeOrbitLastTime = 0;
-  homeOrbitIsSettling = false;
-  updateHomeCarousel();
-  initEarth();
-
-  document.querySelectorAll("[data-carousel-index]").forEach((button) => {
-    button.addEventListener("click", () => {
-      setHomeCarouselIndex(Number(button.dataset.carouselIndex), true);
-    });
-  });
-
-  startHomeOrbit();
-}
-
-function carouselOffset(index) {
-  const count = albums.length;
-  let offset = index - state.homeAlbumIndex;
-  if (offset > count / 2) offset -= count;
-  if (offset < -count / 2) offset += count;
-  return offset;
-}
-
-function shiftHomeCarousel(direction, userInitiated = false) {
-  setHomeCarouselIndex(state.homeAlbumIndex + direction, userInitiated);
-}
-
-function setHomeCarouselIndex(index, userInitiated = false) {
-  state.homeAlbumIndex = (index + albums.length) % albums.length;
-  homeOrbitTargetAngle = indexToOrbitAngle(state.homeAlbumIndex);
-  homeOrbitIsSettling = true;
-  homeOrbitResumeAt = performance.now() + (userInitiated ? 2600 : 1200);
-  updateHomeCarousel();
-}
-
-function updateHomeCarousel() {
-  const slides = document.querySelectorAll("[data-carousel-slide]");
-  const dots = document.querySelectorAll("[data-carousel-index]");
-  const activeAlbum = albums[state.homeAlbumIndex];
-  const step = 360 / albums.length;
-  const focusedAngle = normalizeAngle(homeOrbitAngle);
-
-  slides.forEach((slide) => {
-    const index = Number(slide.dataset.carouselSlide);
-    const isCompact = window.innerWidth <= 760;
-    const angle = normalizeAngle(index * step + focusedAngle);
-    const slotDistance = circularDistance(angle, 0);
-    const distance = Math.round(slotDistance / step);
-    const isActive = index === state.homeAlbumIndex;
-    const radians = (angle * Math.PI) / 180;
-    const carousel = document.querySelector(".album-carousel");
-    const carouselWidth = carousel?.clientWidth || window.innerWidth;
-    const carouselHeight = carousel?.clientHeight || window.innerHeight;
-    const centerRatio = isCompact ? 0.5 : window.innerWidth <= 1060 ? 0.46 : 0.42;
-    const cardEstimate = isCompact ? Math.min(window.innerWidth * 0.34, 136) : Math.min(Math.max(window.innerWidth * 0.12, 142), 186);
-    const availableRight = carouselWidth * (1 - centerRatio);
-    const orbitRadiusX = isCompact
-      ? Math.max(104, Math.min(132, carouselWidth * 0.3))
-      : Math.max(182, Math.min(274, availableRight - cardEstimate / 2 - 14));
-    const orbitRadiusY = isCompact ? Math.max(110, Math.min(138, carouselHeight * 0.31)) : Math.max(192, Math.min(262, carouselHeight * 0.41));
-    const x = Math.cos(radians) * orbitRadiusX;
-    const y = Math.sin(radians) * orbitRadiusY;
-    const orbitCos = Math.cos(radians);
-    const isHiddenSide = !isCompact && orbitCos < -0.52;
-    const frontness = (orbitCos + 1) / 2;
-    const axisDissolve = 1 - Math.pow(Math.min(1, Math.abs(orbitCos) / 0.42), 1.7);
-    const behindFade = isCompact ? 1 : 1 - smoothStep(0.06, 0.48, -orbitCos);
-    const dissolveOpacity = 1 - axisDissolve * 0.76;
-    const dissolveCut = 5 + axisDissolve * 32;
-    const dissolveGrain = 1 - axisDissolve;
-    const dissolveSaturate = 1 - axisDissolve * 0.28;
-    const dissolveBlur = axisDissolve * 2;
-    const compactDistanceFade = Math.max(0, 1 - distance * 0.22);
-    const opacity = isCompact
-      ? Math.max(0.12, (0.2 + frontness * 0.8) * compactDistanceFade)
-      : Math.max(0, (0.24 + frontness * 0.76) * dissolveOpacity * behindFade);
-    const scale = isCompact ? 0.52 + frontness * 0.3 : 0.62 + frontness * 0.28;
-    const pointerEnabled = isCompact ? isActive || frontness > 0.78 : !isHiddenSide && frontness > 0.58;
-
-    slide.dataset.offset = String(Math.round(signedCircularDistance(angle, 0) / step));
-    slide.dataset.side = isHiddenSide ? "hidden" : "visible";
-    slide.dataset.interactive = String(pointerEnabled);
-    slide.style.setProperty("--poster-x", `${x}px`);
-    slide.style.setProperty("--poster-y", `${y}px`);
-    slide.style.setProperty("--poster-scale", String(scale));
-    slide.style.setProperty("--poster-opacity", String(opacity));
-    slide.style.setProperty("--poster-dissolve", axisDissolve.toFixed(3));
-    slide.style.setProperty("--poster-dissolve-cut", `${dissolveCut.toFixed(2)}%`);
-    slide.style.setProperty("--poster-dissolve-grain", dissolveGrain.toFixed(3));
-    slide.style.setProperty("--poster-saturate", dissolveSaturate.toFixed(3));
-    slide.style.setProperty("--poster-blur", `${dissolveBlur.toFixed(2)}px`);
-    slide.style.setProperty("--poster-rotate", `${isCompact ? 0 : Math.sin(radians) * 2.5}deg`);
-    slide.style.setProperty("--poster-rotate-y", "0deg");
-    slide.style.setProperty("--poster-z-depth", "0");
-    slide.style.setProperty("--poster-z", String(Math.round(10 + frontness * 20 - distance)));
-    slide.classList.toggle("is-active", isActive);
-    slide.classList.toggle("is-near", distance === 1 && !isHiddenSide);
-    slide.classList.toggle("is-far", !isActive && (distance > 1 || isHiddenSide));
-    slide.setAttribute("aria-hidden", String(!pointerEnabled));
-    slide.tabIndex = pointerEnabled ? 0 : -1;
-  });
-
-  dots.forEach((dot) => {
-    const isActive = Number(dot.dataset.carouselIndex) === state.homeAlbumIndex;
-    dot.classList.toggle("is-active", isActive);
-    dot.setAttribute("aria-selected", String(isActive));
-  });
-
-  if (!state.albumId && activeAlbum) syncPlayerAlbumLink(activeAlbum);
-}
-
-function indexToOrbitAngle(index) {
-  return -index * (360 / albums.length);
-}
-
-function normalizeAngle(angle) {
-  return ((angle % 360) + 360) % 360;
-}
-
-function signedCircularDistance(from, to) {
-  return ((((to - from) % 360) + 540) % 360) - 180;
-}
-
-function circularDistance(from, to) {
-  return Math.abs(signedCircularDistance(from, to));
-}
-
-function smoothStep(edge0, edge1, value) {
-  const x = Math.min(1, Math.max(0, (value - edge0) / (edge1 - edge0)));
-  return x * x * (3 - 2 * x);
-}
-
-async function initEarth() {
-  const canvas = document.querySelector("#earth-canvas");
-  if (!canvas || canvas.dataset.ready) return;
-  canvas.dataset.ready = "true";
-
-  try {
-    const THREE = await import("https://unpkg.com/three@0.165.0/build/three.module.js");
-    if (!document.contains(canvas)) return;
-    earthRenderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    earthRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-    earthScene = new THREE.Scene();
-    earthCamera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-    earthCamera.position.set(0, 0.2, 5.2);
-
-    earthGroup = new THREE.Group();
-    earthScene.add(earthGroup);
-
-    const earthGeometry = new THREE.SphereGeometry(1.22, 96, 96);
-    const earthMaterial = new THREE.MeshStandardMaterial({
-      color: 0x2b8794,
-      roughness: 0.78,
-      metalness: 0.04,
-      emissive: 0x0b3038,
-      emissiveIntensity: 0.62,
-    });
-    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-    earthGroup.add(earth);
-
-    const atmosphere = new THREE.Mesh(
-      new THREE.SphereGeometry(1.28, 96, 96),
-      new THREE.MeshBasicMaterial({ color: 0x76ead8, transparent: true, opacity: 0.12, side: THREE.BackSide }),
-    );
-    earthGroup.add(atmosphere);
-
-    const wire = new THREE.Mesh(
-      new THREE.SphereGeometry(1.235, 32, 16),
-      new THREE.MeshBasicMaterial({ color: 0xece6d7, wireframe: true, transparent: true, opacity: 0.08 }),
-    );
-    earthGroup.add(wire);
-
-    earthScene.add(new THREE.AmbientLight(0xb9eef0, 1.55));
-    const keyLight = new THREE.DirectionalLight(0xb8fff4, 2.4);
-    keyLight.position.set(3.6, 2.5, 4);
-    earthScene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0xd7b363, 1.1);
-    rimLight.position.set(-3, -1.2, 2);
-    earthScene.add(rimLight);
-    const frontLight = new THREE.DirectionalLight(0x76ead8, 1.2);
-    frontLight.position.set(0.2, 0.3, 5);
-    earthScene.add(frontLight);
-
-    earthClockStart = performance.now();
-    resizeEarth();
-    animateEarth();
-  } catch {
-    canvas.closest(".orbit-core")?.classList.add("is-fallback");
-  }
-}
-
-function resizeEarth() {
-  if (!earthRenderer || !earthCamera) return;
-  const canvas = document.querySelector("#earth-canvas");
-  const rect = canvas?.getBoundingClientRect();
-  if (!rect?.width || !rect?.height) return;
-  earthRenderer.setSize(rect.width, rect.height, false);
-  earthCamera.aspect = rect.width / rect.height;
-  earthCamera.updateProjectionMatrix();
-}
-
-function animateEarth(time = performance.now()) {
-  if (!earthRenderer || !earthScene || !earthCamera || !earthGroup) return;
-  resizeEarth();
-  const elapsed = (time - earthClockStart) * 0.001;
-  if (!prefersReducedMotion.matches) {
-    earthGroup.rotation.y = elapsed * 0.16;
-    earthGroup.rotation.x = Math.sin(elapsed * 0.35) * 0.045;
-  }
-  earthRenderer.render(earthScene, earthCamera);
-  if (!prefersReducedMotion.matches) {
-    earthAnimationFrame = window.requestAnimationFrame(animateEarth);
-  }
-}
-
-function startHomeCarouselTimer() {
-  startHomeOrbit();
-}
-
-function stopHomeCarouselTimer() {
-  stopHomeOrbit();
-}
-
-function startHomeOrbit() {
-  stopHomeOrbit();
-  if (!document.querySelector(".album-carousel")) return;
-  homeOrbitLastTime = 0;
-  homeOrbitAnimationFrame = window.requestAnimationFrame(animateHomeOrbit);
-}
-
-function stopHomeOrbit() {
-  window.cancelAnimationFrame(homeOrbitAnimationFrame);
-  window.clearTimeout(homeOrbitAnimationFrame);
-  homeOrbitAnimationFrame = 0;
-}
-
-function animateHomeOrbit(time = performance.now()) {
-  if (!document.querySelector(".album-carousel")) {
-    stopHomeOrbit();
-    return;
-  }
-
-  if (document.hidden) {
-    homeOrbitAnimationFrame = window.setTimeout(() => animateHomeOrbit(performance.now()), 250);
-    return;
-  }
-
-  if (!homeOrbitLastTime) homeOrbitLastTime = time;
-  const delta = Math.min(48, time - homeOrbitLastTime) / 1000;
-  homeOrbitLastTime = time;
-
-  if (prefersReducedMotion.matches) {
-    homeOrbitAngle = homeOrbitTargetAngle;
-  } else if (homeOrbitIsSettling) {
-    const remaining = signedCircularDistance(homeOrbitAngle, homeOrbitTargetAngle);
-    homeOrbitAngle += remaining * Math.min(1, delta * homeOrbitSettleRate);
-    if (Math.abs(remaining) < 0.08) {
-      homeOrbitAngle = homeOrbitTargetAngle;
-      homeOrbitIsSettling = false;
-    }
-  } else if (time >= homeOrbitResumeAt) {
-    homeOrbitAngle += homeOrbitSpeed * delta;
-    const nearestIndex = Math.round(-homeOrbitAngle / (360 / albums.length));
-    const nextIndex = ((nearestIndex % albums.length) + albums.length) % albums.length;
-    if (nextIndex !== state.homeAlbumIndex) state.homeAlbumIndex = nextIndex;
-  }
-
-  updateHomeCarousel();
-  homeOrbitAnimationFrame = prefersReducedMotion.matches
-    ? window.setTimeout(() => animateHomeOrbit(performance.now()), 250)
-    : window.requestAnimationFrame(animateHomeOrbit);
-}
-
-function disposeEarth() {
-  window.cancelAnimationFrame(earthAnimationFrame);
-  earthAnimationFrame = 0;
-
-  if (earthScene) {
-    earthScene.traverse((object) => {
-      object.geometry?.dispose?.();
-      if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose?.());
-      else object.material?.dispose?.();
-    });
-  }
-
-  earthRenderer?.dispose?.();
-  earthRenderer = null;
-  earthScene = null;
-  earthCamera = null;
-  earthGroup = null;
-}
-
-function restartHomeCarouselTimer() {
-  stopHomeCarouselTimer();
-  startHomeCarouselTimer();
-}
-
 function bindAlbum(album) {
   renderPlaylist(album);
+  document.querySelectorAll("[data-story-step]").forEach(button => button.addEventListener("click", () => {
+    const current = activeStoryIndex(album);
+    const next = (current + Number(button.dataset.storyStep) + album.story.length) % album.story.length;
+    selectTrack(album, Math.max(0, album.story[next].track - 1), !audio.paused);
+    document.querySelector(".reader").scrollIntoView({ block: "start", behavior: "instant" });
+  }));
+  document.querySelector("#story-play")?.addEventListener("click", playAudioFromGesture);
   document.querySelectorAll("[data-album-jump]").forEach((link) => {
     link.addEventListener("click", () => {
       state.trackIndex = 0;
@@ -836,15 +526,22 @@ function bindAlbum(album) {
   });
 }
 
+function activeStoryIndex(album) {
+  const exact = album.story.findIndex(section => section.track === state.trackIndex + 1);
+  if (exact >= 0) return exact;
+  return Math.max(0, album.story.findLastIndex(section => section.track <= state.trackIndex + 1));
+}
+
 function selectTrack(album, index, autoplay) {
   state.resumeTime = 0;
   state.restoringPlayback = false;
   state.trackIndex = index;
   document.querySelectorAll(".track-button").forEach((button, buttonIndex) => {
     button.classList.toggle("is-active", buttonIndex === index);
+    button.setAttribute("aria-current", String(buttonIndex === index));
   });
   document.querySelectorAll(".story-section").forEach((section, sectionIndex) => {
-    section.classList.toggle("is-active", sectionIndex === index);
+    section.classList.toggle("is-active", sectionIndex === activeStoryIndex(album));
   });
   updatePlayer(album, index, autoplay);
   closePlaylist();
@@ -859,13 +556,14 @@ function updatePlayer(album, index, autoplay) {
 
   state.albumId = album.id;
   state.trackIndex = index;
-  player.index.textContent = `TRACK ${String(index + 1).padStart(2, "0")}`;
-  player.title.textContent = track.title;
+  player.index.textContent = `${tr("tracks")} ${String(index + 1).padStart(2, "0")}`;
+  player.title.textContent = localizedTrackTitle(album, track, index);
   syncPlayerTrackLink(track);
   player.album.textContent = album.title[state.lang];
   syncPlayerAlbumLink(album);
 
   if (audio.dataset.src !== source) {
+    document.querySelector("#playback-message").hidden = true;
     audio.dataset.src = source;
     audio.src = source;
     audio.dataset.resumeTime = restoreTime > 0 ? String(restoreTime) : "";
@@ -931,6 +629,7 @@ function updateLanguageButtons() {
 
   player.playlistPanel.querySelectorAll(".track-button").forEach((button, index) => {
     button.classList.toggle("is-active", index === state.trackIndex);
+    button.setAttribute("aria-current", String(index === state.trackIndex));
   });
 }
 
@@ -950,13 +649,26 @@ function currentAlbum() {
 }
 
 function playAudioFromGesture() {
+  document.querySelector("#playback-message").hidden = true;
   state.wantsAutoplay = true;
-  return audio.play().catch(() => {
+  return audio.play().catch((error) => {
+    if (error.name === "AbortError") return;
+    showPlaybackError();
     state.isPlaying = false;
     state.wantsAutoplay = false;
     updatePlayButton();
   });
 }
+
+function showPlaybackError() {
+  const message = document.querySelector("#playback-message");
+  message.textContent = state.lang === "zh" ? "暂时无法播放此音源，可点击曲名在网易云收听。" : "音源を再生できません。曲名から网易云でお聴きください。";
+  message.hidden = false;
+}
+
+audio.addEventListener("error", () => {
+  if (state.wantsAutoplay) showPlaybackError();
+});
 
 player.play.addEventListener("click", () => {
   if (audio.paused) {
@@ -1023,7 +735,7 @@ audio.addEventListener("timeupdate", () => {
 audio.addEventListener("ended", () => {
   state.resumeTime = 0;
   state.restoringPlayback = false;
-  player.next.click();
+  selectTrack(currentAlbum(), (state.trackIndex + 1) % currentAlbum().tracks.length, true);
 });
 
 player.playlistToggle.addEventListener("click", () => {
@@ -1054,7 +766,7 @@ function renderPlaylist(album) {
       <span>${album.tracks.length}${tr("trackUnit")}</span>
     </div>
     <div class="track-list" aria-label="${tr("tracks")}">
-      ${album.tracks.map((track, index) => trackButton(track, index)).join("")}
+      ${album.tracks.map((track, index) => trackButton(album, track, index)).join("")}
     </div>
   `;
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
@@ -1078,6 +790,8 @@ function renderPlaylist(album) {
 
 function updatePlayButton() {
   player.play.innerHTML = icon(state.isPlaying ? "pause" : "play");
+  player.play.setAttribute("aria-label", state.lang === "zh" ? (state.isPlaying ? "暂停" : "播放") : (state.isPlaying ? "一時停止" : "再生"));
+  player.shell.classList.toggle("is-playing", state.isPlaying);
 }
 
 function updateSeekProgress() {
@@ -1090,108 +804,24 @@ function updateSeekProgress() {
 
 window.addEventListener("resize", updateSeekProgress);
 
-function animatePlayerSignal(time = performance.now()) {
-  if (!playerSignalStart) playerSignalStart = time;
-  ensurePlayerSignalTrail();
-  const rect = player.shell.getBoundingClientRect();
-  const radius = Math.min(18, Math.max(12, parseFloat(getComputedStyle(player.shell).borderRadius) || 16));
-  const inset = 1;
-
-  if (rect.width && rect.height) {
-    const width = Math.max(1, rect.width - inset * 2);
-    const height = Math.max(1, rect.height - inset * 2);
-    const straightX = Math.max(1, width - radius * 2);
-    const straightY = Math.max(1, height - radius * 2);
-    const corner = (Math.PI * radius) / 2;
-    const perimeter = Math.max(1, straightX * 2 + straightY * 2 + corner * 4);
-    const distance = (((time - playerSignalStart) * 0.038) % perimeter + perimeter) % perimeter;
-    const spacing = Math.min(11, perimeter / 52);
-
-    player.signalDots.forEach((dot, index) => {
-      const trailDistance = (distance - index * spacing + perimeter) % perimeter;
-      const point = roundedRectPoint(trailDistance, { inset, width, height, radius, straightX, straightY, corner });
-      const falloff = index / Math.max(1, playerSignalTrailCount - 1);
-      dot.style.setProperty("--signal-x", `${point.x}px`);
-      dot.style.setProperty("--signal-y", `${point.y}px`);
-      dot.style.setProperty("--signal-alpha", `${Math.max(0.06, 1 - falloff * 1.04)}`);
-      dot.style.setProperty("--signal-scale", `${Math.max(0.32, 1 - falloff * 0.62)}`);
-      dot.style.setProperty("--signal-blur", `${falloff * 1.8}px`);
-    });
-  }
-
-  playerSignalAnimationFrame = prefersReducedMotion.matches
-    ? window.setTimeout(() => animatePlayerSignal(performance.now()), 250)
-    : window.requestAnimationFrame(animatePlayerSignal);
-}
-
-function ensurePlayerSignalTrail() {
-  if (player.signalDots.length === playerSignalTrailCount) return;
-  player.shell.querySelectorAll(".player-signal-dot").forEach((dot) => dot.remove());
-  player.signalDots = Array.from({ length: playerSignalTrailCount }, (_, index) => {
-    const dot = document.createElement("span");
-    dot.className = `player-signal-dot ${index === 0 ? "is-head" : ""}`;
-    dot.setAttribute("aria-hidden", "true");
-    player.shell.append(dot);
-    return dot;
-  });
-}
-
-function restartPlayerSignal() {
-  window.cancelAnimationFrame(playerSignalAnimationFrame);
-  window.clearTimeout(playerSignalAnimationFrame);
-  playerSignalAnimationFrame = 0;
-  playerSignalStart = 0;
-  animatePlayerSignal();
-}
-
-function roundedRectPoint(distance, metrics) {
-  const { inset, width, height, radius, straightX, straightY, corner } = metrics;
-  let d = distance;
-  const right = inset + width;
-  const bottom = inset + height;
-  const left = inset;
-  const top = inset;
-
-  if (d < straightX) return { x: left + radius + d, y: top };
-  d -= straightX;
-
-  if (d < corner) {
-    const t = d / corner;
-    const angle = -Math.PI / 2 + t * (Math.PI / 2);
-    return { x: right - radius + Math.cos(angle) * radius, y: top + radius + Math.sin(angle) * radius };
-  }
-  d -= corner;
-
-  if (d < straightY) return { x: right, y: top + radius + d };
-  d -= straightY;
-
-  if (d < corner) {
-    const t = d / corner;
-    const angle = t * (Math.PI / 2);
-    return { x: right - radius + Math.cos(angle) * radius, y: bottom - radius + Math.sin(angle) * radius };
-  }
-  d -= corner;
-
-  if (d < straightX) return { x: right - radius - d, y: bottom };
-  d -= straightX;
-
-  if (d < corner) {
-    const t = d / corner;
-    const angle = Math.PI / 2 + t * (Math.PI / 2);
-    return { x: left + radius + Math.cos(angle) * radius, y: bottom - radius + Math.sin(angle) * radius };
-  }
-  d -= corner;
-
-  if (d < straightY) return { x: left, y: bottom - radius - d };
-  d -= straightY;
-
-  const t = Math.min(1, d / corner);
-  const angle = Math.PI + t * (Math.PI / 2);
-  return { x: left + radius + Math.cos(angle) * radius, y: top + radius + Math.sin(angle) * radius };
-}
-
 language.toggle.addEventListener("click", () => {
   setLanguageMenuOpen(language.menu.hidden);
+});
+
+language.toggle.addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowDown") return;
+  event.preventDefault();
+  setLanguageMenuOpen(true);
+  language.options[0].focus();
+});
+language.menu.addEventListener("keydown", (event) => {
+  const options = [...language.options];
+  const index = options.indexOf(document.activeElement);
+  const offsets = { ArrowDown: 1, ArrowUp: -1 };
+  if (event.key in offsets) {
+    event.preventDefault();
+    options[(index + offsets[event.key] + options.length) % options.length].focus();
+  }
 });
 
 language.options.forEach((option) => {
@@ -1206,33 +836,26 @@ document.addEventListener("click", (event) => {
   setLanguageMenuOpen(false);
 });
 
-document.addEventListener(
-  "pointerdown",
-  (event) => {
-    if (!archiveGate.shell || archiveGate.shell.hidden || state.hasEnteredArchive) return;
-    event.preventDefault();
-    enterArchive();
-  },
-  { capture: true },
-);
-
 intro.toggle?.addEventListener("click", () => setIntroOpen(intro.panel.hidden));
 intro.close?.addEventListener("click", () => setIntroOpen(false));
 intro.backdrop?.addEventListener("click", () => setIntroOpen(false));
-archiveGate.enter?.addEventListener("pointerdown", enterArchive);
-archiveGate.enter?.addEventListener("click", enterArchive);
-archiveGate.shell?.addEventListener("pointerdown", enterArchive);
-archiveGate.shell?.addEventListener("click", enterArchive);
+document.querySelector(".skip-link").addEventListener("click", (event) => {
+  event.preventDefault();
+  app.focus();
+  app.scrollIntoView({ block: "start" });
+});
 
 document.addEventListener("keydown", (event) => {
-  if (!archiveGate.shell?.hidden && !state.hasEnteredArchive && (event.key === "Enter" || event.key === " ")) {
-    event.preventDefault();
-    enterArchive();
-    return;
+  if (event.key === "Tab" && !intro.panel.hidden) {
+    const focusable = [...intro.panel.querySelectorAll("a[href], button")];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
-
   if (event.key === "Escape") {
     setLanguageMenuOpen(false);
+    closePlaylist();
     setIntroOpen(false);
   }
 });
@@ -1244,41 +867,18 @@ function syncShellText() {
   if (brandTitle) brandTitle.textContent = tr("brand");
   if (brandSub) brandSub.textContent = tr("brandSub");
   player.playlistToggle.setAttribute("aria-label", tr("playlist"));
+  document.querySelector(".header-motto").textContent = tr("headerMotto");
+  document.querySelector(".skip-link").textContent = tr("skipContent");
+  if (!document.querySelector("#playback-message").hidden) showPlaybackError();
+  syncMotionText();
   syncIntroText();
-  syncArchiveGateText();
+  updatePlayButton();
+  player.prev.setAttribute("aria-label", state.lang === "zh" ? "上一首" : "前の曲");
+  player.next.setAttribute("aria-label", state.lang === "zh" ? "下一首" : "次の曲");
+  player.seek.setAttribute("aria-label", state.lang === "zh" ? "播放进度" : "再生位置");
+  document.querySelector(".top-nav").setAttribute("aria-label", state.lang === "zh" ? "主导航" : "メインナビゲーション");
+  player.shell.setAttribute("aria-label", state.lang === "zh" ? "音乐播放器" : "音楽プレーヤー");
   updateLanguageButtons();
-}
-
-function syncArchiveGateText() {
-  if (!archiveGate.shell) return;
-  archiveGate.shell.setAttribute("aria-label", tr("gateEnter"));
-  if (archiveGate.enterLabel) archiveGate.enterLabel.textContent = tr("gateEnter");
-}
-
-function setupArchiveGate() {
-  if (!archiveGate.shell) return;
-  syncArchiveGateText();
-  if (state.hasEnteredArchive) {
-    archiveGate.shell.hidden = true;
-    document.body.classList.add("archive-opened");
-    return;
-  }
-  document.body.classList.add("archive-locked");
-  requestAnimationFrame(() => archiveGate.enter?.focus({ preventScroll: true }));
-}
-
-function enterArchive() {
-  if (!archiveGate.shell || archiveGate.shell.hidden || state.hasEnteredArchive) return;
-  state.hasEnteredArchive = true;
-  document.body.classList.add("archive-opening");
-  document.body.classList.remove("archive-locked");
-
-  window.setTimeout(() => {
-    archiveGate.shell.hidden = true;
-    document.body.classList.remove("archive-opening");
-    document.body.classList.add("archive-opened");
-    app?.focus({ preventScroll: true });
-  }, prefersReducedMotion.matches ? 80 : 820);
 }
 
 function syncIntroText() {
@@ -1305,7 +905,10 @@ function setIntroOpen(isOpen) {
   intro.backdrop.hidden = !isOpen;
   intro.toggle?.classList.toggle("is-active", isOpen);
   intro.toggle?.setAttribute("aria-expanded", String(isOpen));
+  [document.querySelector(".site-header"), app, player.shell].forEach(element => { element.inert = isOpen; });
+  document.body.classList.toggle("intro-open", isOpen);
   if (isOpen) {
+    closePlaylist();
     setLanguageMenuOpen(false);
     requestAnimationFrame(() => intro.close?.focus());
   } else if (wasOpen) {
@@ -1314,10 +917,75 @@ function setIntroOpen(isOpen) {
 }
 
 function setLanguageMenuOpen(isOpen) {
+  const restoreFocus = !isOpen && language.menu.contains(document.activeElement);
   language.menu.hidden = !isOpen;
   language.toggle.classList.toggle("is-active", isOpen);
   language.toggle.setAttribute("aria-expanded", String(isOpen));
+  if (restoreFocus) language.toggle.focus({ preventScroll: true });
 }
+
+function motionIsReduced() {
+  return prefersReducedMotion.matches || motionPaused;
+}
+
+function syncMotionText() {
+  const labels = { "gate-footnote": "gateLicense", "gate-replay": "gateReplay" };
+  Object.entries(labels).forEach(([id, key]) => { document.getElementById(id).textContent = tr(key); });
+  document.querySelector("#gate-enter-label").textContent = tr("gateAction");
+  gate.setAttribute("aria-label", tr("gateAction"));
+  document.querySelector("#archive-enter").setAttribute("aria-label", tr("gateAction"));
+  const toggle = document.querySelector("#motion-toggle");
+  toggle.setAttribute("aria-label", tr(motionPaused ? "motionResume" : "motionPause"));
+  toggle.title = tr(motionPaused ? "motionResume" : "motionPause");
+  toggle.setAttribute("aria-pressed", String(motionPaused));
+  document.body.classList.toggle("motion-paused", motionPaused);
+}
+
+function openArchiveGate(replay = false) {
+  if (gate.open) return;
+  gateReturnFocus = replay ? intro.toggle : app;
+  if (!intro.panel.hidden) setIntroOpen(false);
+  closePlaylist();
+  gateClosing = false;
+  gate.classList.remove("is-departing");
+  document.body.classList.add("archive-locked");
+  gate.showModal();
+  document.querySelector("#archive-enter").focus({ preventScroll: true });
+}
+
+async function enterArchive(skip = false) {
+  if (!gate.open || gateClosing) return;
+  gateClosing = true;
+  try {
+    if (!skip && !motionIsReduced()) {
+      gate.classList.add("is-departing");
+      await gate.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 720, easing: "cubic-bezier(.22,1,.36,1)", fill: "forwards" }).finished;
+    }
+  } catch {
+    // A cancelled transition must still release the modal and restore focus.
+  } finally {
+    gate.close();
+    gate.getAnimations().forEach(animation => animation.cancel());
+    gate.classList.remove("is-departing");
+    document.body.classList.remove("archive-locked");
+    document.body.classList.add("archive-entered");
+    clearTimeout(entranceTimer);
+    entranceTimer = setTimeout(() => document.body.classList.remove("archive-entered"), 1100);
+    gateReturnFocus?.focus({ preventScroll: true });
+    gateClosing = false;
+  }
+}
+
+document.querySelector("#archive-enter").addEventListener("click", () => enterArchive());
+document.querySelector("#gate-enter-label").addEventListener("click", () => enterArchive());
+document.querySelector("#gate-replay").addEventListener("click", () => openArchiveGate(true));
+gate.addEventListener("cancel", event => { event.preventDefault(); enterArchive(true); });
+document.querySelector("#motion-toggle").addEventListener("click", () => {
+  motionPaused = !motionPaused;
+  localStorage.setItem("ssc-motion-paused", String(motionPaused));
+  syncMotionText();
+  resetStars();
+});
 
 function drawStars(time = 0) {
   const canvas = document.querySelector("#starfield");
@@ -1325,7 +993,7 @@ function drawStars(time = 0) {
   const pixelRatio = window.devicePixelRatio || 1;
   const width = window.innerWidth;
   const height = window.innerHeight;
-  const slowTime = prefersReducedMotion.matches ? 0 : time * 0.00008;
+  const slowTime = motionIsReduced() ? 0 : time * 0.00008;
 
   if (width !== starCanvasWidth || height !== starCanvasHeight || pixelRatio !== starCanvasPixelRatio) {
     starCanvasWidth = width;
@@ -1349,14 +1017,14 @@ function drawStars(time = 0) {
 
   drawNebula(context, width, height, slowTime);
 
-  const starCount = Math.min(300, Math.floor((width * height) / 4800));
+  const starCount = Math.min(130, Math.floor((width * height) / 8500));
 
   for (let index = 0; index < starCount; index += 1) {
     const layer = index % 5;
     const drift = slowTime * (12 + layer * 8);
     const x = wrap((Math.sin(index * 91.7) * 0.5 + 0.5) * width + drift * (layer % 2 ? -1 : 1), width);
     const y = wrap((Math.cos(index * 53.3) * 0.5 + 0.5) * height + slowTime * (8 + layer * 5), height);
-    const pulse = prefersReducedMotion.matches ? 0 : Math.sin(time * 0.0012 + index * 0.61) * 0.12;
+    const pulse = motionIsReduced() ? 0 : Math.sin(time * 0.0012 + index * 0.61) * 0.12;
     const radius = index % 29 === 0 ? 1.4 : index % 11 === 0 ? 1 : 0.56;
     context.globalAlpha = Math.min(0.78, (index % 7 === 0 ? 0.56 : 0.3) + pulse);
     context.fillStyle = index % 13 === 0 ? "rgba(215, 179, 99, 0.72)" : "rgba(244, 240, 231, 0.78)";
@@ -1405,8 +1073,9 @@ function wrap(value, limit) {
 }
 
 function animateStars(time = 0) {
+  if (document.hidden) return;
   drawStars(time);
-  if (!prefersReducedMotion.matches) {
+  if (!motionIsReduced()) {
     starAnimationFrame = window.requestAnimationFrame(animateStars);
   }
 }
@@ -1414,31 +1083,28 @@ function animateStars(time = 0) {
 function resetStars() {
   window.cancelAnimationFrame(starAnimationFrame);
   animateStars(0);
-  resizeEarth();
 }
 
 window.addEventListener("hashchange", route);
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) savePlaybackState();
+  document.body.classList.toggle("page-hidden", document.hidden);
+  if (document.hidden) { savePlaybackState(); window.cancelAnimationFrame(starAnimationFrame); }
+  else resetStars();
 });
 window.addEventListener("pagehide", savePlaybackState);
 window.addEventListener("resize", () => {
   resetStars();
-  updateHomeCarousel();
   updateSeekProgress();
-  restartPlayerSignal();
 });
 prefersReducedMotion.addEventListener("change", () => {
   resetStars();
-  window.cancelAnimationFrame(earthAnimationFrame);
-  if (document.querySelector("#earth-canvas")) animateEarth();
-  restartPlayerSignal();
 });
 
 animateStars();
-restartPlayerSignal();
 await loadContentOverrides();
 applySavedPlaybackState();
 syncShellText();
 route();
-setupArchiveGate();
+openArchiveGate();
+
+setupAstralCursor(() => !motionIsReduced());

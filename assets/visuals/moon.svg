@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="700" height="700" viewBox="0 0 700 700">
+<defs>
+ <radialGradient id="surface" cx="32%" cy="26%" r="76%"><stop stop-color="#ebdfdc"/><stop offset=".38" stop-color="#b7adb9"/><stop offset=".72" stop-color="#686577"/><stop offset="1" stop-color="#242936"/></radialGradient>
+ <radialGradient id="shade" cx="24%" cy="35%" r="78%"><stop offset=".4" stop-color="#111323" stop-opacity="0"/><stop offset=".83" stop-color="#0a1020" stop-opacity=".5"/><stop offset="1" stop-color="#070c16"/></radialGradient>
+ <filter id="terrain" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".026" numOctaves="5" seed="19"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="gamma" amplitude="1" exponent="1.8" offset="0"/><feFuncG type="gamma" amplitude="1" exponent="1.8" offset="0"/><feFuncB type="gamma" amplitude="1" exponent="1.8" offset="0"/></feComponentTransfer><feComposite in2="SourceGraphic" operator="in"/><feBlend in2="SourceGraphic" mode="multiply"/></filter>
+ <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
+ <clipPath id="sphere"><circle cx="350" cy="350" r="298"/></clipPath>
+ <radialGradient id="crater"><stop stop-color="#3c3a4a" stop-opacity=".2"/><stop offset=".8" stop-color="#303341" stop-opacity=".25"/><stop offset=".92" stop-color="#e6dce0" stop-opacity=".2"/><stop offset="1" stop-color="#a29aaa" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="350" cy="350" r="300" fill="#c8bbc9" opacity=".1" filter="url(#soft)"/>
+<g clip-path="url(#sphere)"><circle cx="350" cy="350" r="298" fill="url(#surface)" filter="url(#terrain)"/>
+<g fill="#363b50" opacity=".24" filter="url(#soft)"><path d="M206 119Q261 76 309 157T373 204Q445 173 453 240T374 298Q312 269 271 312T177 269Q216 227 182 190T206 119Z"/><path d="M116 301Q186 248 217 333T235 438Q181 474 140 411Z"/><ellipse cx="435" cy="172" rx="45" ry="35"/><ellipse cx="401" cy="359" rx="63" ry="42"/></g>
+<g fill="url(#crater)"><circle cx="262" cy="463" r="44"/><circle cx="309" cy="545" r="31"/><circle cx="154" cy="238" r="28"/><circle cx="498" cy="330" r="50"/><circle cx="422" cy="431" r="26"/><circle cx="219" cy="384" r="22"/><circle cx="398" cy="128" r="19"/><circle cx="155" cy="467" r="37"/><circle cx="495" cy="471" r="35"/><circle cx="338" cy="369" r="16"/></g>
+<circle cx="350" cy="350" r="298" fill="url(#shade)"/></g>
+</svg>

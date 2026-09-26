@@ -55,3 +55,7 @@ Open `http://127.0.0.1:4173`.
 ## Deploy
 
 Pushing to `main` deploys the site through GitHub Pages Actions.
+
+## License
+
+Website code is released under the [MIT License](LICENSE). Music, album artwork and booklet text retain their respective owners’ rights.

@@ -55,3 +55,7 @@ python3 -m http.server 4173 --bind 127.0.0.1
 ## デプロイ
 
 `main` に push すると、GitHub Pages Actions から自動公開されます。
+
+## ライセンス
+
+サイトのコードは [MIT ライセンス](LICENSE) で公開しています。音楽、ジャケット、ブックレット本文の権利は各権利者に帰属します。

@@ -55,3 +55,7 @@ python3 -m http.server 4173 --bind 127.0.0.1
 ## 部署
 
 推送到 `main` 后，GitHub Pages Actions 会自动发布网站。
+
+## 开源协议
+
+网站代码采用 [MIT 协议](LICENSE) 开源。音乐、专辑封面与附带故事的版权归各自权利人所有。
